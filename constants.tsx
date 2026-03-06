@@ -1,4 +1,3 @@
-
 import { PersonalityProfile } from './types';
 
 export const FACE_MAP: Record<string, PersonalityProfile> = {
@@ -7,7 +6,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "ARLC",
     "name": "殺人鯨領主",
     "attributes": "A 積極 / R 理性 / L 長期 / C 集中",
-    "imageUrl": "https://duk.tw/weLVfe.png",
+    "imageUrl": "/images/image (1).png",
     "portrait": "海中智商最高的頂級掠食者，擁有冷酷的邏輯與極致的耐心。懂得利用複利洋流節省體力，狩獵風格是「三年不開張，開張吃三年」，目標是鎖定擁有護城河的超級獵物並重倉咬住。是巴菲特與蒙格的忠實信徒。",
     "motto": "最好的操作就是什麼都不做；我看準了，我重壓，然後我去睡覺。",
     "psychology": {
@@ -34,7 +33,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "ARLD",
     "name": "白頭鷹建築師",
     "attributes": "A 積極 / R 理性 / L 長期 / D 分散",
-    "imageUrl": "https://duk.tw/3uykhk.png",
+    "imageUrl": "/images/image (2).png",
     "portrait": "擁有宏觀經濟視野與精密藍圖。選擇用「系統化」方式佈局全球，透過資產配置建立獲利帝國，不追求單一馬匹，而是買下整個賽馬場。",
     "motto": "我不需要預測哪一匹馬會贏，我直接買下整個賽馬場；只要時代在前進，我的資產就會起飛。",
     "psychology": {
@@ -61,7 +60,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "ARTC",
     "name": "雪豹狙擊手",
     "attributes": "A 積極 / R 理性 / T 交易 / C 集中",
-    "imageUrl": "https://duk.tw/0nCKAZ.png",
+    "imageUrl": "/images/image (3).png",
     "portrait": "棲息在雪線之上的孤高獵人，追求極致精準度。相信市場可透過精密計算破解，追求「一擊必殺」的效率，常花 90% 的時間偽裝與等待。",
     "motto": "市場沒有感情，只有機率；我不在乎漲跌，我只在乎我的準星有沒有對準。",
     "psychology": {
@@ -88,7 +87,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "ARTD",
     "name": "灰狼調度員",
     "attributes": "A 積極 / R 理性 / T 交易 / D 分散",
-    "imageUrl": "https://duk.tw/sNbWDT.png",
+    "imageUrl": "/images/image (4).png",
     "portrait": "狼群首領與塔台調度員。依靠「大數法則」與「期望值」，在市場中進行高頻率、多目標的戰術圍捕。相信系統性的機率優勢。",
     "motto": "我不是在賭博，我是在經營賭場；我不依賴單一運氣，我依靠系統性的機率優勢。",
     "psychology": {
@@ -115,7 +114,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "AILC",
     "name": "黑豹傳教士",
     "attributes": "A 積極 / I 感性 / L 長期 / C 集中",
-    "imageUrl": "https://duk.tw/UlRYmS.png",
+    "imageUrl": "/images/image (5).png",
     "portrait": "投資的是「未來」而非股票。對破壞式創新有宗教般的熱忱，能無視嘲笑與暴跌，用「鑽石手」死抱直到未來實現或歸零。",
     "motto": "別人笑我太瘋癲，我笑他人看不穿；我買的不是代碼，而是人類的下一個紀元。",
     "psychology": {
@@ -142,7 +141,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "AILD",
     "name": "松鼠策劃家",
     "attributes": "A 積極 / I 感性 / L 長期 / D 分散",
-    "imageUrl": "https://duk.tw/uHvGBn.png",
+    "imageUrl": "/images/image (6).png",
     "portrait": "依靠敏銳直覺尋找爆發趨勢，將資金分散在各種激動人心的題材。投資組合像「未來博物館」，收藏各種創新種子。",
     "motto": "這個看起來會漲，那個故事也很棒！小朋友才做選擇，我全都要！",
     "psychology": {
@@ -169,7 +168,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "AITC",
     "name": "劍齒虎猛獸",
     "attributes": "A 積極 / I 感性 / T 交易 / C 集中",
-    "imageUrl": "https://duk.tw/AKwQuW.png",
+    "imageUrl": "/images/image (7).png",
     "portrait": "依靠本能與直覺生存，字典裡只有「進攻」。在轉折點全倉出擊，追求「獵殺」或是「飢餓」的極端感。",
     "motto": "聽見市場的脈搏，在那一秒全倉出擊；要嘛贏得世界，要嘛回家吃土。",
     "psychology": {
@@ -196,7 +195,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "AITD",
     "name": "蜂鳥衝浪者",
     "attributes": "A 積極 / I 感性 / T 交易 / D 分散",
-    "imageUrl": "https://duk.tw/3Vw5zr.png",
+    "imageUrl": "/images/image (8).png",
     "portrait": "頻率最高反應最快，在熱門股間快速切換。不愛持有愛波動，相信積少成多維持高速飛行。",
     "motto": "天下武功，唯快不破，我玩的不是股票，是心跳！",
     "psychology": {
@@ -223,7 +222,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "PRLC",
     "name": "高山岩羊隱士",
     "attributes": "P 保守 / R 理性 / L 長期 / C 集中",
-    "imageUrl": "https://duk.tw/6N6i4r.png",
+    "imageUrl": "/images/image (9).png",
     "portrait": "棲息在險峻峭壁，遠離市場雜訊。專注研究財報數據尋找低估價值。確認岩石穩固才將全重壓上。",
     "motto": "眾人皆醉我獨醒；我不看價格，我只看價值。只要公司沒壞，股價腰斬正如我意。",
     "psychology": {
@@ -250,7 +249,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "PRLD",
     "name": "信天翁導航員",
     "attributes": "P 保守 / R 理性 / L 長期 / D 分散",
-    "imageUrl": "https://duk.tw/lT4quz.png",
+    "imageUrl": "/images/image (10).png",
     "portrait": "在惡劣海象中長時間滑翔而不費力。極度厭惡風險，追求萬無一失的「平安抵達」。",
     "motto": "飛得快不一定飛得遠；我不求暴利，只求軟著陸。活著，就是最大的勝利。",
     "psychology": {
@@ -277,7 +276,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "PRTC",
     "name": "狐狸拾荒者",
     "attributes": "P 保守 / R 理性 / T 交易 / C 集中",
-    "imageUrl": "https://duk.tw/ChS2ng.png",
+    "imageUrl": "/images/image (11).png",
     "portrait": "多疑且機警，尋找極低風險的套利機會。勝率超 90% 才重倉咬下一口即逃。哲學是絕對不賠。",
     "motto": "我從不賭博，我只在看見底牌時才下注；與其在大海中冒險，我寧願撿拾岸邊確定的貝殼。",
     "psychology": {
@@ -304,7 +303,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "PRTD",
     "name": "大象守衛員",
     "attributes": "P 保守 / R 理性 / T 交易 / D 分散",
-    "imageUrl": "https://duk.tw/85Q1wN.png",
+    "imageUrl": "/images/image (12).png",
     "portrait": "謹慎的象群守護者，試圖用笨重身軀跳輕靈舞步。習慣分散且時刻警戒頻繁調度。",
     "motto": "我每天檢查一百道鎖，調度一千次衛兵；雖然很累且沒賺多少，但至少今晚我很安全。",
     "psychology": {
@@ -331,7 +330,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "PILC",
     "name": "犀牛護衛隊",
     "attributes": "P 保守 / I 感性 / L 長期 / C 集中",
-    "imageUrl": "https://duk.tw/g7tCpp.png",
+    "imageUrl": "/images/image (13).png",
     "portrait": "溫和但固執。依靠直覺、信任與人情決策。認定公司便誓死守護持有到天荒地老。",
     "motto": "我不懂財報，但我相信這家公司；只要它還在，我就不會離開。",
     "psychology": {
@@ -358,7 +357,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "PILD",
     "name": "深海巨龜隱者",
     "attributes": "P 保守 / I 感性 / L 長期 / D 分散",
-    "imageUrl": "https://duk.tw/mNW9iG.png",
+    "imageUrl": "/images/image (14).png",
     "portrait": "擁有「防禦性忽略」超能力，不看就不會虧。買得散以求心安，擅長的事情是遺忘。",
     "motto": "不看就不會虧，只要我心如止水，股市波動就與我無關。",
     "psychology": {
@@ -385,7 +384,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "PITC",
     "name": "耳廓狐警探",
     "attributes": "P 保守 / I 感性 / T 交易 / C 集中",
-    "imageUrl": "https://duk.tw/77SIIB.png",
+    "imageUrl": "/images/image (15).png",
     "portrait": "對風聲最敏感。生存哲學是極致防禦性掠奪，趨勢反轉瞬間離場。拆彈專家般的獨行俠。",
     "motto": "看見的不只是獲利，而是獲利背後那 100 種可能讓我受傷的方式。",
     "psychology": {
@@ -412,7 +411,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "code": "PITD",
     "name": "考拉隨行者",
     "attributes": "P 保守 / I 感性 / T 交易 / D 分散",
-    "imageUrl": "https://duk.tw/sqJBv6.png",
+    "imageUrl": "/images/image (16).png",
     "portrait": "溫和但缺乏安全感，必須抱住專家明牌大樹才覺安全。跟單大雜燴投資，通常不知買了什麼。",
     "motto": "大家都去的地方，一定比較安全吧？",
     "psychology": {
