@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FACE 投資人格日記 | 交易解憂 Bar</title>
+    
+    <!-- Open Graph / Facebook / LINE -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://guileless-sopapillas-e84b99.netlify.app">
+    <meta property="og:title" content="FACE 投資人格日記 | 在波動中讀懂你的靈魂">
+    <meta property="og:description" content="結合禪風美學與行為金融學，測量你的投資 DNA，在交易的迷霧中定錨真實自我。">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=1200">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://guileless-sopapillas-e84b99.netlify.app">
+    <meta name="twitter:title" content="FACE 投資人格日記">
+    <meta name="twitter:description" content="一個結合禪風美學與行為金融學的投資心理管理工具，透過 FACE 十六型人格分析，幫助投資者保持覺察。">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=1200">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Social Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --zen-bg: #F5F5F0;
+            --zen-ink: #2D2D2D;
+            --zen-muted: #8C7E6D;
+            --zen-border: #D1D1C7;
+            --zen-stone: #E6E6E1;
+            --zen-accent: #8C635B;
+            --cyber-glow: rgba(140, 126, 109, 0.2);
+        }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--zen-bg);
+            color: var(--zen-ink);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
+        }
+        h1, h2, h3, h4, .serif {
+            font-family: 'Noto Serif TC', serif;
+            letter-spacing: 0.15em;
+        }
+        .text-zen-ink { color: var(--zen-ink); }
+        .text-zen-muted { color: var(--zen-muted); }
+        .border-zen { border-color: var(--zen-border); }
+        .bg-zen-paper { background-color: var(--zen-bg); }
+        
+        .fade-in {
+            animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cyber-ink-card {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--zen-border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cyber-ink-card:hover {
+            border-color: var(--zen-ink);
+            box-shadow: 0 20px 40px var(--cyber-glow);
+            transform: translateY(-5px);
+        }
+        
+        .ink-stamp {
+            border: 1px solid var(--zen-accent);
+            color: var(--zen-accent);
+            padding: 2px 8px;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 700;
+            line-height: 1.2;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.9;
+        }
+
+        .sci-fi-scan {
+            position: relative;
+        }
+        .sci-fi-scan::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(140, 99, 91, 0.2);
+            animation: scanning 3s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanning {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
