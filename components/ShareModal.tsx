@@ -21,7 +21,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
   }, []);
 
   // 指定分享的基礎網址
-  const shareBaseUrl = "https://guileless-sopapillas-e84b99.netlify.app";
+  const shareBaseUrl = "https://faceyourself.vercel.app";
 
   const generateShareUrl = () => {
     const scores = Object.entries(dna).map(([k, v]) => `${k}${v}`).join('_');
