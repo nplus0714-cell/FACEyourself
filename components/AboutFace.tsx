@@ -39,12 +39,13 @@ export const AboutFace: React.FC = () => {
   };
 
   return (
-    <div className="space-y-32 pb-40 fade-in">
-      {/* 1. Hero / Intro Section */}
-      <section className="relative flex flex-col items-center text-center px-6 overflow-hidden rounded-sm bg-[#F5F5F0] pt-32 pb-40">
+    <div className="pb-40 fade-in">
+      
+      {/* ✅ 修改 1: 建立一個包含 Hero 與 四維光譜 的共用背景區塊 */}
+      <div className="relative bg-[#F5F5F0] pt-32 pb-32 mb-24 rounded-sm overflow-hidden">
         
-        {/* ✅ 修改 1: 放置背景浮水印 background3.png */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.08] grayscale select-none flex items-center justify-center">
+        {/* 浮水印圖層：設定 absolute 讓他鋪滿這個大區塊，墊在文字後方 */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.12] grayscale select-none flex items-center justify-center">
           <img 
             src="/images/background3.png" 
             alt="FACE Background Watermark" 
@@ -52,61 +53,64 @@ export const AboutFace: React.FC = () => {
           />
         </div>
 
-        <div className="relative z-10 max-w-4xl space-y-10">
-          <p className="serif text-[#8C635B] text-[10px] tracking-[0.5em] uppercase font-black animate-pulse">Inner Peace Trading</p>
-          <h1 className="text-4xl md:text-7xl serif text-[#2D2D2D] font-light leading-tight tracking-tight">
-            交易沒有標準答案<br />
-            只有<span className="italic font-normal text-[#8C635B]">平靜</span>後的倒影
-          </h1>
-          <div className="w-12 h-[0.5px] bg-[#8C635B]/30 mx-auto"></div>
-          <p className="text-lg md:text-xl text-[#8C7E6D] serif italic max-w-2xl mx-auto leading-relaxed px-4">
-            「FACE 系統不是一張成績單，而是一面『後照鏡』。<br />
-            當你了解鏡中的自己，市場便不再是戰場，而是一場關於修煉的旅程。」
-          </p>
-        </div>
-      </section>
+        {/* 1. Hero / Intro Section (加上 relative z-10 讓文字浮在圖上) */}
+        <section className="relative z-10 flex flex-col items-center text-center px-6 mb-32">
+          <div className="max-w-4xl space-y-10">
+            <p className="serif text-[#8C635B] text-[10px] tracking-[0.5em] uppercase font-black animate-pulse">Inner Peace Trading</p>
+            <h1 className="text-4xl md:text-7xl serif text-[#2D2D2D] font-light leading-tight tracking-tight">
+              交易沒有標準答案<br />
+              只有<span className="italic font-normal text-[#8C635B]">平靜</span>後的倒影
+            </h1>
+            <div className="w-12 h-[0.5px] bg-[#8C635B]/30 mx-auto"></div>
+            <p className="text-lg md:text-xl text-[#8C7E6D] serif italic max-w-2xl mx-auto leading-relaxed px-4">
+              「FACE 系統不是一張成績單，而是一面『後照鏡』。<br />
+              當你了解鏡中的自己，市場便不再是戰場，而是一場關於修煉的旅程。」
+            </p>
+          </div>
+        </section>
 
-      {/* 2. FACE Mirror System */}
-      <section className="max-w-6xl mx-auto px-6">
-        <div className="text-center space-y-6 mb-20">
-          <div className="w-[1px] h-16 bg-[#8C635B] mx-auto opacity-40"></div>
-          <h2 className="text-3xl serif text-[#2D2D2D] tracking-widest font-bold">看見視線死角</h2>
-          <p className="text-[#8C7E6D] serif italic">透過 FACE 四維光譜，重新認識你的交易體質</p>
-        </div>
+        {/* 2. FACE Mirror System (加上 relative z-10 讓卡片浮在圖上) */}
+        <section className="relative z-10 max-w-6xl mx-auto px-6">
+          <div className="text-center space-y-6 mb-20">
+            <div className="w-[1px] h-16 bg-[#8C635B] mx-auto opacity-40"></div>
+            <h2 className="text-3xl serif text-[#2D2D2D] tracking-widest font-bold">看見視線死角</h2>
+            <p className="text-[#8C7E6D] serif italic">透過 FACE 四維光譜，重新認識你的交易體質</p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {dimensions.map((dim) => (
-            <div key={dim.id} className="group p-10 bg-white border border-[#D1D1C7]/30 hover:border-[#2D2D2D] hover:shadow-2xl transition-all duration-700 text-center space-y-6 rounded-sm">
-              <div 
-                className="w-16 h-16 rounded-full bg-[#F5F5F0] flex items-center justify-center mx-auto text-2xl transition-all duration-500 group-hover:text-white"
-                style={{ '--hover-bg': dim.color } as any}
-              >
-                <i className={`${dim.icon} transition-colors duration-500 group-hover:text-white`}></i>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {dimensions.map((dim) => (
+              <div key={dim.id} className="group p-10 bg-white border border-[#D1D1C7]/30 hover:border-[#2D2D2D] hover:shadow-2xl transition-all duration-700 text-center space-y-6 rounded-sm">
+                <div 
+                  className="w-16 h-16 rounded-full bg-[#F5F5F0] flex items-center justify-center mx-auto text-2xl transition-all duration-500 group-hover:text-white"
+                  style={{ '--hover-bg': dim.color } as any}
+                >
+                  <i className={`${dim.icon} transition-colors duration-500 group-hover:text-white`}></i>
+                </div>
+                <style>{`
+                  .group:hover .w-16.h-16 { background-color: ${dim.color}; }
+                `}</style>
+                <div className="space-y-2">
+                  <h3 className="text-xl serif font-bold text-[#2D2D2D]">{dim.title}</h3>
+                </div>
+                <p className="text-[14px] leading-relaxed text-[#555] serif italic">
+                  {dim.description}
+                </p>
               </div>
-              <style>{`
-                .group:hover .w-16.h-16 { background-color: ${dim.color}; }
-              `}</style>
-              <div className="space-y-2">
-                <h3 className="text-xl serif font-bold text-[#2D2D2D]">{dim.title}</h3>
-              </div>
-              <p className="text-[14px] leading-relaxed text-[#555] serif italic">
-                {dim.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      </div>
 
       {/* 3. Founder / NPC Section */}
-      <section className="bg-[#E6E6E1]/30 py-24 rounded-sm">
+      <section className="bg-[#E6E6E1]/30 py-24 rounded-sm mb-32">
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
             <div className="w-full md:w-1/2 relative">
               <div className="absolute -top-4 -left-4 w-full h-full border border-[#8C635B]/20 rounded-sm"></div>
               
-              {/* ✅ 修改 2: 更新 NPC Bartender 圖片路徑 */}
+              {/* ✅ 修改 2: 更新 NPC Bartender 圖片路徑 (直接用空格) */}
               <img 
-                src="/images/NPC%20Bartender.png" 
+                src="/images/NPC Bartender.png" 
                 alt="NPC Bartender" 
                 className="relative z-10 w-full grayscale-[0.4] hover:grayscale-0 transition-all duration-1000 rounded-sm shadow-xl"
               />
