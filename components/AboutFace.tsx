@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export const AboutFace: React.FC = () => {
@@ -43,12 +42,13 @@ export const AboutFace: React.FC = () => {
     <div className="space-y-32 pb-40 fade-in">
       {/* 1. Hero / Intro Section */}
       <section className="relative flex flex-col items-center text-center px-6 overflow-hidden rounded-sm bg-[#F5F5F0] pt-32 pb-40">
-        {/* 背景浮水印 */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.06] grayscale select-none">
+        
+        {/* ✅ 修改 1: 放置背景浮水印 background3.png */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.08] grayscale select-none flex items-center justify-center">
           <img 
-            src="https://duk.tw/Pn9KqJ.jpg" 
-            alt="FACE 動物大合照 浮水印" 
-            className="w-full h-full object-cover object-center scale-110"
+            src="/images/background3.png" 
+            alt="FACE Background Watermark" 
+            className="w-full h-full object-cover object-center scale-105"
           />
         </div>
 
@@ -103,8 +103,10 @@ export const AboutFace: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
             <div className="w-full md:w-1/2 relative">
               <div className="absolute -top-4 -left-4 w-full h-full border border-[#8C635B]/20 rounded-sm"></div>
+              
+              {/* ✅ 修改 2: 更新 NPC Bartender 圖片路徑 */}
               <img 
-                src="https://duk.tw/16BbdW.jpg" 
+                src="/images/NPC%20Bartender.png" 
                 alt="NPC Bartender" 
                 className="relative z-10 w-full grayscale-[0.4] hover:grayscale-0 transition-all duration-1000 rounded-sm shadow-xl"
               />
@@ -140,7 +142,7 @@ export const AboutFace: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. Footer / CTA Section */}
+      {/* 4. Footer Section */}
       <section className="bg-[#2D2D2D] py-32 text-center px-6 rounded-sm relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-[#8C635B]"></div>
         <div className="relative z-10 space-y-12">
