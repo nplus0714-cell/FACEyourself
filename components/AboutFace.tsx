@@ -47,7 +47,7 @@ export const AboutFace: React.FC = () => {
         {/* 浮水印圖層：設定 absolute 讓他鋪滿這個大區塊，墊在文字後方 */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.12] grayscale select-none flex items-center justify-center">
           <img 
-            src="/images/background3.png" 
+            src="/images/background3.jpg" 
             alt="FACE Background Watermark" 
             className="w-full h-full object-cover object-center scale-105"
           />
@@ -110,7 +110,7 @@ export const AboutFace: React.FC = () => {
               
               {/* ✅ 修改 2: 更新 NPC Bartender 圖片路徑 (直接用空格) */}
               <img 
-                src="/images/NPC Bartender.png" 
+                src="/images/NPC Bartender.jpg" 
                 alt="NPC Bartender" 
                 className="relative z-10 w-full grayscale-[0.4] hover:grayscale-0 transition-all duration-1000 rounded-sm shadow-xl"
               />
