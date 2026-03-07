@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FaceScores, Language } from '../types';
 import { translations } from '../i18n';
@@ -65,43 +64,51 @@ export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, t
   ];
 
   return (
-    <div className="max-w-xl mx-auto py-2 px-2 flex flex-col min-h-[70vh] justify-center fade-in">
-      {/* 頂部維度：1x4 並排橫向佈局 */}
-      <div className="text-center mb-6 space-y-4">
-        <div className="grid grid-cols-4 gap-1 border-[0.5px] border-[#D1D1C7]/40 w-full overflow-hidden bg-white/20">
+    <div className="max-w-xl mx-auto py-4 px-4 flex flex-col min-h-[75vh] justify-center fade-in">
+      
+      {/* 頂部維度：比照 Aman 風格，增加字距與可讀性 */}
+      <div className="text-center mb-8 space-y-6">
+        <div className="grid grid-cols-4 gap-0 border-[0.5px] border-[#D1D1C7]/60 w-full overflow-hidden bg-white/40 shadow-sm">
           {categories.map((cat) => {
             const isActive = currentQ.category === cat.key;
             return (
               <div 
                 key={cat.en} 
-                className={`flex flex-col items-center justify-center py-2 px-1 transition-all duration-700 ${
+                className={`flex flex-col items-center justify-center py-4 px-1 transition-all duration-700 ${
                   isActive 
-                  ? 'bg-[#2D2D2D] text-white' 
-                  : 'text-[#8C7E6D]'
+                  ? 'bg-[#2D2D2D] text-white scale-100' 
+                  : 'text-[#8C7E6D] opacity-60'
                 }`}
               >
-                <span className="text-[8px] tracking-[0.1em] font-mono opacity-80 leading-none">{cat.en}</span>
-                <span className="text-[9px] tracking-widest serif mt-1 leading-none">{language === 'zh' ? cat.zh : cat.en}</span>
+                {/* ✅ 放大：text-[8px] -> text-[10px] md:text-xs，增加字距 */}
+                <span className="text-[10px] tracking-[0.25em] font-mono leading-none">{cat.en}</span>
+                {/* ✅ 放大：text-[9px] -> text-xs (12px) */}
+                <span className="text-xs tracking-widest serif mt-1.5 leading-none font-bold">
+                  {language === 'zh' ? cat.zh : cat.en}
+                </span>
               </div>
             );
           })}
         </div>
 
-        <div className="space-y-1">
-          <h2 className="text-base md:text-lg serif text-[#2D2D2D] tracking-[0.15em] font-light">
+        <div className="space-y-2">
+          {/* ✅ 放大標題層次 */}
+          <h2 className="text-lg md:text-xl serif text-[#2D2D2D] tracking-[0.2em] font-light">
             {title}
           </h2>
-          <div className="w-6 h-[0.5px] bg-[#2D2D2D]/30 mx-auto"></div>
+          <div className="w-10 h-[0.5px] bg-[#2D2D2D]/30 mx-auto"></div>
         </div>
         
-        <div className="flex justify-between items-center px-2 max-w-sm mx-auto">
-            <p className="text-[8px] tracking-[0.3em] text-[#8C7E6D] uppercase font-mono">
+        <div className="flex justify-between items-center px-1 max-w-md mx-auto">
+            {/* ✅ 放大：text-[8px] -> text-xs (12px) 並增加字距 */}
+            <p className="text-xs tracking-[0.35em] text-[#8C7E6D] uppercase font-mono">
               {t.common.step} {step + 1} / {totalSteps}
             </p>
             {step > 0 && (
               <button 
                 onClick={handleBack}
-                className="text-[8px] tracking-[0.15em] text-[#2D2D2D] uppercase border-b border-[#2D2D2D]/30 pb-0.5"
+                /* ✅ 放大：text-[8px] -> text-xs (12px) */
+                className="text-xs tracking-[0.2em] text-[#2D2D2D] uppercase border-b border-[#2D2D2D]/40 pb-1 hover:opacity-60 transition-opacity"
               >
                 {t.common.back}
               </button>
@@ -109,47 +116,51 @@ export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, t
         </div>
       </div>
       
-      {/* 題目區塊：減少留白，斜體非粗體 */}
-      <div className="space-y-4">
-        <div className="text-center min-h-[60px] flex items-center justify-center px-4">
-          <p className="text-lg md:text-xl leading-snug serif text-[#2D2D2D] italic font-normal tracking-wide">
+      {/* 題目區塊：比照安縵，讓文字更有份量 */}
+      <div className="space-y-8">
+        <div className="text-center min-h-[80px] flex items-center justify-center px-4">
+          {/* ✅ 確保題目在手機上是顯眼的 20px (text-xl) */}
+          <p className="text-xl md:text-2xl leading-[1.6] serif text-[#2D2D2D] italic font-normal tracking-wide">
             {currentQ.text}
           </p>
         </div>
 
-        {/* 選項區塊：緊湊設計 */}
-        <div className="grid grid-cols-1 gap-3">
+        {/* 選項區塊：增加點擊範圍與文字易讀性 */}
+        <div className="grid grid-cols-1 gap-4">
           <button 
             onClick={() => handleChoice('A')} 
-            className="group relative flex items-center p-4 bg-white/40 border-[0.5px] border-[#D1D1C7]/60 hover:border-[#2D2D2D] hover:bg-[#2D2D2D] transition-all duration-500 rounded-none text-left shadow-sm"
+            className="group relative flex items-center p-6 bg-white border border-[#D1D1C7]/60 hover:border-[#2D2D2D] hover:bg-[#2D2D2D] transition-all duration-500 rounded-none text-left shadow-sm"
           >
-            <div className="flex items-center gap-4 w-full">
-              <span className="text-[8px] font-mono text-[#8C7E6D] group-hover:text-white/40 tracking-tighter uppercase shrink-0">OPTION A</span>
-              <span className="text-base md:text-lg tracking-tight text-[#2D2D2D] group-hover:text-white font-normal transition-colors serif flex-grow">
+            <div className="flex items-center gap-6 w-full">
+              {/* ✅ 選項標籤放大：text-[8px] -> text-[10px] */}
+              <span className="text-[10px] font-mono text-[#8C7E6D] group-hover:text-white/40 tracking-widest uppercase shrink-0">OPTION A</span>
+              {/* ✅ 核心選項文字：text-lg (18px)，與 16Personalities 對標 */}
+              <span className="text-lg md:text-xl tracking-tight text-[#2D2D2D] group-hover:text-white font-normal transition-colors serif flex-grow">
                 {currentQ.labels[0]}
               </span>
-              <span className="opacity-0 group-hover:opacity-100 transition-all text-white text-lg">›</span>
+              <span className="opacity-0 group-hover:opacity-100 transition-all text-white text-xl">›</span>
             </div>
           </button>
 
           <button 
             onClick={() => handleChoice('B')} 
-            className="group relative flex items-center p-4 bg-white/40 border-[0.5px] border-[#D1D1C7]/60 hover:border-[#2D2D2D] hover:bg-[#2D2D2D] transition-all duration-500 rounded-none text-left shadow-sm"
+            className="group relative flex items-center p-6 bg-white border border-[#D1D1C7]/60 hover:border-[#2D2D2D] hover:bg-[#2D2D2D] transition-all duration-500 rounded-none text-left shadow-sm"
           >
-            <div className="flex items-center gap-4 w-full">
-              <span className="text-[8px] font-mono text-[#8C7E6D] group-hover:text-white/40 tracking-tighter uppercase shrink-0">OPTION B</span>
-              <span className="text-base md:text-lg tracking-tight text-[#2D2D2D] group-hover:text-white font-normal transition-colors serif flex-grow">
+            <div className="flex items-center gap-6 w-full">
+              <span className="text-[10px] font-mono text-[#8C7E6D] group-hover:text-white/40 tracking-widest uppercase shrink-0">OPTION B</span>
+              <span className="text-lg md:text-xl tracking-tight text-[#2D2D2D] group-hover:text-white font-normal transition-colors serif flex-grow">
                 {currentQ.labels[1]}
               </span>
-              <span className="opacity-0 group-hover:opacity-100 transition-all text-white text-lg">›</span>
+              <span className="opacity-0 group-hover:opacity-100 transition-all text-white text-xl">›</span>
             </div>
           </button>
         </div>
       </div>
 
-      <div className="mt-8 text-center">
-        <div className="inline-block py-2 border-t border-[#D1D1C7]/20 w-full max-w-[160px]">
-          <p className="text-[7px] tracking-[0.5em] text-[#8C7E6D] uppercase font-light italic opacity-50">
+      <div className="mt-12 text-center">
+        <div className="inline-block py-3 border-t border-[#D1D1C7]/30 w-full max-w-[200px]">
+          {/* ✅ 底部資訊放大至可閱讀尺寸 */}
+          <p className="text-[10px] tracking-[0.5em] text-[#8C7E6D] uppercase font-light italic opacity-60">
             SOUL MINDFULNESS
           </p>
         </div>
