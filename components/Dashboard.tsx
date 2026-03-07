@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip,
@@ -76,8 +75,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#2D2D2D] text-white px-3 py-2 text-[10px] shadow-2xl border border-white/10 rounded-sm">
-          <p className="font-bold border-b border-white/20 mb-1 pb-1 uppercase tracking-widest">{payload[0].payload.subject}</p>
+        <div className="bg-[#2D2D2D] text-white px-4 py-3 text-xs shadow-2xl border border-white/10 rounded-sm">
+          <p className="font-bold border-b border-white/20 mb-2 pb-1 uppercase tracking-widest">{payload[0].payload.subject}</p>
           <p className="opacity-80">{t.dashboard.baseEnergy}: {payload[0].value}%</p>
           {daily && <p className="text-[#D9B5AF] font-bold">{t.dashboard.todayStatus}: {payload[1].value}%</p>}
         </div>
@@ -89,20 +88,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
   if (loading) {
     return (
       <div className="py-24 flex flex-col items-center justify-center space-y-6">
-        <div className="w-8 h-8 border-2 border-dashed border-[#8C635B] rounded-full animate-spin"></div>
-        <p className="text-[10px] tracking-[0.4em] text-[#8C635B] font-bold uppercase">解碼靈魂波動中...</p>
+        <div className="w-10 h-10 border-2 border-dashed border-[#8C635B] rounded-full animate-spin"></div>
+        <p className="text-sm tracking-[0.5em] text-[#8C635B] font-bold uppercase">解碼靈魂波動中...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 pb-32 fade-in px-1 max-w-2xl mx-auto">
-      {/* 操作按鈕區 */}
+    <div className="space-y-10 pb-40 fade-in px-2 max-w-2xl mx-auto">
+      {/* 操作按鈕區 - 放大字體與間距 */}
       {!isSharedView && (
-        <div className="flex flex-wrap justify-center gap-3 mb-4">
+        <div className="flex flex-wrap justify-center gap-4 mb-8 pt-4">
           <button 
             onClick={() => setIsShareModalOpen(true)}
-            className="flex items-center gap-3 px-6 py-2 border-[0.5px] border-[#2D2D2D] text-[10px] tracking-[0.4em] uppercase font-bold hover:bg-[#2D2D2D] hover:text-white transition-all shadow-sm group"
+            className="flex items-center gap-4 px-8 py-3 border border-[#2D2D2D] text-xs tracking-[0.5em] uppercase font-bold hover:bg-[#2D2D2D] hover:text-white transition-all shadow-md group"
           >
             <span>{t.common.share}</span>
             <span className="opacity-40 group-hover:opacity-100">›</span>
@@ -110,58 +109,62 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
           
           <button 
             onClick={onRetest}
-            className="flex items-center gap-3 px-6 py-2 border-[0.5px] border-[#8C7E6D]/50 text-[10px] tracking-[0.4em] uppercase font-bold text-[#8C7E6D] hover:border-[#2D2D2D] hover:text-[#2D2D2D] transition-all shadow-sm"
+            className="flex items-center gap-4 px-8 py-3 border border-[#8C7E6D]/50 text-xs tracking-[0.5em] uppercase font-bold text-[#8C7E6D] hover:border-[#2D2D2D] hover:text-[#2D2D2D] transition-all shadow-md"
           >
-            <i className="fa-solid fa-rotate-right text-[9px]"></i>
+            <i className="fa-solid fa-rotate-right text-[10px]"></i>
             <span>{t.common.retestDna}</span>
           </button>
         </div>
       )}
 
       {/* 頂部數據分析卡 */}
-      <div className="bg-white border border-[#D1D1C7] rounded-sm shadow-sm overflow-hidden p-4 md:p-8 space-y-4">
-        <div className="text-center space-y-1">
-          <span className="text-[8px] font-black text-[#8C635B] uppercase tracking-[0.3em] block">{t.dashboard.analysis}</span>
-          <h2 className="text-xl serif text-[#2D2D2D] font-bold tracking-tight">{t.dashboard.title}</h2>
+      <div className="bg-white border border-[#D1D1C7] rounded-sm shadow-sm overflow-hidden p-6 md:p-12 space-y-8">
+        <div className="text-center space-y-2">
+          {/* ✅ 放大：text-[8px] -> text-xs (12px) */}
+          <span className="text-xs font-black text-[#8C635B] uppercase tracking-[0.4em] block">{t.dashboard.analysis}</span>
+          <h2 className="text-2xl serif text-[#2D2D2D] font-bold tracking-widest">{t.dashboard.title}</h2>
         </div>
 
-        <div className="bg-[#FBFBFA] border border-[#D1D1C7]/20 p-2 md:p-4 rounded-sm">
-          <div className="h-[300px] w-full">
+        <div className="bg-[#FBFBFA] border border-[#D1D1C7]/30 p-4 md:p-8 rounded-sm">
+          <div className="h-[350px] w-full mb-8">
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={radarData} outerRadius="80%" margin={{ top: 0, right: 30, bottom: 0, left: 30 }}>
+              <RadarChart data={radarData} outerRadius="75%" margin={{ top: 0, right: 30, bottom: 0, left: 30 }}>
                 <PolarGrid stroke="#D1D1C7" strokeDasharray="4 4" />
                 <PolarAngleAxis 
                   dataKey="subject" 
-                  tick={{ fontSize: 9, fontWeight: 700, fill: '#2D2D2D', fontFamily: 'Noto Serif TC' }}
+                  tick={{ fontSize: 11, fontWeight: 700, fill: '#2D2D2D', fontFamily: 'Noto Serif TC' }}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Radar dataKey="base" stroke="#2D2D2D" strokeWidth={1} fill="#2D2D2D" fillOpacity={0.03} />
-                {daily && <Radar dataKey="current" stroke="#8C635B" strokeWidth={2} fill="#8C635B" fillOpacity={0.15} dot={{ r: 2.5, fill: '#8C635B' }} />}
+                {daily && <Radar dataKey="current" stroke="#8C635B" strokeWidth={2} fill="#8C635B" fillOpacity={0.15} dot={{ r: 3, fill: '#8C635B' }} />}
               </RadarChart>
             </ResponsiveContainer>
           </div>
           
-          <div className="max-w-md mx-auto space-y-4 border-t border-[#D1D1C7]/30 pt-4">
+          {/* 量表區塊優化 */}
+          <div className="max-w-lg mx-auto space-y-8 border-t border-[#D1D1C7]/40 pt-8">
             {faceData.map((item, idx) => {
               const deepColor = daily ? '#8C635B' : '#2D2D2D';
               const lightColor = '#D1D1C7';
               return (
-                <div key={idx} className="space-y-1">
+                <div key={idx} className="space-y-3">
                   <div className="text-center">
-                    <span className="text-[11px] font-bold serif italic text-[#2D2D2D] tracking-widest">{item.label}</span>
+                    {/* ✅ 放大：text-[11px] -> text-sm (14px) */}
+                    <span className="text-sm font-bold serif italic text-[#2D2D2D] tracking-[0.2em]">{item.label}</span>
                   </div>
                   <div className="relative">
-                    <div className="flex justify-between items-end mb-0.5 px-0.5">
+                    <div className="flex justify-between items-end mb-1 px-1">
                       <div className="text-left w-1/2">
-                        <p className={`text-[9px] font-bold ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l1Name}</p>
-                        <p className={`text-base font-mono font-black ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v1}%</p>
+                        {/* ✅ 放大：text-[9px] -> text-xs (12px) */}
+                        <p className={`text-xs font-bold tracking-wider ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l1Name}</p>
+                        <p className={`text-xl font-mono font-black ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v1}%</p>
                       </div>
                       <div className="text-right w-1/2">
-                        <p className={`text-[9px] font-bold ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l2Name}</p>
-                        <p className={`text-base font-mono font-black ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v2}%</p>
+                        <p className={`text-xs font-bold tracking-wider ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l2Name}</p>
+                        <p className={`text-xl font-mono font-black ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v2}%</p>
                       </div>
                     </div>
-                    <div className="h-[10px] w-full bg-[#E6E6E1] rounded-full overflow-hidden flex relative shadow-inner">
+                    <div className="h-[12px] w-full bg-[#E6E6E1] rounded-full overflow-hidden flex relative shadow-inner">
                       <div className="h-full transition-all duration-1000" style={{ width: `${item.v1}%`, backgroundColor: item.v1 >= item.v2 ? deepColor : lightColor }}></div>
                       <div className="h-full transition-all duration-1000" style={{ width: `${item.v2}%`, backgroundColor: item.v2 > item.v1 ? deepColor : lightColor }}></div>
                     </div>
@@ -173,129 +176,139 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
         </div>
       </div>
 
-      {/* 完整文案內容 */}
+      {/* 完整文案內容 - 極致放大閱讀體驗 */}
       <div className="bg-white border border-[#D1D1C7] rounded-sm shadow-sm overflow-hidden flex flex-col items-center">
         <div className="relative aspect-[21/9] w-full overflow-hidden">
           <img src={profile.imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt={profile.name} />
           <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
-          {/* 人格代碼移動至左上角 */}
-          <div className="absolute top-3 left-3">
-            <span className="bg-[#2D2D2D] text-white text-[9px] px-3 py-1 font-bold tracking-[0.1em] uppercase shadow-lg inline-block">{code}</span>
+          <div className="absolute top-4 left-4">
+            <span className="bg-[#2D2D2D] text-white text-[11px] px-4 py-1.5 font-bold tracking-[0.2em] uppercase shadow-lg inline-block">{code}</span>
           </div>
         </div>
 
-        <div className="p-4 md:p-10 space-y-8 text-center w-full">
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl serif text-[#2D2D2D] font-black tracking-tighter">【{profile.name}】</h1>
-            <div className="w-10 h-[1px] bg-[#D1D1C7] mx-auto"></div>
-            <p className="text-lg italic font-bold text-[#8C635B] serif leading-relaxed px-2">「{profile.motto}」</p>
+        <div className="p-6 md:p-12 space-y-12 text-center w-full">
+          <div className="space-y-4">
+            {/* ✅ 主標題大幅度放大 */}
+            <h1 className="text-4xl md:text-5xl serif text-[#2D2D2D] font-black tracking-tight">【{profile.name}】</h1>
+            <div className="w-16 h-[0.5px] bg-[#D1D1C7] mx-auto"></div>
+            {/* ✅ 座右銘放大：text-lg -> text-xl (20px) 以上 */}
+            <p className="text-xl md:text-2xl italic font-medium text-[#8C635B] serif leading-relaxed px-4">「{profile.motto}」</p>
           </div>
 
-          <div className="space-y-2 max-w-xl mx-auto">
-             <span className="text-[9px] font-black text-[#8C7E6D] uppercase tracking-[0.4em] block">{t.dashboard.portrait}</span>
-             <p className="text-[15px] leading-[1.6] text-[#2D2D2D] serif italic opacity-90">{profile.portrait}</p>
+          <div className="space-y-4 max-w-xl mx-auto">
+             <span className="text-xs font-black text-[#8C7E6D] uppercase tracking-[0.5em] block">{t.dashboard.portrait}</span>
+             {/* ✅ 內文描述放大至 17px 並增加行高 */}
+             <p className="text-[17px] leading-[1.8] text-[#2D2D2D] serif italic tracking-wide">{profile.portrait}</p>
           </div>
 
-          <div className="bg-[#F5F5F0] p-6 border-y border-[#D1D1C7]/30 shadow-inner max-w-xl mx-auto space-y-2">
-             <p className="text-[9px] font-black text-[#8C7E6D] uppercase tracking-[0.3em]">{t.dashboard.psychology}</p>
-             <p className="text-[16px] leading-relaxed text-[#2D2D2D] font-bold serif">{profile.psychology.mechanism}</p>
-             <p className="text-[13px] leading-relaxed text-[#8C7E6D] serif italic mt-2 border-t border-[#D1D1C7]/20 pt-2">“{profile.psychology.scene}”</p>
+          <div className="bg-[#F5F5F0] p-8 md:p-12 border-y border-[#D1D1C7]/40 shadow-inner max-w-2xl mx-auto space-y-4">
+             <p className="text-xs font-black text-[#8C7E6D] uppercase tracking-[0.4em]">{t.dashboard.psychology}</p>
+             <p className="text-[18px] md:text-[20px] leading-relaxed text-[#2D2D2D] font-bold serif">{profile.psychology.mechanism}</p>
+             <p className="text-[15px] leading-relaxed text-[#8C7E6D] serif italic mt-4 border-t border-[#D1D1C7]/30 pt-4 tracking-widest">“{profile.psychology.scene}”</p>
           </div>
 
-          <div className="space-y-4 pt-2">
-            <h4 className="text-[11px] font-black text-[#A64D4D] uppercase tracking-[0.5em] flex flex-col items-center gap-1.5">
+          {/* 盲點區塊優化 */}
+          <div className="space-y-6 pt-4">
+            <h4 className="text-sm font-black text-[#A64D4D] uppercase tracking-[0.6em] flex flex-col items-center gap-2">
               {t.dashboard.blindSpots}
-              <span className="w-12 h-[1px] bg-[#A64D4D]"></span>
+              <span className="w-16 h-[0.5px] bg-[#A64D4D]"></span>
             </h4>
-            <div className="space-y-6 max-w-xl mx-auto">
+            <div className="space-y-10 max-w-xl mx-auto">
               {profile.blindSpots.map((bs, i) => (
-                <div key={i} className="space-y-2">
-                  <p className="text-[15px] font-black text-[#2D2D2D] tracking-wider">【{bs.title}】</p>
-                  <p className="text-[14px] leading-[1.6] text-[#555] serif italic">{bs.description}</p>
-                  <p className="text-[12px] leading-relaxed text-[#A64D4D] font-bold border-t border-[#A64D4D]/10 pt-2 max-w-sm mx-auto">{bs.behavior}</p>
+                <div key={i} className="space-y-3">
+                  <p className="text-lg md:text-xl font-black text-[#2D2D2D] tracking-widest">【{bs.title}】</p>
+                  <p className="text-base md:text-lg leading-[1.7] text-[#555] serif italic">{bs.description}</p>
+                  <p className="text-sm md:text-base leading-relaxed text-[#A64D4D] font-bold border-t border-[#A64D4D]/15 pt-3 max-w-md mx-auto">{bs.behavior}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="space-y-6 pt-2">
-            <h4 className="text-[11px] font-black text-[#8C635B] uppercase tracking-[0.6em] flex flex-col items-center gap-1.5">
+          {/* 工具包區塊優化 */}
+          <div className="space-y-8 pt-4">
+            <h4 className="text-sm font-black text-[#8C635B] uppercase tracking-[0.6em] flex flex-col items-center gap-2">
               {t.dashboard.kit}
             </h4>
-            <div className="grid grid-cols-1 gap-4 max-w-xl mx-auto">
+            <div className="grid grid-cols-1 gap-6 max-w-xl mx-auto">
               {Object.entries(profile.pouches).map(([key, value], i) => {
                 const icons = ['💊', '🛡️', '✨'];
                 const labels = t.dashboard.pouchLabels;
                 return (
-                  <div key={key} className="bg-white border-b border-[#D1D1C7]/60 p-4 space-y-1 shadow-sm">
-                    <span className="text-2xl block mb-0.5">{icons[i]}</span>
-                    <p className="text-[9px] font-black text-[#8C7E6D] uppercase tracking-widest">{labels[i]}</p>
-                    <p className="text-[14px] font-bold text-[#2D2D2D] serif italic leading-relaxed px-1">{value}</p>
+                  <div key={key} className="bg-white border-b border-[#D1D1C7]/80 pb-6 space-y-2">
+                    <span className="text-3xl block mb-2">{icons[i]}</span>
+                    <p className="text-[10px] font-black text-[#8C7E6D] uppercase tracking-widest">{labels[i]}</p>
+                    <p className="text-base md:text-lg font-bold text-[#2D2D2D] serif italic leading-relaxed px-4">{value}</p>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          <div className="bg-[#2D2D2D] text-white p-8 text-center space-y-4 rounded-t-2xl mt-4 relative overflow-hidden w-full">
-            <div className="absolute top-0 left-0 w-full h-0.5 bg-[#8C635B]"></div>
-            <p className="text-[9px] uppercase tracking-[0.8em] opacity-40 font-black">{t.dashboard.blessing}</p>
-            <p className="text-xl md:text-2xl serif italic font-medium leading-[1.6] tracking-tight">「{profile.antidote}」</p>
+          {/* 結尾祝福區塊 */}
+          <div className="bg-[#2D2D2D] text-white p-12 text-center space-y-6 rounded-t-3xl mt-8 relative overflow-hidden w-full shadow-2xl">
+            <div className="absolute top-0 left-0 w-full h-[1.5px] bg-[#8C635B]"></div>
+            <p className="text-[10px] uppercase tracking-[1em] opacity-40 font-black">{t.dashboard.blessing}</p>
+            <p className="text-2xl md:text-3xl serif italic font-light leading-[1.8] tracking-widest">「{profile.antidote}」</p>
           </div>
 
           {!isSharedView && onGoToGallery && (
-            <button onClick={onGoToGallery} className="w-full max-w-xs py-3 text-[10px] tracking-[0.3em] text-[#2D2D2D] font-black border border-[#2D2D2D] hover:bg-[#2D2D2D] hover:text-white transition-all uppercase">
+            <button onClick={onGoToGallery} className="w-full max-w-xs py-4 text-xs tracking-[0.4em] text-[#2D2D2D] font-black border border-[#2D2D2D] hover:bg-[#2D2D2D] hover:text-white transition-all uppercase mt-10">
               探索十六型靈魂圖鑑
             </button>
           )}
         </div>
       </div>
 
+      {/* 動態分析報告 (每日解憂) 部分同樣進行質感放大 */}
       {daily && report && (
-        <div className="bg-white border border-[#D1D1C7] rounded-sm shadow-xl overflow-hidden animate-fade-in flex flex-col items-center mt-8">
-          <div className="bg-[#2D2D2D] text-white py-3 w-full text-[9px] tracking-[0.4em] font-bold uppercase text-center">{t.dashboard.offsetInsight}</div>
-          <div className="p-4 md:p-8 space-y-10 text-center w-full">
-            <section className="space-y-4">
-              <h4 className="text-[12px] font-black text-[#2D2D2D] uppercase tracking-[0.4em]">1. 今日偏移畫像</h4>
-              <p className="text-[16px] text-[#2D2D2D] font-bold leading-[1.6] serif italic bg-[#FBFBFA] p-6 rounded-sm shadow-inner border border-[#8C635B]/5 max-w-xl mx-auto">「{report.soulPortrait.description}」</p>
+        <div className="bg-white border border-[#D1D1C7] rounded-sm shadow-2xl overflow-hidden animate-fade-in flex flex-col items-center mt-12 mb-20">
+          <div className="bg-[#2D2D2D] text-white py-4 w-full text-xs tracking-[0.5em] font-bold uppercase text-center">{t.dashboard.offsetInsight}</div>
+          <div className="p-6 md:p-12 space-y-12 text-center w-full">
+            <section className="space-y-6">
+              <h4 className="text-sm font-black text-[#2D2D2D] uppercase tracking-[0.4em]">1. 今日偏移畫像</h4>
+              <p className="text-lg md:text-xl text-[#2D2D2D] font-bold leading-[1.8] serif italic bg-[#FBFBFA] p-8 rounded-sm shadow-inner border border-[#8C635B]/10 max-w-2xl mx-auto">「{report.soulPortrait.description}」</p>
             </section>
-            <section className="space-y-4">
-              <h4 className="text-[12px] font-black text-[#2D2D2D] uppercase tracking-[0.4em]">2. 內心張力安撫</h4>
-              <div className="space-y-4 max-w-xl mx-auto">
-                <div className="bg-[#F5F5F0] p-4 rounded-sm border-y border-[#A64D4D]/10">
-                  <p className="text-[14px] leading-[1.6] text-[#2D2D2D] font-bold serif italic px-2">{report.innerPain}</p>
+            
+            <section className="space-y-6">
+              <h4 className="text-sm font-black text-[#2D2D2D] uppercase tracking-[0.4em]">2. 內心張力安撫</h4>
+              <div className="space-y-6 max-w-xl mx-auto">
+                <div className="bg-[#F5F5F0] p-6 rounded-sm border-y border-[#A64D4D]/10">
+                  <p className="text-base md:text-lg leading-[1.7] text-[#2D2D2D] font-bold serif italic px-4">{report.innerPain}</p>
                 </div>
-                <div className="bg-[#8C635B] p-6 rounded-sm text-white shadow-md">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-2 opacity-70">Emergency Warning</p>
-                  <p className="text-[17px] font-black italic leading-snug">「{report.blindSpot}」</p>
+                <div className="bg-[#8C635B] p-8 rounded-sm text-white shadow-xl">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-3 opacity-80">Emergency Warning</p>
+                  <p className="text-xl md:text-2xl font-black italic leading-tight tracking-wide">「{report.blindSpot}」</p>
                 </div>
               </div>
             </section>
-            <section className="space-y-4">
-              <h4 className="text-[12px] font-black text-[#2D2D2D] uppercase tracking-[0.4em]">3. 禪式回歸建議</h4>
-              <div className="bg-[#FBFBFA] p-6 border border-[#D1D1C7]/20 flex flex-col items-center gap-3 rounded-sm max-w-xl mx-auto">
-                <span className="text-3xl">🧘</span>
-                <p className="text-[15px] text-[#2D2D2D] font-black leading-[1.7] serif italic px-2">{report.zenSolution}</p>
+
+            <section className="space-y-6">
+              <h4 className="text-sm font-black text-[#2D2D2D] uppercase tracking-[0.4em]">3. 禪式回歸建議</h4>
+              <div className="bg-[#FBFBFA] p-8 border border-[#D1D1C7]/30 flex flex-col items-center gap-4 rounded-sm max-w-xl mx-auto shadow-sm">
+                <span className="text-4xl">🧘</span>
+                <p className="text-lg md:text-xl text-[#2D2D2D] font-black leading-[1.8] serif italic px-4">{report.zenSolution}</p>
               </div>
             </section>
-            <div className="space-y-8">
-               <h4 className="text-[12px] font-black text-[#8C635B] uppercase tracking-[0.4em]">4. 保命與祝福</h4>
-               <div className="grid grid-cols-1 gap-4 max-w-xl mx-auto">
-                  <div className="bg-white border-y border-[#D1D1C7]/40 p-4 space-y-2 shadow-sm">
-                    <span className="text-2xl block opacity-60">🛡️</span>
-                    <p className="text-[8px] font-black text-[#8C7E6D] uppercase tracking-widest">今日保命符</p>
-                    <p className="text-[14px] font-bold text-[#2D2D2D] serif italic leading-relaxed">{report.antiHangover.lifesaver}</p>
+
+            <div className="space-y-10">
+               <h4 className="text-sm font-black text-[#8C635B] uppercase tracking-[0.4em]">4. 保命與祝福</h4>
+               <div className="grid grid-cols-1 gap-6 max-w-xl mx-auto">
+                  <div className="bg-white border-y border-[#D1D1C7]/60 p-6 space-y-3 shadow-sm">
+                    <span className="text-3xl block opacity-80">🛡️</span>
+                    <p className="text-xs font-black text-[#8C7E6D] uppercase tracking-[0.3em]">今日保命符</p>
+                    <p className="text-base md:text-lg font-bold text-[#2D2D2D] serif italic leading-relaxed px-4">{report.antiHangover.lifesaver}</p>
                   </div>
-                  <div className="bg-[#2D2D2D] p-8 rounded-sm text-white text-center space-y-4 shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-0.5 bg-[#8C635B]"></div>
-                    <p className="text-[9px] uppercase tracking-[0.6em] opacity-40 font-black">Daily Blessing</p>
-                    <p className="text-lg md:text-xl serif italic font-medium leading-relaxed">「{report.antiHangover.blessing}」</p>
+                  <div className="bg-[#2D2D2D] p-10 rounded-sm text-white text-center space-y-6 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-[1.5px] bg-[#8C635B]"></div>
+                    <p className="text-[10px] uppercase tracking-[0.8em] opacity-40 font-black">Daily Blessing</p>
+                    <p className="text-xl md:text-2xl serif italic font-light leading-relaxed tracking-widest">「{report.antiHangover.blessing}」</p>
                   </div>
                </div>
             </div>
+
             {onSave && (
-               <div className="pt-4">
-                 <button onClick={() => onSave(report, new Date().toLocaleDateString('zh-TW'))} className="w-full max-w-xs py-5 bg-[#8C635B] text-white text-[13px] tracking-[0.6em] uppercase font-black shadow-lg hover:bg-[#7D5A50] transition-colors rounded-sm">{t.common.archive}</button>
+               <div className="pt-10">
+                 <button onClick={() => onSave(report, new Date().toLocaleDateString('zh-TW'))} className="w-full max-w-md py-6 bg-[#8C635B] text-white text-sm tracking-[0.8em] uppercase font-black shadow-2xl hover:bg-[#7D5A50] transition-all rounded-none">{t.common.archive}</button>
                </div>
             )}
           </div>
