@@ -41,10 +41,10 @@ export const AboutFace: React.FC = () => {
   return (
     <div className="pb-40 fade-in">
       
-      {/* ✅ 修改 1: 建立一個包含 Hero 與 四維光譜 的共用背景區塊 */}
+      {/* 1 & 2. Hero + Mirror System Block */}
       <div className="relative bg-[#F5F5F0] pt-32 pb-32 mb-24 rounded-sm overflow-hidden">
         
-        {/* 浮水印圖層：設定 absolute 讓他鋪滿這個大區塊，墊在文字後方 */}
+        {/* 背景浮水印 */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.12] grayscale select-none flex items-center justify-center">
           <img 
             src="/images/background3.jpg" 
@@ -53,28 +53,30 @@ export const AboutFace: React.FC = () => {
           />
         </div>
 
-        {/* 1. Hero / Intro Section (加上 relative z-10 讓文字浮在圖上) */}
+        {/* 1. Hero Section */}
         <section className="relative z-10 flex flex-col items-center text-center px-6 mb-32">
           <div className="max-w-4xl space-y-10">
-            <p className="serif text-[#8C635B] text-[10px] tracking-[0.5em] uppercase font-black animate-pulse">Inner Peace Trading</p>
+            {/* ✅ 放大：text-[10px] -> text-xs (12px) */}
+            <p className="serif text-[#8C635B] text-xs tracking-[0.5em] uppercase font-black animate-pulse">Inner Peace Trading</p>
             <h1 className="text-4xl md:text-7xl serif text-[#2D2D2D] font-light leading-tight tracking-tight">
               交易沒有標準答案<br />
               只有<span className="italic font-normal text-[#8C635B]">平靜</span>後的倒影
             </h1>
             <div className="w-12 h-[0.5px] bg-[#8C635B]/30 mx-auto"></div>
-            <p className="text-lg md:text-xl text-[#8C7E6D] serif italic max-w-2xl mx-auto leading-relaxed px-4">
+            {/* ✅ 放大：text-lg -> text-xl (在手機上更清晰) */}
+            <p className="text-xl md:text-2xl text-[#8C7E6D] serif italic max-w-2xl mx-auto leading-relaxed px-4">
               「FACE 系統不是一張成績單，而是一面『後照鏡』。<br />
               當你了解鏡中的自己，市場便不再是戰場，而是一場關於修煉的旅程。」
             </p>
           </div>
         </section>
 
-        {/* 2. FACE Mirror System (加上 relative z-10 讓卡片浮在圖上) */}
+        {/* 2. FACE Mirror System */}
         <section className="relative z-10 max-w-6xl mx-auto px-6">
           <div className="text-center space-y-6 mb-20">
             <div className="w-[1px] h-16 bg-[#8C635B] mx-auto opacity-40"></div>
             <h2 className="text-3xl serif text-[#2D2D2D] tracking-widest font-bold">看見視線死角</h2>
-            <p className="text-[#8C7E6D] serif italic">透過 FACE 四維光譜，重新認識你的交易體質</p>
+            <p className="text-lg text-[#8C7E6D] serif italic">透過 FACE 四維光譜，重新認識你的交易體質</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -90,9 +92,10 @@ export const AboutFace: React.FC = () => {
                   .group:hover .w-16.h-16 { background-color: ${dim.color}; }
                 `}</style>
                 <div className="space-y-2">
-                  <h3 className="text-xl serif font-bold text-[#2D2D2D]">{dim.title}</h3>
+                  <h3 className="text-2xl serif font-bold text-[#2D2D2D]">{dim.title}</h3>
                 </div>
-                <p className="text-[14px] leading-relaxed text-[#555] serif italic">
+                {/* ✅ 放大：text-[14px] -> text-base (16px) */}
+                <p className="text-base leading-relaxed text-[#555] serif italic">
                   {dim.description}
                 </p>
               </div>
@@ -107,8 +110,6 @@ export const AboutFace: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
             <div className="w-full md:w-1/2 relative">
               <div className="absolute -top-4 -left-4 w-full h-full border border-[#8C635B]/20 rounded-sm"></div>
-              
-              {/* ✅ 修改 2: 更新 NPC Bartender 圖片路徑 (直接用空格) */}
               <img 
                 src="/images/NPC Bartender.jpg" 
                 alt="NPC Bartender" 
@@ -118,13 +119,15 @@ export const AboutFace: React.FC = () => {
             
             <div className="w-full md:w-1/2 space-y-8">
               <div className="space-y-2">
-                <h4 className="text-[#8C635B] text-[10px] font-black tracking-[0.4em] uppercase">Founder & Guide</h4>
+                {/* ✅ 放大：text-[10px] -> text-sm (14px) */}
+                <h4 className="text-[#8C635B] text-sm font-black tracking-[0.4em] uppercase">Founder & Guide</h4>
                 <h2 className="text-4xl serif text-[#2D2D2D] leading-tight font-light">
                   我是 NPC，<br />這間解憂 Bar 的 Bartender
                 </h2>
               </div>
               
-              <div className="space-y-6 text-[#555] serif italic leading-loose text-lg text-justify">
+              {/* ✅ 放大：text-lg -> text-xl，提升故事的可讀性 */}
+              <div className="space-y-6 text-[#555] serif italic leading-loose text-xl text-justify">
                 <p>
                   這個「Bar」與其說是酒吧，不如說是一個讓靈魂休息的茶室。
                   我知道在充滿雜訊的交易世界裡，要始終保持清醒是多麼費力。
@@ -151,15 +154,16 @@ export const AboutFace: React.FC = () => {
         <div className="absolute top-0 left-0 w-full h-1 bg-[#8C635B]"></div>
         <div className="relative z-10 space-y-12">
           <div className="space-y-4">
-            <p className="text-white/40 serif italic tracking-[0.2em] text-lg">追蹤社群，領取每日『解酒錠』</p>
+            <p className="text-white/40 serif italic tracking-[0.2em] text-xl">追蹤社群，領取每日『解酒錠』</p>
           </div>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-2xl mx-auto">
+            {/* ✅ 優化：text-[11px] -> text-xs，增加按鈕點擊感 */}
             <a 
               href={socialLinks.facebook} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex-1 py-4 px-6 bg-transparent border border-white/20 text-white text-[11px] tracking-[0.4em] uppercase font-black hover:bg-white hover:text-[#2D2D2D] transition-all flex items-center justify-center gap-3"
+              className="flex-1 py-4 px-6 bg-transparent border border-white/20 text-white text-xs tracking-[0.4em] uppercase font-black hover:bg-white hover:text-[#2D2D2D] transition-all flex items-center justify-center gap-3"
             >
               <i className="fa-brands fa-facebook-f text-lg"></i> Facebook
             </a>
@@ -167,7 +171,7 @@ export const AboutFace: React.FC = () => {
               href={socialLinks.instagram} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex-1 py-4 px-6 bg-white text-[#2D2D2D] text-[11px] tracking-[0.4em] uppercase font-black hover:bg-[#8C635B] hover:text-white transition-all shadow-xl flex items-center justify-center gap-3"
+              className="flex-1 py-4 px-6 bg-white text-[#2D2D2D] text-xs tracking-[0.4em] uppercase font-black hover:bg-[#8C635B] hover:text-white transition-all shadow-xl flex items-center justify-center gap-3"
             >
               <i className="fa-brands fa-instagram text-lg"></i> Instagram
             </a>
@@ -175,7 +179,7 @@ export const AboutFace: React.FC = () => {
               href={socialLinks.threads} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex-1 py-4 px-6 bg-transparent border border-white/20 text-white text-[11px] tracking-[0.4em] uppercase font-black hover:bg-white hover:text-[#2D2D2D] transition-all flex items-center justify-center gap-3"
+              className="flex-1 py-4 px-6 bg-transparent border border-white/20 text-white text-xs tracking-[0.4em] uppercase font-black hover:bg-white hover:text-[#2D2D2D] transition-all flex items-center justify-center gap-3"
             >
               <i className="fa-brands fa-threads text-lg"></i> Threads
             </a>
@@ -184,10 +188,10 @@ export const AboutFace: React.FC = () => {
           <div className="pt-20 border-t border-white/5 space-y-6">
             <div className="flex items-center justify-center gap-3 opacity-30">
               <span className="w-8 h-[1px] bg-white"></span>
-              <span className="serif font-bold text-sm tracking-[0.3em] text-white">交易解憂 Bar</span>
+              <span className="serif font-bold text-base tracking-[0.3em] text-white">交易解憂 Bar</span>
               <span className="w-8 h-[1px] bg-white"></span>
             </div>
-            <p className="text-[10px] text-white/20 font-mono tracking-widest uppercase">© 2024 Trading Solace Bar. All rights reserved.</p>
+            <p className="text-xs text-white/20 font-mono tracking-widest uppercase">© 2024 Trading Solace Bar. All rights reserved.</p>
           </div>
         </div>
       </section>
