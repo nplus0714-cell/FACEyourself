@@ -37,13 +37,16 @@
             font-family: 'Noto Sans TC', sans-serif;
             background-color: var(--zen-bg);
             color: var(--zen-ink);
+            /* ✅ 全域字體放大至 18px，讓閱讀更輕鬆 */
+            font-size: 18px; 
             line-height: 1.8;
             -webkit-font-smoothing: antialiased;
             background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
         }
         h1, h2, h3, h4, .serif {
             font-family: 'Noto Serif TC', serif;
-            letter-spacing: 0.15em;
+            /* ✅ 稍微增加字間距，提升質感與可讀性 */
+            letter-spacing: 0.18em; 
         }
         .text-zen-ink { color: var(--zen-ink); }
         .text-zen-muted { color: var(--zen-muted); }
@@ -74,7 +77,7 @@
         .ink-stamp {
             border: 1px solid var(--zen-accent);
             color: var(--zen-accent);
-            padding: 2px 8px;
+            padding: 4px 10px; /* ✅ 稍微加大內縮，讓印章感更明顯 */
             font-family: 'Noto Serif TC', serif;
             font-weight: 700;
             line-height: 1.2;
