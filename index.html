@@ -24,85 +24,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root {
-            --zen-bg: #F5F5F0;
-            --zen-ink: #2D2D2D;
-            --zen-muted: #8C7E6D;
-            --zen-border: #D1D1C7;
-            --zen-stone: #E6E6E1;
-            --zen-accent: #8C635B;
-            --cyber-glow: rgba(140, 126, 109, 0.2);
-        }
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: var(--zen-bg);
-            color: var(--zen-ink);
-            /* ✅ 全域字體放大至 18px，讓閱讀更輕鬆 */
-            font-size: 18px; 
-            line-height: 1.8;
-            -webkit-font-smoothing: antialiased;
-            background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
-        }
-        h1, h2, h3, h4, .serif {
-            font-family: 'Noto Serif TC', serif;
-            /* ✅ 稍微增加字間距，提升質感與可讀性 */
-            letter-spacing: 0.18em; 
-        }
-        .text-zen-ink { color: var(--zen-ink); }
-        .text-zen-muted { color: var(--zen-muted); }
-        .border-zen { border-color: var(--zen-border); }
-        .bg-zen-paper { background-color: var(--zen-bg); }
-        
-        .fade-in {
-            animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .cyber-ink-card {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid var(--zen-border);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .cyber-ink-card:hover {
-            border-color: var(--zen-ink);
-            box-shadow: 0 20px 40px var(--cyber-glow);
-            transform: translateY(-5px);
-        }
-        
-        .ink-stamp {
-            border: 1px solid var(--zen-accent);
-            color: var(--zen-accent);
-            padding: 4px 10px; /* ✅ 稍微加大內縮，讓印章感更明顯 */
-            font-family: 'Noto Serif TC', serif;
-            font-weight: 700;
-            line-height: 1.2;
-            display: inline-block;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            opacity: 0.9;
-        }
-
-        .sci-fi-scan {
-            position: relative;
-        }
-        .sci-fi-scan::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: rgba(140, 99, 91, 0.2);
-            animation: scanning 3s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes scanning {
-            0% { top: 0; }
-            100% { top: 100%; }
-        }
-    </style>
+    body {
+        font-family: 'Noto Sans TC', sans-serif;
+        background-color: var(--zen-bg);
+        color: var(--zen-ink);
+        /* ✅ 保持 18px 確保手機易讀性 */
+        font-size: 18px; 
+        /* ✅ 增加行高至 1.9，創造安縵般的「呼吸感」 */
+        line-height: 1.9;
+        -webkit-font-smoothing: antialiased;
+        /* ✅ 略微加深文字顏色，補足紙張紋理造成的對比度損失 */
+        color: #2D2D2D; 
+    }
+    h1, h2, h3, .serif {
+        font-family: 'Noto Serif TC', serif;
+        /* ✅ Aman 的靈魂：極寬的字間距 */
+        letter-spacing: 0.22em; 
+        /* ✅ 確保標題粗細適中，過粗會失去禪意 */
+        font-weight: 300; 
+    }
+</style>
 <script type="importmap">
 {
   "imports": {
