@@ -35,7 +35,8 @@ export const AboutFace: React.FC = () => {
   const socialLinks = {
     facebook: "https://www.facebook.com/profile.php?id=61585260510757&locale=zh_TW",
     instagram: "https://www.instagram.com/the_trading_post234/",
-    threads: "https://www.threads.com/@the_trading_post234?xmt=AQF0L-LuDhBrr-ph13qsPUU4fAPWhMiGrETCyAWw6c6fOHk"
+    threads: "https://www.threads.com/@the_trading_post234?xmt=AQF0L-LuDhBrr-ph13qsPUU4fAPWhMiGrETCyAWw6c6fOHk",
+    line: "https://line.me/ti/p/@227bctxh" // ✅ 新增 LINE@ 連結
   };
 
   return (
@@ -133,7 +134,7 @@ export const AboutFace: React.FC = () => {
         </div>
       </section>
 
-      {/* ✅ LINE@ 服務連結與每日解酒錠區塊 */}
+      {/* ✅ LINE@ 服務連結：現在 QR Code 具備點擊跳轉功能 */}
       <section className="py-24 bg-white/40 backdrop-blur-md border-y border-[#D1D1C7]/30 mb-32 relative overflow-hidden">
         <div className="max-w-5xl mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-16">
           <div className="text-center md:text-left space-y-8 max-w-xl">
@@ -155,22 +156,30 @@ export const AboutFace: React.FC = () => {
           </div>
 
           <div className="relative group shrink-0">
-            {/* 裝飾性雙邊框 */}
             <div className="absolute -inset-6 border border-[#8C635B]/10 rounded-sm scale-95 group-hover:scale-100 transition-all duration-1000"></div>
             <div className="absolute -inset-3 border border-[#8C635B]/20 rounded-sm group-hover:border-[#8C635B]/40 transition-all duration-700"></div>
             
-            {/* QR Code 容器 */}
-            <div className="relative bg-white p-6 shadow-2xl transition-transform duration-700 group-hover:translate-y-[-4px]">
-              <img 
-                src="/images/line-qrcode.png" 
-                alt="LINE@ QR Code" 
-                className="w-48 h-48 grayscale hover:grayscale-0 transition-all duration-1000"
-                loading="lazy"
-              />
-              <div className="mt-6 text-center">
-                <p className="text-[10px] tracking-[0.5em] text-[#8C7E6D] uppercase font-black">Scan to Connect</p>
-                <div className="w-4 h-[1px] bg-[#8C635B] mx-auto mt-2"></div>
-              </div>
+            {/* ✅ QR Code 容器：已嵌入連結，點擊圖片直接跳轉 LINE@ */}
+            <div className="relative bg-white p-6 shadow-2xl transition-transform duration-700 group-hover:translate-y-[-8px]">
+              <a 
+                href={socialLinks.line} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block cursor-pointer"
+              >
+                <img 
+                  src="/images/line-qrcode.png" 
+                  alt="LINE@ QR Code" 
+                  className="w-48 h-48 grayscale hover:grayscale-0 transition-all duration-1000"
+                  loading="lazy"
+                />
+                <div className="mt-6 text-center">
+                  <p className="text-[10px] tracking-[0.5em] text-[#8C7E6D] uppercase font-black group-hover:text-[#8C635B] transition-colors">
+                    Click or Scan to Connect
+                  </p>
+                  <div className="w-4 h-[1px] bg-[#8C635B] mx-auto mt-2"></div>
+                </div>
+              </a>
             </div>
           </div>
         </div>
