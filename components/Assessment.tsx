@@ -64,7 +64,7 @@ export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, t
   ];
 
   return (
-    <div className="max-w-xl mx-auto py-4 px-4 flex flex-col min-h-[75vh] justify-center fade-in">
+    <div className="max-w-xl mx-auto py-4 px-8 flex flex-col min-h-[75vh] justify-center fade-in">
       
       {/* 頂部維度：比照 Aman 風格，增加字距與可讀性 */}
       <div className="text-center mb-8 space-y-6">
@@ -118,7 +118,7 @@ export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, t
       
       {/* 題目區塊：比照安縵，讓文字更有份量 */}
       <div className="space-y-8">
-        <div className="text-center min-h-[80px] flex items-center justify-center px-4">
+        <div className="text-center min-h-[80px] flex items-center justify-center px-8">
           {/* ✅ 確保題目在手機上是顯眼的 20px (text-xl) */}
           <p className="text-xl md:text-2xl leading-[1.6] serif text-[#2D2D2D] italic font-normal tracking-wide">
             {currentQ.text}

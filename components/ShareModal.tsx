@@ -107,7 +107,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
             {/* 1. 複製連結 */}
             <button 
               onClick={handleCopy}
-              className="group flex items-center justify-between px-4 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] transition-all bg-[#FBFBFA]/50"
+              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] transition-all bg-[#FBFBFA]/50"
             >
               <div className="flex flex-col items-start text-left">
                 <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 01</span>
@@ -121,7 +121,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
             {/* 2. 分享至 LINE */}
             <button 
               onClick={shareToLine}
-              className="group flex items-center justify-between px-4 py-3 border border-[#D1D1C7]/40 hover:border-[#06C755] hover:bg-[#06C755]/5 transition-all"
+              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#06C755] hover:bg-[#06C755]/5 transition-all"
             >
               <div className="flex flex-col items-start text-left">
                 <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 02</span>
@@ -133,7 +133,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
             {/* 3. 分享至 FB */}
             <button 
               onClick={shareToFB}
-              className="group flex items-center justify-between px-4 py-3 border border-[#D1D1C7]/40 hover:border-[#1877F2] hover:bg-[#1877F2]/5 transition-all"
+              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#1877F2] hover:bg-[#1877F2]/5 transition-all"
             >
               <div className="flex flex-col items-start text-left">
                 <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 03</span>
@@ -145,7 +145,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
             {/* 4. 分享至 IG */}
             <button 
               onClick={handleIgCopy}
-              className="group flex items-center justify-between px-4 py-3 border border-[#D1D1C7]/40 hover:border-[#E4405F] hover:bg-[#E4405F]/5 transition-all"
+              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#E4405F] hover:bg-[#E4405F]/5 transition-all"
             >
               <div className="flex flex-col items-start text-left">
                 <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 04</span>
@@ -159,7 +159,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
             {/* 5. 分享至 Threads */}
             <button 
               onClick={shareToThreads}
-              className="group flex items-center justify-between px-4 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] hover:bg-black/5 transition-all"
+              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] hover:bg-black/5 transition-all"
             >
               <div className="flex flex-col items-start text-left">
                 <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 05</span>
@@ -171,7 +171,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
             {/* 6. 分享至 X (Twitter) */}
             <button 
               onClick={shareToX}
-              className="group flex items-center justify-between px-4 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] hover:bg-black/5 transition-all"
+              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] hover:bg-black/5 transition-all"
             >
               <div className="flex flex-col items-start text-left">
                 <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 06</span>
@@ -184,7 +184,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
             {navigator.share && (
               <button 
                 onClick={handleNativeShare}
-                className="group flex items-center justify-between px-4 py-3 bg-[#2D2D2D] text-white hover:bg-black transition-all mt-1"
+                className="group flex items-center justify-between px-8 py-3 bg-[#2D2D2D] text-white hover:bg-black transition-all mt-1"
               >
                 <div className="flex flex-col items-start text-left">
                   <span className="text-[7px] font-mono opacity-50 uppercase tracking-widest mb-0.5">Method 07</span>

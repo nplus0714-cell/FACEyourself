@@ -41,7 +41,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   const isAssessmentView = activeView === 'dna-test' || activeView === 'daily-test';
 
   return (
-    <div className={`min-h-screen relative flex flex-col items-center transition-colors duration-1000 bg-zen-paper px-4 md:px-8 py-6 md:py-12`}>
+    <div className={`min-h-screen relative flex flex-col items-center transition-colors duration-1000 bg-zen-paper px-8 md:px-8 py-6 md:py-12`}>
       <div className={`${(wide ? 'max-w-6xl' : 'max-w-4xl') + ' w-full'} transition-all duration-500`}>
         
         {/* Header - 質感深度優化 */}
@@ -65,7 +65,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
               {/* Language Switcher - 提升點擊範圍 */}
               <button 
                 onClick={onToggleLanguage}
-                className="px-3 py-2 sm:px-4 sm:py-2.5 border border-[#D1D1C7] text-xs tracking-[0.2em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold bg-white/50 shadow-sm"
+                className="px-6 py-2 sm:px-8 sm:py-2.5 border border-[#D1D1C7] text-xs tracking-[0.2em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold bg-white/50 shadow-sm"
               >
                 {language === 'zh' ? 'EN' : '中'}
               </button>
@@ -105,7 +105,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
               ) : (
                 <button 
                   onClick={onLogin}
-                  className="flex items-center gap-3 px-4 py-2 sm:px-6 sm:py-3 bg-white border border-[#2D2D2D] text-xs tracking-[0.3em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold shadow-md whitespace-nowrap"
+                  className="flex items-center gap-3 px-8 py-2 sm:px-6 sm:py-3 bg-white border border-[#2D2D2D] text-xs tracking-[0.3em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold shadow-md whitespace-nowrap"
                 >
                   {t.common.login}
                 </button>

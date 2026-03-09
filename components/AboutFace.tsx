@@ -63,7 +63,7 @@ export const AboutFace: React.FC = () => {
               只有<span className="italic font-light text-[#8C635B]">平靜</span>後的倒影
             </h1>
             <div className="w-16 h-[0.5px] bg-[#8C635B]/40 mx-auto"></div>
-            <p className="text-xl md:text-3xl text-[#5D554D] serif italic max-w-3xl mx-auto leading-[1.8] tracking-wide px-4">
+            <p className="text-xl md:text-3xl text-[#5D554D] serif italic max-w-3xl mx-auto leading-[1.8] tracking-wide px-8">
               「FACE 系統不是一張成績單，而是一面『後照鏡』。<br className="hidden md:block" />
               當你了解鏡中的自己，市場便不再是戰場。」
             </p>

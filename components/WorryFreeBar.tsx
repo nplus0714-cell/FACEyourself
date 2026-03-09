@@ -49,11 +49,11 @@ export const WorryFreeBar: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 space-y-20 fade-in min-h-[85vh] flex flex-col">
+    <div className="max-w-3xl mx-auto py-12 px-8 space-y-20 fade-in min-h-[85vh] flex flex-col">
       <div className="text-center space-y-6">
-        <div className="inline-block px-4 py-1.5 border border-[#8C635B] text-[#8C635B] text-xs tracking-[0.5em] uppercase font-black">Late Night Session</div>
+        <div className="inline-block px-8 py-1.5 border border-[#8C635B] text-[#8C635B] text-xs tracking-[0.5em] uppercase font-black">Late Night Session</div>
         <h2 className="text-4xl md:text-5xl serif text-[#2D2D2D] font-light tracking-[0.2em]">交易解憂 Bar</h2>
-        <p className="text-[#8C7E6D] text-lg serif italic opacity-80 px-4">「入座。在這裡，盈虧只是過往雲煙。」</p>
+        <p className="text-[#8C7E6D] text-lg serif italic opacity-80 px-8">「入座。在這裡，盈虧只是過往雲煙。」</p>
       </div>
 
       {!response && !loading && (
