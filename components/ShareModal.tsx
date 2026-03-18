@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { FaceScores, PersonalityProfile } from '../types';
 
@@ -28,6 +27,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
     return `${shareBaseUrl}?dna_share=${scores}`;
   };
 
+  // ✅ 統一的分享文案 (您要求的格式)
   const shareText = `測測看你是什麼交易風格？什麼動物～我在「FACE 投資人格日記」測出的靈魂定錨是：【${profile.name}】！`;
 
   const handleCopy = () => {
@@ -46,26 +46,31 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
     });
   };
 
+  // ✅ LINE 分享：明確分離 text 和 url 參數
   const shareToLine = () => {
     const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(generateShareUrl())}&text=${encodeURIComponent(shareText)}`;
     window.open(url, '_blank', 'width=600,height=400');
   };
 
+  // ✅ FB 分享：FB 的 API 規定只能傳 u (url)，傳 text 會被忽略或報錯
   const shareToFB = () => {
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(generateShareUrl())}`;
     window.open(url, '_blank', 'width=600,height=400');
   };
 
+  // ✅ Threads 分享：可以將 text 和 url 串在一起當作 text 傳送
   const shareToThreads = () => {
-    const url = `https://www.threads.net/intent/post?text=${encodeURIComponent(shareText + ' ' + generateShareUrl())}`;
-    window.open(url, '_blank', 'width=600,height=400');
+    const url = `https://www.threads.net/intent/post?text=${encodeURIComponent(shareText + '\n' + generateShareUrl())}`;
+    window.open(url, '_blank', 'width=600,height=600');
   };
 
+  // ✅ X (Twitter) 分享：支援 text 和 url 參數分離
   const shareToX = () => {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(generateShareUrl())}`;
     window.open(url, '_blank', 'width=600,height=400');
   };
 
+  // ✅ 系統原生分享 (手機端最順暢)
   const handleNativeShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -112,7 +117,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
               <div className="flex flex-col items-start text-left">
                 <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 01</span>
                 <span className="text-[11px] font-bold text-[#2D2D2D] serif uppercase tracking-[0.1em]">
-                  {copied ? '已複製！' : '複製連結與文本'}
+                  {copied ? '已複製內容！' : '複製文案與連結'}
                 </span>
               </div>
               <i className="fa-solid fa-link text-[#8C7E6D] group-hover:text-[#2D2D2D] transition-colors text-base"></i>
@@ -130,7 +135,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
               <i className="fa-brands fa-line text-xl text-[#06C755]"></i>
             </button>
 
-            {/* 3. 分享至 FB */}
+            {/* 3. 分享至 FB (僅網址) */}
             <button 
               onClick={shareToFB}
               className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#1877F2] hover:bg-[#1877F2]/5 transition-all"
@@ -142,7 +147,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
               <i className="fa-brands fa-facebook-f text-lg text-[#1877F2]"></i>
             </button>
 
-            {/* 4. 分享至 IG */}
+            {/* 4. 複製給 IG */}
             <button 
               onClick={handleIgCopy}
               className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#E4405F] hover:bg-[#E4405F]/5 transition-all"
@@ -150,7 +155,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
               <div className="flex flex-col items-start text-left">
                 <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 04</span>
                 <span className="text-[11px] font-bold text-[#2D2D2D] serif uppercase tracking-[0.1em]">
-                   {igCopied ? '已複製！' : '分享至 Instagram'}
+                   {igCopied ? '已複製內容！' : '複製給 Instagram'}
                 </span>
               </div>
               <i className="fa-brands fa-instagram text-xl text-[#E4405F]"></i>
@@ -180,7 +185,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
               <i className="fa-brands fa-x-twitter text-lg text-[#2D2D2D]"></i>
             </button>
 
-            {/* 7. 系統原生分享 */}
+            {/* 7. 系統原生分享 (手機端首選) */}
             {navigator.share && (
               <button 
                 onClick={handleNativeShare}
