@@ -13,6 +13,7 @@ import { generateMarketAwareQuestions } from './services/geminiService';
 import { translations } from './i18n';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
+const BASELINE_ASSESSMENT_VERSION = 'face-baseline-20q-v1';
 
 const App: React.FC = () => {
   const [state, setState] = useState<UserState>({ user: null, dna: null, history: [], tempDaily: null });
@@ -213,7 +214,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {view === 'dna-test' && <Assessment title={language === 'zh' ? "投資 DNA 基準測量" : "Investment DNA Baseline"} questions={INITIAL_QUESTIONS} weightPerQuestion={20} onComplete={handleDnaComplete} language={language} />}
+      {view === 'dna-test' && <Assessment title={language === 'zh' ? "投資 DNA 基準測量" : "Investment DNA Baseline"} questions={INITIAL_QUESTIONS} weightPerQuestion={20} onComplete={handleDnaComplete} language={language} assessmentVersion={BASELINE_ASSESSMENT_VERSION} />}
       
       {view === 'daily-test' && (
         isFetchingQuestions ? (
