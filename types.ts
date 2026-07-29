@@ -13,9 +13,55 @@ export interface Question {
   labels: string[];
 }
 
+export type FaceTrait = 'A' | 'P' | 'R' | 'I' | 'L' | 'T' | 'C' | 'D';
+
+export type FaceDimension = 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
+
+export type FaceQuestionType = 'scenario' | 'image' | 'intuition' | 'agreement';
+
+export interface FaceQuestionOption {
+  id: 'a' | 'b';
+  label: string;
+  trait: FaceTrait;
+}
+
+export interface FaceImagePlaceholder {
+  assetKey: string;
+  alt: string;
+  prompt: string;
+}
+
+export interface FaceCompositeImage {
+  src: string;
+  alt: string;
+}
+
+export interface FaceAgreementMapping {
+  agreeTrait: FaceTrait;
+  disagreeTrait: FaceTrait;
+}
+
+/**
+ * The source of truth for a versioned FACE question.
+ *
+ * Unlike the legacy `Question` model, each answer declares the trait it
+ * represents. That is required for reverse-scored agreement questions.
+ */
+export interface FaceQuestion {
+  id: string;
+  order: number;
+  type: FaceQuestionType;
+  dimension: FaceDimension;
+  prompt: string;
+  options?: [FaceQuestionOption, FaceQuestionOption];
+  agreement?: FaceAgreementMapping;
+  images?: [FaceImagePlaceholder, FaceImagePlaceholder];
+  compositeImage?: FaceCompositeImage;
+}
+
 export interface AssessmentAnswer {
   question_code: string;
-  selected_option: 'A' | 'B';
+  selected_option: 'A' | 'B' | 'very_agree' | 'somewhat_agree' | 'neutral' | 'somewhat_disagree' | 'very_disagree';
   dimension: 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
   score_value: number;
   answered_at: string;

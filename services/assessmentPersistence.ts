@@ -1,7 +1,7 @@
 import { getFaceCode } from '../constants';
 import { getSupabaseClient } from '../lib/supabase';
 import type { Json } from '../lib/database.types';
-import type { AssessmentAnswer, FaceScores, Question } from '../types';
+import type { AssessmentAnswer, FaceQuestion, FaceScores, Question } from '../types';
 
 const VISITOR_ID_KEY = 'face_anonymous_visitor_id_v1';
 
@@ -161,5 +161,45 @@ export const completeAssessmentRun = async (
   } catch (error) {
     if (error instanceof AssessmentPersistenceError) throw error;
     throw new AssessmentPersistenceError('測驗答案尚未保存，請重試。', error);
+  }
+};
+
+export const completeFaceAssessmentRun = async (
+  runId: string,
+  questions: FaceQuestion[],
+  answers: Record<string, AssessmentAnswer['selected_option']>,
+  scores: FaceScores,
+  scoreValues: Record<string, number>,
+): Promise<string> => {
+  try {
+    const supabase = getSupabaseClient();
+    const serializedAnswers: AssessmentAnswer[] = questions.map((question) => {
+      const selectedOption = answers[question.id];
+      if (!selectedOption) {
+        throw new AssessmentPersistenceError(`Question ${question.id} is missing an answer.`);
+      }
+
+      return {
+        question_code: question.id,
+        selected_option: selectedOption,
+        dimension: question.dimension,
+        score_value: scoreValues[question.id],
+        answered_at: new Date().toISOString(),
+      };
+    });
+
+    const { data, error } = await supabase.rpc('complete_assessment', {
+      p_run_id: runId,
+      p_face_code: getFaceCode(scores),
+      p_scores: scores as unknown as Json,
+      p_answers: serializedAnswers as unknown as Json,
+    });
+
+    if (error) throw error;
+    if (!data) throw new Error('FACE assessment completion did not return a run id.');
+    return data;
+  } catch (error) {
+    if (error instanceof AssessmentPersistenceError) throw error;
+    throw new AssessmentPersistenceError('無法保存這次測驗，請再試一次。', error);
   }
 };

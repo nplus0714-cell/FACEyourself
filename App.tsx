@@ -2,18 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { ZenLayout } from './components/ZenLayout';
 import { Assessment } from './components/Assessment';
+import { FaceAssessment } from './components/FaceAssessment';
 import { Dashboard } from './components/Dashboard';
 import { RoleGallery } from './components/RoleGallery';
 import { ZenDnaChart } from './components/ZenDnaChart';
 import { AboutFace } from './components/AboutFace';
 import { WorryFreeBar } from './components/WorryFreeBar';
-import { INITIAL_QUESTIONS, DAILY_QUESTIONS } from './constants';
+import { DAILY_QUESTIONS } from './constants';
 import { FaceScores, UserState, DiaryEntry, AuthUser, Language } from './types';
 import { generateMarketAwareQuestions } from './services/geminiService';
 import { translations } from './i18n';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
-const BASELINE_ASSESSMENT_VERSION = 'face-baseline-20q-v1';
 
 const App: React.FC = () => {
   const [state, setState] = useState<UserState>({ user: null, dna: null, history: [], tempDaily: null });
@@ -214,7 +214,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {view === 'dna-test' && <Assessment title={language === 'zh' ? "投資 DNA 基準測量" : "Investment DNA Baseline"} questions={INITIAL_QUESTIONS} weightPerQuestion={20} onComplete={handleDnaComplete} language={language} assessmentVersion={BASELINE_ASSESSMENT_VERSION} />}
+      {view === 'dna-test' && <FaceAssessment onComplete={handleDnaComplete} />}
       
       {view === 'daily-test' && (
         isFetchingQuestions ? (
