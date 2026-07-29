@@ -5,6 +5,22 @@ export interface FaceScores {
   A: number; P: number; R: number; I: number; L: number; T: number; C: number; D: number;
 }
 
+export interface Question {
+  id: string;
+  pair: string[];
+  category: string;
+  text: string;
+  labels: string[];
+}
+
+export interface AssessmentAnswer {
+  question_code: string;
+  selected_option: 'A' | 'B';
+  dimension: 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
+  score_value: number;
+  answered_at: string;
+}
+
 export interface AuthUser {
   id: string;
   name: string;

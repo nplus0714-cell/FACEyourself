@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import { GoogleGenAI } from "@google/genai";
-
-// ✅ 安全讀取 Vite 環境變數
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "dummy_key_to_prevent_crash";
-const ai = new GoogleGenAI({ apiKey });
+import { generateBarResponse } from '../services/geminiService';
 
 export const WorryFreeBar: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -12,10 +8,10 @@ export const WorryFreeBar: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   const menu = [
-    { id: 'fomo', name: 'FOMO 特調', icon: '✨', description: '針對錯失恐懼、想追高熱門股的焦慮。', prompt: '我感到 FOMO (錯失恐懼)，看著別人的標的狂飆而我的沒動，我感到焦慮。請給我一段極具禪意且富有哲理的寬慰與建議，字數約 120 字。' },
-    { id: 'loss', name: '回撤苦艾酒', icon: '🌿', description: '針對帳面虧損、淨值下滑帶來的生理不安。', prompt: '我的帳面正在回撤，我感到心跳加速與不安。請以一位智慧長者的口吻，給我一段關於波動與價值的對話，字數約 120 字。' },
-    { id: 'doubt', name: '自我懷疑補藥', icon: '💎', description: '針對連續失利、懷疑系統有效性的迷失。', prompt: '我連續交易失利，開始懷疑自己的判斷與能力。請給我一段充滿力量但溫柔的鼓勵，告訴我如何與挫折共處，字數約 120 字。' },
-    { id: 'greed', name: '貪婪解毒水', icon: '🌑', description: '針對獲利後過度自信、無法收手的亢奮。', prompt: '我發現自己變得很貪婪，不斷想加大槓桿，停不下來。請給我一段嚴肅但慈悲的警示，讓我清醒過來，字數約 120 字。' }
+    { id: 'fomo', name: 'FOMO 特調', icon: '✨', description: '針對錯失恐懼、想追高熱門股的焦慮。' },
+    { id: 'loss', name: '回撤苦艾酒', icon: '🌿', description: '針對帳面虧損、淨值下滑帶來的生理不安。' },
+    { id: 'doubt', name: '自我懷疑補藥', icon: '💎', description: '針對連續失利、懷疑系統有效性的迷失。' },
+    { id: 'greed', name: '貪婪解毒水', icon: '🌑', description: '針對獲利後過度自信、無法收手的亢奮。' }
   ];
 
   const orderDrink = async (item: typeof menu[0]) => {
@@ -24,13 +20,8 @@ export const WorryFreeBar: React.FC = () => {
     setResponse(null);
 
     try {
-      const result = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `您是一位在深山經營「交易解憂酒吧」的禪修大師。現在一位投資者點了「${item.name}」。
-        請針對他的內心苦處提供禪宗式的指引：${item.prompt}
-        文案風格：極致優雅、詩意、冷靜、且最後要提供一個簡單的「當下動作」來平復心境。`
-      });
-      setResponse(result.text || '「大師今日靜默。請深呼吸，再試一次。」');
+      const text = await generateBarResponse(item.id);
+      setResponse(text || '「大師今日靜默。請深呼吸，再試一次。」');
     } catch (e) {
       setResponse('「酒窖正在重整。請閉上眼，感受此刻的呼吸。」');
     } finally {

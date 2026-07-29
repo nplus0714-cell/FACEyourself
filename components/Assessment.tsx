@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
-import { FaceScores, Language } from '../types';
+import React, { useRef, useState } from 'react';
+import { FaceScores, Language, Question } from '../types';
 import { translations } from '../i18n';
-
-interface Question {
-  id: string;
-  pair: string[];
-  category: string;
-  text: string;
-  labels: string[];
-}
+import {
+  AssessmentPersistenceError,
+  completeAssessmentRun,
+  startAssessmentRun,
+} from '../services/assessmentPersistence';
 
 interface AssessmentProps {
   questions: Question[];
@@ -16,39 +13,130 @@ interface AssessmentProps {
   title: string;
   weightPerQuestion: number;
   language: Language;
+  assessmentVersion?: string;
 }
 
-export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, title, weightPerQuestion, language }) => {
+export const Assessment: React.FC<AssessmentProps> = ({
+  questions,
+  onComplete,
+  title,
+  weightPerQuestion,
+  language,
+  assessmentVersion,
+}) => {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, 'A' | 'B'>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const clientRunIdRef = useRef<string | null>(null);
+  const runIdRef = useRef<string | null>(null);
+  const runPromiseRef = useRef<Promise<string> | null>(null);
   const t = translations[language];
 
   const currentQ = questions[step];
   const totalSteps = questions.length;
 
+  const getOrStartRun = (): Promise<string> => {
+    if (!assessmentVersion) {
+      return Promise.reject(new Error('This assessment is not configured for persistence.'));
+    }
+
+    if (runIdRef.current) {
+      return Promise.resolve(runIdRef.current);
+    }
+
+    if (!runPromiseRef.current) {
+      clientRunIdRef.current ??= crypto.randomUUID();
+      runPromiseRef.current = startAssessmentRun(
+        clientRunIdRef.current,
+        assessmentVersion,
+        questions.length,
+      )
+        .then((runId) => {
+          runIdRef.current = runId;
+          return runId;
+        })
+        .catch((error) => {
+          runPromiseRef.current = null;
+          throw error;
+        });
+    }
+
+    return runPromiseRef.current;
+  };
+
+  const calculateScores = (
+    completedAnswers: Record<string, 'A' | 'B'>,
+  ): FaceScores => {
+    const final: FaceScores = { A: 0, P: 0, R: 0, I: 0, L: 0, T: 0, C: 0, D: 0 };
+
+    questions.forEach(q => {
+      const choice = completedAnswers[q.id];
+      if (!choice) return;
+
+      const primaryTrait = q.pair[0];
+      const secondaryTrait = q.pair[1];
+
+      if (choice === 'A') {
+        (final as any)[primaryTrait] += weightPerQuestion;
+      } else {
+        (final as any)[secondaryTrait] += weightPerQuestion;
+      }
+    });
+
+    return final;
+  };
+
+  const finishAssessment = async (
+    completedAnswers: Record<string, 'A' | 'B'>,
+  ) => {
+    const final = calculateScores(completedAnswers);
+
+    if (!assessmentVersion) {
+      onComplete(final);
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const runId = await getOrStartRun();
+      await completeAssessmentRun(
+        runId,
+        assessmentVersion,
+        questions,
+        completedAnswers,
+        final,
+        weightPerQuestion,
+      );
+      onComplete(final);
+    } catch (error) {
+      console.error('Failed to persist assessment', error);
+      setSaveError(
+        error instanceof AssessmentPersistenceError
+          ? error.message
+          : '測驗答案尚未保存，請重試。',
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleChoice = (choice: 'A' | 'B') => {
+    if (isSaving) return;
+
     const updated = { ...answers, [currentQ.id]: choice };
     setAnswers(updated);
+
+    if (assessmentVersion && !runIdRef.current && !runPromiseRef.current) {
+      void getOrStartRun().catch(() => undefined);
+    }
     
     if (step < totalSteps - 1) {
       setStep(step + 1);
     } else {
-      const final: FaceScores = { A: 0, P: 0, R: 0, I: 0, L: 0, T: 0, C: 0, D: 0 };
-      
-      questions.forEach(q => {
-        const choice = updated[q.id];
-        if (!choice) return;
-        
-        const primaryTrait = q.pair[0];   
-        const secondaryTrait = q.pair[1]; 
-        
-        if (choice === 'A') {
-          (final as any)[primaryTrait] += weightPerQuestion;
-        } else {
-          (final as any)[secondaryTrait] += weightPerQuestion;
-        }
-      });
-      onComplete(final);
+      void finishAssessment(updated);
     }
   };
 
@@ -107,6 +195,7 @@ export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, t
             {step > 0 && (
               <button 
                 onClick={handleBack}
+                disabled={isSaving}
                 /* ✅ 放大：text-[8px] -> text-xs (12px) */
                 className="text-xs tracking-[0.2em] text-[#2D2D2D] uppercase border-b border-[#2D2D2D]/40 pb-1 hover:opacity-60 transition-opacity"
               >
@@ -128,7 +217,8 @@ export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, t
         {/* 選項區塊：增加點擊範圍與文字易讀性 */}
         <div className="grid grid-cols-1 gap-4">
           <button 
-            onClick={() => handleChoice('A')} 
+            onClick={() => handleChoice('A')}
+            disabled={isSaving}
             className="group relative flex items-center p-6 bg-white border border-[#D1D1C7]/60 hover:border-[#2D2D2D] hover:bg-[#2D2D2D] transition-all duration-500 rounded-none text-left shadow-sm"
           >
             <div className="flex items-center gap-6 w-full">
@@ -143,7 +233,8 @@ export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, t
           </button>
 
           <button 
-            onClick={() => handleChoice('B')} 
+            onClick={() => handleChoice('B')}
+            disabled={isSaving}
             className="group relative flex items-center p-6 bg-white border border-[#D1D1C7]/60 hover:border-[#2D2D2D] hover:bg-[#2D2D2D] transition-all duration-500 rounded-none text-left shadow-sm"
           >
             <div className="flex items-center gap-6 w-full">
@@ -155,6 +246,26 @@ export const Assessment: React.FC<AssessmentProps> = ({ questions, onComplete, t
             </div>
           </button>
         </div>
+
+        {isSaving && (
+          <p className="text-center text-xs tracking-[0.2em] text-[#8C7E6D]" role="status">
+            正在安全保存測驗結果…
+          </p>
+        )}
+
+        {saveError && (
+          <div className="space-y-3 text-center" role="alert">
+            <p className="text-sm text-[#8C635B]">{saveError}</p>
+            <button
+              type="button"
+              onClick={() => void finishAssessment(answers)}
+              disabled={isSaving}
+              className="px-6 py-3 border border-[#8C635B] text-[#8C635B] text-xs tracking-[0.2em] hover:bg-[#8C635B] hover:text-white transition-colors"
+            >
+              重新嘗試保存
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="mt-12 text-center">
