@@ -168,16 +168,19 @@ const App: React.FC = () => {
         <div className="relative min-h-[72vh] md:min-h-[85vh] flex flex-col items-center justify-center fade-in px-0 sm:px-6">
           <ZenDnaChart />
           
-          <div className="relative z-10 flex flex-col items-center space-y-7 md:space-y-12 max-w-4xl mx-auto w-full text-center">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl serif text-[#2D2D2D] tracking-tight leading-[1.25] font-normal whitespace-pre-line">
+          <div className="relative z-10 flex flex-col items-center space-y-7 md:space-y-10 max-w-4xl mx-auto w-full text-center">
+            <h1 className="text-center text-3xl md:text-5xl lg:text-6xl serif text-[#2D2D2D] tracking-tight leading-[1.75] md:leading-[1.68] font-normal whitespace-pre-line">
               {t.landing.title}
             </h1>
             
-            <p className="max-w-md text-[#8C7E6D] text-sm md:text-[15px] tracking-wide font-medium leading-relaxed">
+            <p className="mx-auto max-w-3xl text-center text-[#8C7E6D] text-3xl md:text-4xl tracking-wide font-medium leading-[1.7]">
               {t.landing.motto}
             </p>
+            <p className="mx-auto max-w-3xl -translate-y-2 text-center text-[#6F6258] text-[34px] md:text-[44px] tracking-wide leading-[1.7]">
+              {t.landing.supportingLine}
+            </p>
 
-            <div className="pt-3 md:pt-8 w-full max-w-lg mx-auto">
+            <div className="w-full max-w-lg mx-auto">
               {!state.dna ? (
                 <button 
                   onClick={() => setView('dna-test')} 
@@ -204,12 +207,6 @@ const App: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="absolute bottom-0 left-0 w-full text-center pb-4 md:pb-8 px-2 sm:px-6">
-            <p className="text-[#8C7E6D] text-[13px] md:text-[13px] tracking-wide font-medium leading-relaxed max-w-2xl mx-auto opacity-80">
-              {t.landing.footer}
-            </p>
           </div>
         </div>
       )}

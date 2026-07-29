@@ -10,8 +10,9 @@ export const translations: Record<Language, any> = {
       bar: '解憂 Bar'
     },
     landing: {
-      title: '看懂你的交易習慣，\n不只看輸贏',
-      motto: '40 題，約 6 分鐘，找出你的 FACE 交易風格。',
+      title: '投資沒有標準答案\n只有適合你的交易方式',
+      motto: '先看懂自己，再看懂市場',
+      supportingLine: '找到你的交易舒適圈',
       startTest: '開始 40 題交易人格測驗',
       dnaTest: 'trading style test',
       todayAwareness: '今日交易回顧',
@@ -55,6 +56,7 @@ export const translations: Record<Language, any> = {
     landing: {
       title: 'Understand How You Trade,\nNot Just Your Returns',
       motto: '40 questions. About 6 minutes. Find your FACE trading style.',
+      supportingLine: 'Find the trading approach that feels right for you.',
       startTest: 'Start the 40-Question Test',
       dnaTest: 'TRADING STYLE TEST',
       todayAwareness: 'Today’s Trade Review',

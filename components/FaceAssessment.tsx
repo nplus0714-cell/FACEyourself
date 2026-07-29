@@ -179,7 +179,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
       disabled={isSaving}
       className={`flex w-full items-center gap-5 border p-6 text-left shadow-sm transition-all duration-300 disabled:cursor-wait disabled:opacity-60 ${optionTone}`}
     >
-      <span className={`shrink-0 font-mono text-[10px] tracking-[0.22em] ${labelTone}`}>
+      <span className={`shrink-0 font-mono text-[11px] tracking-[0.18em] ${labelTone}`}>
         OPTION {item.id.toUpperCase()}
       </span>
       <span className="serif text-lg leading-relaxed text-[#2D2D2D]">{item.label}</span>
@@ -194,7 +194,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
           {Object.entries(DIMENSION_LABELS).map(([dimension, label]) => (
             <div
               key={dimension}
-              className="border-r border-[#D1D1C7]/60 px-1 py-2.5 text-[10px] tracking-normal text-[#5D5D56] last:border-r-0 md:py-3 md:text-xs"
+              className="border-r border-[#D1D1C7]/60 px-1 py-2.5 text-[11px] tracking-normal text-[#5D5D56] last:border-r-0 md:py-3 md:text-xs"
             >
               <span className="sm:hidden">{MOBILE_DIMENSION_LABELS[dimension as keyof typeof DIMENSION_LABELS]}</span>
               <span className="hidden sm:inline">{label}</span>
@@ -202,7 +202,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
           ))}
         </div>
         <div className="space-y-2">
-          <p className="font-mono text-[10px] font-bold tracking-[0.2em] text-[#8C635B]">{TYPE_LABELS[question.type]}</p>
+          <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">{TYPE_LABELS[question.type]}</p>
           <h2 className="serif text-xl tracking-wide text-[#2D2D2D]">FACE 交易人格測驗</h2>
           <div className="mx-auto max-w-lg pt-2" aria-label={`測驗進度：第 ${step + 1} 題，共 ${FACE_BASELINE_40_QUESTION_COUNT} 題`}>
             <div className="relative h-5">
@@ -210,7 +210,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
               <div className="absolute left-0 top-1/2 h-0.5 -translate-y-1/2 bg-[#8C635B] transition-all duration-500" style={{ width: `${((step + 1) / FACE_BASELINE_40_QUESTION_COUNT) * 100}%` }}></div>
               <div className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#8C635B] shadow-sm transition-all duration-500" style={{ left: `${((step + 1) / FACE_BASELINE_40_QUESTION_COUNT) * 100}%` }}></div>
             </div>
-            <div className="flex justify-between font-mono text-[10px] tracking-[0.08em] text-[#8C7E6D]">
+            <div className="flex justify-between font-mono text-[11px] tracking-[0.06em] text-[#8C7E6D]">
               <span>START</span>
               <span>第 {step + 1} 題 / {FACE_BASELINE_40_QUESTION_COUNT}</span>
               <span>FINISH</span>
