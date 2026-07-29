@@ -122,7 +122,7 @@ export const AboutFace: React.FC = () => {
                 </h2>
               </div>
               <div className="space-y-8 text-[#444] serif italic leading-[2] text-xl text-justify tracking-wide">
-                <p>這個「Bar」與其說是酒吧，不如說是一個讓靈魂休息的茶室。我知道在充滿雜訊的交易世界裡，要始終保持清醒是多麼費力。</p>
+                <p>這個「Bar」不是要替你下單，而是讓你在資訊很亂的時候，先把自己的交易想法整理清楚。</p>
                 <p>我就像一位旁觀的 Bartender，不問你的輸贏，<strong className="text-[#2D2D2D] font-normal underline underline-offset-8 decoration-[0.5px]">只專注於擦亮手中的杯子。</strong></p>
                 <p>這裡沒有焦慮的喊盤聲，只有讓情緒沉澱的精油香氣。我想提供一個安靜的角落，陪你過濾掉多餘的雜訊，去蕪存菁。</p>
               </div>
@@ -140,11 +140,11 @@ export const AboutFace: React.FC = () => {
           <div className="text-center md:text-left space-y-8 max-w-xl">
             <div className="space-y-2">
               <span className="text-xs font-black text-[#8C635B] uppercase tracking-[0.6em] block">Exclusive Support</span>
-              <h3 className="text-3xl md:text-4xl serif text-[#2D2D2D] font-light tracking-widest leading-tight">深度解讀您的交易靈魂</h3>
+              <h3 className="text-3xl md:text-4xl serif text-[#2D2D2D] font-light tracking-wide leading-tight">一起釐清你的交易問題</h3>
             </div>
             
             <p className="text-lg md:text-xl text-[#5D554D] serif italic leading-[2] tracking-wide">
-              「有些靈魂的視線死角，需要對話才能定錨。<br />
+              「有些交易盲點，需要透過對話才看得清楚。<br />
               若想更深入解構您的交易人格，或領取每日一份專屬<span className="text-[#8C635B] font-bold">『解酒錠』</span>，歡迎入座 LINE@ 與酒保對談。」
             </p>
 

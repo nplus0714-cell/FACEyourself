@@ -68,7 +68,7 @@ const App: React.FC = () => {
   const handleLogin = () => {
     const mockUser: AuthUser = {
       id: 'u-' + Date.now(),
-      name: language === 'zh' ? '覺察者 Traveler' : 'Observer Traveler',
+      name: language === 'zh' ? 'FACE 使用者' : 'FACE Member',
       email: 'zen@face.diary',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
     };
@@ -80,7 +80,7 @@ const App: React.FC = () => {
       id: 'dna-' + Date.now(), 
       date: new Date().toLocaleDateString('zh-TW'), 
       scores, 
-      marketScenario: language === 'zh' ? "靈魂 DNA 基準建立" : "Soul DNA Baseline Established", 
+      marketScenario: language === 'zh' ? "40 題基準測驗" : "40-Question Baseline Test",
       isBaseline: true 
     };
     setState(p => ({ ...p, dna: scores, history: [baseline, ...p.history] }));
@@ -94,7 +94,7 @@ const App: React.FC = () => {
 
   const startDailyAwareness = async () => {
     if (!state.dna) {
-      alert(language === 'zh' ? '「尚未發現靈魂基準」\n請先完成 DNA 測量，定錨您的投資本質。' : 'Baseline Not Found.\nPlease complete DNA test first.');
+      alert(language === 'zh' ? '你還沒有完成基準測驗。\n請先完成 40 題交易人格測驗。' : 'You have not completed the baseline test yet.\nPlease finish the 40-question trading style test first.');
       setView('landing');
       return;
     }
@@ -119,8 +119,8 @@ const App: React.FC = () => {
 
   const handleRetestDna = () => {
     const confirmMsg = language === 'zh' 
-      ? '此動作將清除您所有的靈魂定錨與歷史紀錄，讓您重新開始。確定嗎？' 
-      : 'This action will clear your soul baseline and all history records to let you start over. Are you sure?';
+      ? '這會清除你的測驗結果與歷史紀錄，並重新開始。確定嗎？'
+      : 'This will clear your test result and history so you can start again. Continue?';
       
     if (window.confirm(confirmMsg)) {
       // 徹底清除狀態，達到「讓網頁忘記儲存紀錄」的效果
@@ -165,26 +165,26 @@ const App: React.FC = () => {
       onToggleLanguage={toggleLanguage}
     >
       {view === 'landing' && (
-        <div className="relative min-h-[85vh] flex flex-col items-center justify-center fade-in px-6">
+        <div className="relative min-h-[72vh] md:min-h-[85vh] flex flex-col items-center justify-center fade-in px-0 sm:px-6">
           <ZenDnaChart />
           
-          <div className="relative z-10 flex flex-col items-center space-y-12 max-w-4xl mx-auto w-full text-center">
-            <h1 className="text-4xl md:text-7xl lg:text-8xl serif text-[#2D2D2D] tracking-tighter leading-[1.2] font-normal whitespace-pre-line">
+          <div className="relative z-10 flex flex-col items-center space-y-7 md:space-y-12 max-w-4xl mx-auto w-full text-center">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl serif text-[#2D2D2D] tracking-tight leading-[1.25] font-normal whitespace-pre-line">
               {t.landing.title}
             </h1>
             
-            <p className="text-[#8C7E6D] text-[13px] md:text-[15px] tracking-[0.5em] font-bold italic">
+            <p className="max-w-md text-[#8C7E6D] text-sm md:text-[15px] tracking-wide font-medium leading-relaxed">
               {t.landing.motto}
             </p>
 
-            <div className="pt-8 w-full max-w-lg mx-auto">
+            <div className="pt-3 md:pt-8 w-full max-w-lg mx-auto">
               {!state.dna ? (
                 <button 
                   onClick={() => setView('dna-test')} 
-                  className="w-full py-7 bg-[#2D2D2D] text-white text-[16px] uppercase font-bold rounded-sm shadow-xl hover:bg-black transition-all flex flex-col items-center justify-center leading-none"
+                  className="w-full py-6 md:py-7 bg-[#2D2D2D] text-white text-[16px] font-bold rounded-sm shadow-xl hover:bg-black transition-all flex flex-col items-center justify-center leading-none"
                 >
-                  <span className="tracking-[0.6em] pl-[0.6em] serif">{t.landing.startTest}</span>
-                  <span className="text-[11px] tracking-[1.2em] opacity-60 mt-4 pl-[1.2em] font-mono font-light">{t.landing.dnaTest}</span>
+                  <span className="tracking-wide serif">{t.landing.startTest}</span>
+                  <span className="text-[10px] tracking-[0.28em] opacity-60 mt-3 font-mono font-light">{t.landing.dnaTest}</span>
                 </button>
               ) : (
                 <div className="flex flex-col gap-4">
@@ -206,8 +206,8 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="absolute bottom-4 left-0 w-full text-center pb-8 px-6">
-            <p className="text-[#8C7E6D] text-[12px] md:text-[13px] tracking-[0.3em] font-medium serif leading-relaxed max-w-2xl mx-auto italic opacity-80">
+          <div className="absolute bottom-0 left-0 w-full text-center pb-4 md:pb-8 px-2 sm:px-6">
+            <p className="text-[#8C7E6D] text-[13px] md:text-[13px] tracking-wide font-medium leading-relaxed max-w-2xl mx-auto opacity-80">
               {t.landing.footer}
             </p>
           </div>
@@ -270,8 +270,8 @@ const App: React.FC = () => {
       {view === 'shared-dashboard' && sharedDna && (
         <div className="space-y-8 flex flex-col items-center">
           <div className="text-center space-y-2 py-8">
-            <h2 className="text-2xl md:text-3xl serif text-[#2D2D2D]">{language === 'zh' ? '靈魂畫像共享' : 'Soul Portrait Shared'}</h2>
-            <p className="text-[#8C7E6D] text-[10px] tracking-[0.4em] font-bold uppercase">Shared Soul Profile</p>
+            <h2 className="text-2xl md:text-3xl serif text-[#2D2D2D]">{language === 'zh' ? '交易風格分享' : 'Trading Style Shared'}</h2>
+            <p className="text-[#8C7E6D] text-[10px] tracking-[0.2em] font-bold uppercase">Shared Trading Style</p>
           </div>
           <Dashboard 
             dna={sharedDna} 
@@ -288,7 +288,7 @@ const App: React.FC = () => {
               }}
               className="px-12 py-5 bg-[#2D2D2D] text-white text-[12px] tracking-[0.6em] uppercase font-black shadow-2xl hover:bg-black transition-all"
             >
-              {language === 'zh' ? '我也要測量靈魂 DNA' : 'I want to measure DNA too'}
+              {language === 'zh' ? '我也要做交易人格測驗' : 'Take the trading style test'}
             </button>
           </div>
         </div>
@@ -308,7 +308,7 @@ const App: React.FC = () => {
                     <span className="text-[10px] font-mono font-black text-[#8C7E6D] uppercase tracking-widest">{h.date}</span>
                     {h.isBaseline && <span className="bg-[#2D2D2D] text-white px-3 py-1 text-[8px] uppercase tracking-widest font-bold">DNA Baseline</span>}
                   </div>
-                  <h4 className="text-xl serif font-bold text-[#2D2D2D]">{h.isBaseline ? (language === 'zh' ? '靈魂原始定錨' : 'Original Anchor') : (language === 'zh' ? '每日偏移觀察' : 'Daily Offset')}</h4>
+                  <h4 className="text-xl serif font-bold text-[#2D2D2D]">{h.isBaseline ? (language === 'zh' ? '40 題基準測驗' : 'Baseline test') : (language === 'zh' ? '今日交易回顧' : 'Daily check-in')}</h4>
                 </div>
                 <button onClick={() => { setSelectedEntry(h); setView('report-detail'); }} className="px-8 py-3 bg-[#2D2D2D] text-white text-[10px] tracking-widest uppercase font-bold rounded-sm group-hover:bg-black transition-all">檢視詳情 View</button>
               </div>

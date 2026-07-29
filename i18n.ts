@@ -4,45 +4,45 @@ import { Language } from './types';
 export const translations: Record<Language, any> = {
   zh: {
     nav: {
-      overview: '概覽 Overview',
-      gallery: '圖鑑 Gallery',
+      overview: '我的結果',
+      gallery: '16 型交易風格',
       about: '關於 FACE',
       bar: '解憂 Bar'
     },
     landing: {
-      title: '在波動中\n讀懂你的靈魂',
-      motto: '「交易如鏡，映照真實」',
-      startTest: '開啟靈魂測量',
-      dnaTest: 'DNA TEST',
-      todayAwareness: '今日覺察',
-      today: 'TODAY',
-      dashboard: '進入我的儀表板',
-      footer: '投資，不只是數字的博弈，更是一場與自我和解的旅程。'
+      title: '看懂你的交易習慣，\n不只看輸贏',
+      motto: '40 題，約 6 分鐘，找出你的 FACE 交易風格。',
+      startTest: '開始 40 題交易人格測驗',
+      dnaTest: 'trading style test',
+      todayAwareness: '今日交易回顧',
+      today: 'DAILY CHECK-IN',
+      dashboard: '查看我的結果',
+      footer: 'FACE 幫你看見自己在機會、風險、決策與交易節奏上的傾向。'
     },
     common: {
-      logout: '登出 Logout',
-      login: 'GOOGLE 登入',
+      logout: '登出',
+      login: '登入',
       retest: '重新測驗',
-      retestDna: '重新測量 DNA',
+      retestDna: '重新做 40 題測驗',
       back: '返回',
-      share: 'SHARE MY SOUL',
-      archive: '封存今日覺察 ARCHIVE',
-      loadingQuestions: '正在聽取今日市場脈搏...',
-      zenMotto: '「當心靜下來，才能看清風的方向」',
+      share: '分享我的結果',
+      archive: '儲存今日回顧',
+      loadingQuestions: '正在整理今日市場資訊...',
+      zenMotto: '完成後，看看今天的市場讓你的想法偏向哪一邊。',
       step: '步驟'
     },
     dashboard: {
-      analysis: '量子靈魂分析 Quantum Soul Analysis',
-      title: '靈魂維度分析',
-      baseEnergy: '基準能量',
+      analysis: 'FACE 分數',
+      title: '你的四個交易面向',
+      baseEnergy: '原始結果',
       todayStatus: '今日狀態',
-      portrait: '人格全貌 Full Portrait',
-      psychology: '核心心理機制 Psychology',
-      blindSpots: '投資盲區 Blind Spots',
-      kit: '靈魂錦囊 Emergency Kit',
-      blessing: '靈魂祝福 Soul Blessing',
-      offsetInsight: '今日偏移覺察 Dynamic Insight',
-      pouchLabels: ['保命機制', '轉念心法', '行為制約']
+      portrait: '你的交易風格',
+      psychology: '你的決策習慣',
+      blindSpots: '可能的盲點',
+      kit: '實用提醒',
+      blessing: '一句提醒',
+      offsetInsight: '今天和你平常的差異',
+      pouchLabels: ['風險提醒', '思考提醒', '行動提醒']
     }
   },
   en: {
@@ -53,39 +53,39 @@ export const translations: Record<Language, any> = {
       bar: 'Solace Bar'
     },
     landing: {
-      title: 'Read Your Soul\nIn Volatility',
-      motto: '"Trading is a mirror, reflecting the truth"',
-      startTest: 'Start Soul Measurement',
-      dnaTest: 'DNA TEST',
-      todayAwareness: 'Today Awareness',
-      today: 'TODAY',
-      dashboard: 'Enter My Dashboard',
-      footer: 'Investing is not just a game of numbers, but a journey of reconciliation with oneself.'
+      title: 'Understand How You Trade,\nNot Just Your Returns',
+      motto: '40 questions. About 6 minutes. Find your FACE trading style.',
+      startTest: 'Start the 40-Question Test',
+      dnaTest: 'TRADING STYLE TEST',
+      todayAwareness: 'Today’s Trade Review',
+      today: 'DAILY CHECK-IN',
+      dashboard: 'View My Results',
+      footer: 'FACE helps you understand how you approach opportunity, risk, decisions, and timing.'
     },
     common: {
       logout: 'Logout',
       login: 'GOOGLE SIGN IN',
       retest: 'Retest',
-      retestDna: 'Retest DNA',
+      retestDna: 'Retake the 40-Question Test',
       back: 'Back',
-      share: 'SHARE MY SOUL',
-      archive: 'ARCHIVE AWARENESS',
-      loadingQuestions: 'Listening to Market Pulse...',
-      zenMotto: '"When the mind is still, the wind\'s direction becomes clear"',
+      share: 'SHARE MY RESULTS',
+      archive: 'SAVE TODAY\'S REVIEW',
+      loadingQuestions: 'Preparing today\'s market context...',
+      zenMotto: 'See how today\'s market may be shaping your decisions.',
       step: 'Step'
     },
     dashboard: {
-      analysis: 'Quantum Soul Analysis',
-      title: 'Soul Dimension Analysis',
-      baseEnergy: 'Baseline Energy',
+      analysis: 'FACE SCORES',
+      title: 'Your Four Trading Dimensions',
+      baseEnergy: 'Baseline Result',
       todayStatus: 'Today Status',
-      portrait: 'Full Portrait',
-      psychology: 'Psychology Mechanism',
-      blindSpots: 'Blind Spots',
-      kit: 'Emergency Kit',
-      blessing: 'Soul Blessing',
-      offsetInsight: 'Today\'s Offset Insight',
-      pouchLabels: ['Survival', 'Mindset', 'Behavior']
+      portrait: 'Your Trading Style',
+      psychology: 'Your Decision Habits',
+      blindSpots: 'Possible Blind Spots',
+      kit: 'Practical Reminders',
+      blessing: 'One Reminder',
+      offsetInsight: 'How Today Differs from Your Usual Style',
+      pouchLabels: ['Risk', 'Thinking', 'Action']
     }
   }
 };

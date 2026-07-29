@@ -60,13 +60,13 @@ const IMAGE_QUESTION_ARTWORK: Record<string, {
   },
   'image-c-01': {
     prompt: '選一張比較吸引你的畫面',
-    labels: ['長期累積', '盤中節奏'],
+    labels: ['續抱長期', '賣出掌握節奏'],
     src: '/images/questions/face-image-05.png',
     alt: '交易週期圖像題：長期累積與盤中節奏',
   },
   'image-c-02': {
     prompt: '選一張比較像你的投資節奏',
-    labels: ['定期累積', '轉折應對'],
+    labels: ['每月固定買', '看變化再決定'],
     src: '/images/questions/face-image-06.png',
     alt: '交易週期圖像題：定期累積與轉折應對',
   },

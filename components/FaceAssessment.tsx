@@ -21,6 +21,13 @@ const DIMENSION_LABELS = {
   EXPOSURE: 'E｜資金暴露',
 } as const;
 
+const MOBILE_DIMENSION_LABELS: Record<keyof typeof DIMENSION_LABELS, string> = {
+  FOCUS: '獲利',
+  ANALYSIS: '決策',
+  CYCLE: '節奏',
+  EXPOSURE: '風險',
+};
+
 const TYPE_LABELS = {
   scenario: '情境題',
   image: '圖像題',
@@ -157,44 +164,53 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
     setStep((current) => current + 1);
   };
 
-  const renderChoice = (item: FaceQuestion['options'][number]) => (
+  const renderChoice = (item: FaceQuestion['options'][number]) => {
+    const isOptionA = item.id === 'a';
+    const optionTone = isOptionA
+      ? 'border-[#E7C0BA] bg-[#FCF2F0] hover:border-[#B8776D] hover:bg-[#F6E0DC]'
+      : 'border-[#BFCCD3] bg-[#F0F5F7] hover:border-[#718792] hover:bg-[#E0EBEF]';
+    const labelTone = isOptionA ? 'text-[#8C635B]' : 'text-[#56616A]';
+
+    return (
     <button
       key={item.id}
       type="button"
       onClick={() => choose(item.id === 'a' ? 'A' : 'B')}
       disabled={isSaving}
-      className="group flex w-full items-center gap-5 border border-[#D1D1C7]/70 bg-white p-6 text-left shadow-sm transition-all duration-300 hover:border-[#2D2D2D] hover:bg-[#2D2D2D] disabled:cursor-wait disabled:opacity-60"
+      className={`flex w-full items-center gap-5 border p-6 text-left shadow-sm transition-all duration-300 disabled:cursor-wait disabled:opacity-60 ${optionTone}`}
     >
-      <span className="shrink-0 font-mono text-[10px] tracking-[0.22em] text-[#8C7E6D] group-hover:text-white/50">
+      <span className={`shrink-0 font-mono text-[10px] tracking-[0.22em] ${labelTone}`}>
         OPTION {item.id.toUpperCase()}
       </span>
-      <span className="serif text-lg leading-relaxed text-[#2D2D2D] transition-colors group-hover:text-white">{item.label}</span>
+      <span className="serif text-lg leading-relaxed text-[#2D2D2D]">{item.label}</span>
     </button>
-  );
+    );
+  };
 
   return (
-    <div className="mx-auto flex min-h-[75vh] max-w-2xl flex-col justify-center px-6 py-4 fade-in md:px-8">
-      <div className="mb-8 space-y-6 text-center">
+    <div className="mx-auto flex min-h-[72vh] max-w-2xl flex-col justify-center px-0 sm:px-4 py-2 md:px-8 md:py-4 fade-in">
+      <div className="mb-6 md:mb-8 space-y-5 md:space-y-6 text-center">
         <div className="grid grid-cols-4 overflow-hidden border border-[#D1D1C7]/60 bg-white/40 shadow-sm">
           {Object.entries(DIMENSION_LABELS).map(([dimension, label]) => (
             <div
               key={dimension}
-              className="border-r border-[#D1D1C7]/60 px-1 py-3 text-[10px] tracking-wide text-[#5D5D56] last:border-r-0 md:text-xs"
+              className="border-r border-[#D1D1C7]/60 px-1 py-2.5 text-[10px] tracking-normal text-[#5D5D56] last:border-r-0 md:py-3 md:text-xs"
             >
-              {label}
+              <span className="sm:hidden">{MOBILE_DIMENSION_LABELS[dimension as keyof typeof DIMENSION_LABELS]}</span>
+              <span className="hidden sm:inline">{label}</span>
             </div>
           ))}
         </div>
         <div className="space-y-2">
-          <p className="font-mono text-[10px] font-bold tracking-[0.35em] text-[#8C635B]">{TYPE_LABELS[question.type]}</p>
-          <h2 className="serif text-xl tracking-[0.18em] text-[#2D2D2D]">FACE 交易人格探索</h2>
+          <p className="font-mono text-[10px] font-bold tracking-[0.2em] text-[#8C635B]">{TYPE_LABELS[question.type]}</p>
+          <h2 className="serif text-xl tracking-wide text-[#2D2D2D]">FACE 交易人格測驗</h2>
           <div className="mx-auto max-w-lg pt-2" aria-label={`測驗進度：第 ${step + 1} 題，共 ${FACE_BASELINE_40_QUESTION_COUNT} 題`}>
             <div className="relative h-5">
               <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-[#D1D1C7]"></div>
               <div className="absolute left-0 top-1/2 h-0.5 -translate-y-1/2 bg-[#8C635B] transition-all duration-500" style={{ width: `${((step + 1) / FACE_BASELINE_40_QUESTION_COUNT) * 100}%` }}></div>
               <div className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#8C635B] shadow-sm transition-all duration-500" style={{ left: `${((step + 1) / FACE_BASELINE_40_QUESTION_COUNT) * 100}%` }}></div>
             </div>
-            <div className="flex justify-between font-mono text-[10px] tracking-[0.18em] text-[#8C7E6D]">
+            <div className="flex justify-between font-mono text-[10px] tracking-[0.08em] text-[#8C7E6D]">
               <span>START</span>
               <span>第 {step + 1} 題 / {FACE_BASELINE_40_QUESTION_COUNT}</span>
               <span>FINISH</span>
@@ -205,8 +221,8 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
 
       <div className="space-y-7">
         <div className="space-y-3 text-center">
-          {question.type === 'image' && <p className="text-sm italic text-[#8C7E6D]">不要想太久，選第一眼比較像你的畫面。</p>}
-          {question.type === 'intuition' && <p className="text-sm italic text-[#8C7E6D]">3 秒內作答，哪個更像你？</p>}
+          {question.type === 'image' && <p className="text-sm text-[#8C7E6D]">不要想太久，選第一眼比較像你的畫面。</p>}
+          {question.type === 'intuition' && <p className="text-sm text-[#8C7E6D]">先選第一個直覺反應。</p>}
           <p className="serif px-2 text-xl leading-[1.7] text-[#2D2D2D] md:text-2xl">{question.prompt}</p>
         </div>
 

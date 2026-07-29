@@ -28,7 +28,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
   };
 
   // ✅ 統一的分享文案 (您要求的格式)
-  const shareText = `測測看你是什麼交易風格？什麼動物～我在「FACE 投資人格日記」測出的靈魂定錨是：【${profile.name}】！`;
+  const shareText = `你是哪一種交易風格？我在 FACE 交易人格測驗的結果是：【${profile.name}】。`;
 
   const handleCopy = () => {
     const fullText = `${shareText}\n${generateShareUrl()}`;
@@ -104,7 +104,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
         <div className="p-6 md:p-8 space-y-5 w-full text-center">
           <div className="space-y-1">
             <span className="text-[9px] tracking-[0.4em] text-[#8C7E6D] uppercase font-black block">Share Session</span>
-            <h3 className="text-xl serif text-[#2D2D2D] font-bold tracking-widest">分享我的靈魂</h3>
+            <h3 className="text-xl serif text-[#2D2D2D] font-bold tracking-wide">分享我的交易風格</h3>
             <div className="w-6 h-[0.5px] bg-[#D1D1C7] mx-auto mt-1"></div>
           </div>
 

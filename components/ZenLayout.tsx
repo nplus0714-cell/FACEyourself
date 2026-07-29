@@ -41,12 +41,12 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   const isAssessmentView = activeView === 'dna-test' || activeView === 'daily-test';
 
   return (
-    <div className={`min-h-screen relative flex flex-col items-center transition-colors duration-1000 bg-zen-paper px-8 md:px-8 py-6 md:py-12`}>
+    <div className={`min-h-screen relative flex flex-col items-center transition-colors duration-1000 bg-zen-paper px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-12`}>
       <div className={`${(wide ? 'max-w-6xl' : 'max-w-4xl') + ' w-full'} transition-all duration-500`}>
         
         {/* Header - 質感深度優化 */}
-        <header className={`${isAssessmentView ? 'mb-8' : 'mb-16'} text-center relative`}>
-          <div className="flex justify-between items-center mb-8">
+        <header className={`${isAssessmentView ? 'mb-5 md:mb-8' : 'mb-10 md:mb-16'} text-center relative`}>
+          <div className="flex justify-between items-center gap-3 mb-6 md:mb-8">
             <div 
               className="flex items-center gap-4 cursor-pointer group" 
               onClick={handleLogoClick}
@@ -54,18 +54,18 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
             >
                {/* ✅ LOGO 放大 */}
                <div className={`w-10 h-10 border border-[#2D2D2D] flex items-center justify-center font-bold text-sm transition-all group-hover:bg-[#2D2D2D] group-hover:text-white`}>F</div>
-               <div className="text-left hidden sm:block">
+               <div className="text-left">
                   {/* ✅ 主標題與副標題字體同步放大 */}
-                  <h1 className={`text-sm font-black tracking-[0.3em] leading-none text-[#2D2D2D]`}>FACE</h1>
-                  <p className={`text-[11px] tracking-[0.2em] uppercase mt-1.5 text-[#8C7E6D] font-medium`}>Investment Soul Diary</p>
+                  <h1 className={`text-xs sm:text-sm font-black tracking-[0.2em] sm:tracking-[0.3em] leading-none text-[#2D2D2D]`}>FACE</h1>
+                  <p className={`hidden sm:block text-[11px] tracking-[0.12em] mt-1.5 text-[#8C7E6D] font-medium`}>Trading style journal</p>
                </div>
             </div>
 
-            <div className="flex items-center gap-3 sm:gap-6">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-6">
               {/* Language Switcher - 提升點擊範圍 */}
               <button 
                 onClick={onToggleLanguage}
-                className="px-6 py-2 sm:px-8 sm:py-2.5 border border-[#D1D1C7] text-xs tracking-[0.2em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold bg-white/50 shadow-sm"
+                className="px-3 py-2 sm:px-8 sm:py-2.5 border border-[#D1D1C7] text-xs tracking-[0.12em] sm:tracking-[0.2em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold bg-white/50 shadow-sm"
               >
                 {language === 'zh' ? 'EN' : '中'}
               </button>
@@ -105,7 +105,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
               ) : (
                 <button 
                   onClick={onLogin}
-                  className="flex items-center gap-3 px-8 py-2 sm:px-6 sm:py-3 bg-white border border-[#2D2D2D] text-xs tracking-[0.3em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold shadow-md whitespace-nowrap"
+                  className="flex items-center gap-0 sm:gap-3 px-3 py-2 sm:px-6 sm:py-3 bg-white border border-[#2D2D2D] text-xs tracking-[0.08em] sm:tracking-[0.3em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold shadow-md whitespace-nowrap"
                 >
                   {t.common.login}
                 </button>
@@ -115,8 +115,8 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
 
           {/* Nav - 安縵風格：極寬字距 */}
           {showNav && !isAssessmentView && onViewChange && (
-            <nav className="mb-10 flex flex-wrap justify-center text-xs tracking-[0.45em] uppercase border-b border-[#D1D1C7]/60 pb-8 gap-y-6">
-              <div className="flex flex-wrap justify-center gap-x-8 md:gap-x-16 px-6">
+            <nav className="mb-8 md:mb-10 flex flex-wrap justify-center text-xs tracking-[0.08em] sm:tracking-[0.2em] md:tracking-[0.45em] uppercase border-b border-[#D1D1C7]/60 pb-5 md:pb-8 gap-y-4 md:gap-y-6">
+              <div className="flex flex-wrap justify-center gap-x-5 sm:gap-x-8 md:gap-x-16 px-2 sm:px-6">
                 <button 
                   onClick={() => onViewChange('dashboard')} 
                   className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'dashboard' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}

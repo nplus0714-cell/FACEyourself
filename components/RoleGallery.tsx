@@ -40,14 +40,14 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ onBack, dna }) => {
       {/* 外部 Header */}
       <div className="flex flex-col items-center space-y-8 border-b border-[#D1D1C7]/60 pb-12 pt-6">
         <div className="text-center space-y-3">
-          <span className="text-xs text-[#8C7E6D] uppercase tracking-[0.5em] font-black block">The Soul Archive</span>
-          <h2 className="text-4xl md:text-5xl serif text-[#2D2D2D] font-extralight tracking-[0.2em]">靈魂圖鑑</h2>
+          <span className="text-xs text-[#8C7E6D] uppercase tracking-[0.25em] font-black block">Trading Style Library</span>
+          <h2 className="text-4xl md:text-5xl serif text-[#2D2D2D] font-extralight tracking-wide">16 型交易風格</h2>
         </div>
         <button 
           onClick={onBack} 
           className="w-full max-w-xs text-xs tracking-[0.5em] uppercase text-[#2D2D2D] border border-[#2D2D2D] py-5 hover:bg-[#2D2D2D] hover:text-white transition-all duration-1000 font-bold shadow-md active:scale-95"
         >
-          返回 DASHBOARD
+          回到我的結果
         </button>
       </div>
 
@@ -118,7 +118,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ onBack, dna }) => {
                 {/* 1. 人格全貌 */}
                 {/* 修正：移除多餘的 pb-8，減少下方無效留白 */}
                 <div className="space-y-6 md:space-y-12 bg-[#FBFBFA]">
-                  <span className="text-[10px] md:text-xs font-black text-[#D1D1C7] uppercase tracking-[0.8em] block">Full Portrait / 人格全貌</span>
+                  <span className="text-[10px] md:text-xs font-black text-[#D1D1C7] uppercase tracking-[0.3em] block">TRADING HABITS / 交易習慣</span>
                   {/* 收緊字距為 tracking-wide，避免中文字散開 */}
                   <p className="text-lg md:text-2xl leading-[2.2] text-[#2D2D2D] serif italic tracking-wide">{selectedRole.portrait}</p>
                 </div>
@@ -126,7 +126,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ onBack, dna }) => {
                 {/* 2. 核心心理機制 */}
                 {/* 修正：將手機版強制推開的 my-12 移除，並把內部上下留白降為 py-10 */}
                 <div className="bg-white py-10 md:py-24 px-6 md:px-24 border border-[#D1D1C7]/30 shadow-sm space-y-6 md:space-y-12 my-2 md:my-20">
-                  <p className="text-[10px] md:text-xs font-black text-[#8C7E6D] uppercase tracking-[0.5em] mb-4">Psychology / 核心心理機制</p>
+                  <p className="text-[10px] md:text-xs font-black text-[#8C7E6D] uppercase tracking-[0.3em] mb-4">DECISION HABITS / 決策習慣</p>
                   <p className="text-xl md:text-4xl leading-[2] text-[#2D2D2D] font-bold serif tracking-wide">{selectedRole.psychology.mechanism}</p>
                   <div className="w-12 h-[1px] bg-[#D1D1C7]/50 mx-auto mt-6 md:mt-8 mb-4 md:mb-6"></div>
                   <p className="text-base md:text-2xl leading-[1.9] text-[#8C7E6D] serif italic tracking-wide">“{selectedRole.psychology.scene}”</p>
@@ -152,8 +152,8 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ onBack, dna }) => {
                 {/* 4. 祝福語區塊：確保字體能橫向延伸 */}
                 <div className="bg-[#2D2D2D] text-white py-16 px-6 md:p-32 text-center space-y-10 md:space-y-14 mt-16 md:mt-40 shadow-2xl relative z-10 rounded-sm">
                   <div className="space-y-4">
-                    <span className="text-[10px] uppercase tracking-[0.8em] text-white/30 font-black block">Soul Blessing</span>
-                    <span className="text-[10px] text-white/20 uppercase tracking-[0.5em] block">靈魂處方箋</span>
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-white/30 font-black block">ONE REMINDER</span>
+                    <span className="text-[10px] text-white/20 uppercase tracking-[0.3em] block">一句提醒</span>
                   </div>
                   {/* 移除了強制擠壓的 px 設定，將 tracking 修正為正常易讀的寬度 */}
                   <p className="text-xl md:text-5xl serif italic font-extralight leading-[2.2] tracking-wide">
