@@ -7,7 +7,8 @@ export const translations: Record<Language, any> = {
       overview: '我的結果',
       gallery: '16 型交易風格',
       about: '關於 FACE',
-      bar: '解憂 Bar'
+      bar: '解憂 Bar',
+      watch: '內容中心'
     },
     landing: {
       title: '投資沒有標準答案\n只有適合你的交易方式',
@@ -18,7 +19,7 @@ export const translations: Record<Language, any> = {
       todayAwareness: '今日交易回顧',
       today: 'DAILY CHECK-IN',
       dashboard: '查看我的結果',
-      footer: 'FACE 幫你看見自己在機會、風險、決策與交易節奏上的傾向。'
+      footer: 'FACE 幫你看見自己的獲利動機、決策邏輯、交易週期與資金管理傾向。'
     },
     common: {
       logout: '登出',
@@ -51,7 +52,8 @@ export const translations: Record<Language, any> = {
       overview: 'Overview',
       gallery: 'Gallery',
       about: 'About FACE',
-      bar: 'Solace Bar'
+      bar: 'Solace Bar',
+      watch: 'Watch'
     },
     landing: {
       title: 'Understand How You Trade,\nNot Just Your Returns',
@@ -62,7 +64,7 @@ export const translations: Record<Language, any> = {
       todayAwareness: 'Today’s Trade Review',
       today: 'DAILY CHECK-IN',
       dashboard: 'View My Results',
-      footer: 'FACE helps you understand how you approach opportunity, risk, decisions, and timing.'
+      footer: 'FACE helps you understand your profit motivation, decision logic, trading cycle, and capital management.'
     },
     common: {
       logout: 'Logout',

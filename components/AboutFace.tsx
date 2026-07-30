@@ -1,218 +1,46 @@
 import React from 'react';
 
-export const AboutFace: React.FC = () => {
-  const dimensions = [
-    {
-      id: 'F',
-      title: 'Focus 獲利動機',
-      description: '追求獵人的快感？還是農夫的安穩？了解核心動機，才能在波動中定錨。',
-      icon: 'fa-solid fa-bullseye',
-      color: '#A68A64'
-    },
-    {
-      id: 'A',
-      title: 'Analysis 決策邏輯',
-      description: '依賴冰冷的數據？還是敏銳的直覺？邏輯決定了你在不確定性中的定力。',
-      icon: 'fa-solid fa-brain',
-      color: '#78716C'
-    },
-    {
-      id: 'C',
-      title: 'Cycle 交易週期',
-      description: '適合長線的複利？還是短線的衝刺？時間刻度決定了你的心跳節律。',
-      icon: 'fa-solid fa-hourglass-half',
-      color: '#576B5F'
-    },
-    {
-      id: 'E',
-      title: 'Exposure 資金管理',
-      description: '習慣重倉一擊必殺？還是分散尋求庇護？行為體現了你對風險的理解。',
-      icon: 'fa-solid fa-shield-halved',
-      color: '#2D2D2D'
-    }
-  ];
+const socials = [
+  { label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61585260510757&locale=zh_TW' },
+  { label: 'Instagram', href: 'https://www.instagram.com/the_trading_post234/' },
+  { label: 'Threads', href: 'https://www.threads.com/@the_trading_post234?xmt=AQF0L-LuDhBrr-ph13qsPUU4fAPWhMiGrETCyAWw6c6fOHk' },
+];
 
-  const socialLinks = {
-    facebook: "https://www.facebook.com/profile.php?id=61585260510757&locale=zh_TW",
-    instagram: "https://www.instagram.com/the_trading_post234/",
-    threads: "https://www.threads.com/@the_trading_post234?xmt=AQF0L-LuDhBrr-ph13qsPUU4fAPWhMiGrETCyAWw6c6fOHk",
-    line: "https://line.me/ti/p/@227bctxh" // ✅ 新增 LINE@ 連結
-  };
-
-  return (
-    <div className="pb-40 fade-in">
-      
-      {/* 1 & 2. Hero + Mirror System Block */}
-      <div className="relative bg-[#F5F5F0] pt-40 pb-40 mb-32 rounded-sm overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.07] grayscale select-none flex items-center justify-center">
-          <img 
-            src="/images/background3.jpg" 
-            alt="FACE Background Watermark" 
-            className="w-full h-full object-cover object-center scale-105"
-            loading="lazy"
-          />
-        </div>
-
-        <section className="relative z-10 flex flex-col items-center text-center px-8 mb-48">
-          <div className="max-w-5xl space-y-16">
-            <p className="serif text-[#8C635B] text-xs md:text-sm tracking-[0.7em] uppercase font-bold animate-pulse">
-              Inner Peace Trading
-            </p>
-            <h1 className="text-5xl md:text-8xl serif text-[#2D2D2D] font-extralight leading-[1.1] tracking-tight">
-              交易沒有標準答案<br />
-              只有<span className="italic font-light text-[#8C635B]">平靜</span>後的倒影
-            </h1>
-            <div className="w-16 h-[0.5px] bg-[#8C635B]/40 mx-auto"></div>
-            <p className="text-xl md:text-3xl text-[#5D554D] serif italic max-w-3xl mx-auto leading-[1.8] tracking-wide px-8">
-              「FACE 系統不是一張成績單，而是一面『後照鏡』。<br className="hidden md:block" />
-              當你了解鏡中的自己，市場便不再是戰場。」
-            </p>
-          </div>
-        </section>
-
-        <section className="relative z-10 max-w-7xl mx-auto px-8">
-          <div className="text-center space-y-8 mb-24">
-            <div className="w-[1px] h-20 bg-[#8C635B] mx-auto opacity-30"></div>
-            <h2 className="text-3xl md:text-4xl serif text-[#2D2D2D] tracking-[0.3em] font-light">看見視線死角</h2>
-            <p className="text-lg md:text-xl text-[#8C7E6D] serif italic tracking-widest">透過 FACE 四維光譜，重新認識你的交易體質</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            {dimensions.map((dim) => (
-              <div key={dim.id} className="group p-12 bg-white/60 backdrop-blur-sm border border-[#D1D1C7]/30 hover:border-[#2D2D2D] hover:shadow-2xl transition-all duration-1000 text-center space-y-8 rounded-sm">
-                <div className="w-20 h-20 rounded-full bg-[#F5F5F0] flex items-center justify-center mx-auto text-3xl transition-all duration-700 group-hover:text-white">
-                  <i className={`${dim.icon} transition-colors duration-700 group-hover:text-white text-[#2D2D2D]`}></i>
-                </div>
-                <style>{`
-                  .group:hover .w-20.h-20 { background-color: ${dim.color}; }
-                  .group:hover .fa-solid { color: white; }
-                `}</style>
-                <div className="space-y-4">
-                  <h3 className="text-2xl serif font-light tracking-widest text-[#2D2D2D]">{dim.title}</h3>
-                  <div className="w-8 h-[0.5px] bg-[#D1D1C7] mx-auto"></div>
-                  <p className="text-lg leading-relaxed text-[#555] serif italic tracking-wide">
-                    {dim.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+export const AboutFace: React.FC = () => (
+  <div className="mx-auto max-w-6xl space-y-20 pb-28 pt-2 fade-in md:space-y-28 md:pt-8">
+    <header className="grid overflow-hidden border border-[#D1D1C7] bg-[#F4F0E9] md:grid-cols-[1.1fr_0.9fr]">
+      <div className="p-8 md:p-14 lg:p-16">
+        <p className="text-xs font-bold tracking-[0.3em] text-[#8C635B]">ABOUT FACE</p>
+        <h1 className="mt-6 serif text-4xl leading-[1.5] text-[#2D2D2D] md:text-6xl">先看懂自己，<br />再看懂市場。</h1>
+        <p className="mt-7 max-w-xl text-base leading-[2] text-[#70665D] md:text-lg">FACE 是一套交易自我覺察工具。它不替你選標的，也不告訴你買賣答案；它幫你看見自己習慣怎麼面對機會、波動、決策與風險。</p>
       </div>
+      <div className="relative min-h-72 overflow-hidden bg-[#2D2D2D] p-8 text-white md:p-14">
+        <span className="absolute -right-6 -top-10 serif text-[14rem] leading-none text-white/[0.06]">F</span>
+        <div className="relative flex h-full flex-col justify-between"><p className="text-xs font-bold tracking-[0.24em] text-white/50">TRADING SELF-AWARENESS</p><p className="max-w-sm serif text-3xl leading-[1.65] md:text-4xl">投資沒有標準答案，只有比較適合你的交易方式。</p></div>
+      </div>
+    </header>
 
-      {/* 3. Founder / NPC Section */}
-      <section className="py-32 mb-16">
-        <div className="max-w-6xl mx-auto px-8">
-          <div className="flex flex-col md:flex-row items-center gap-20 md:gap-32">
-            <div className="w-full md:w-5/12 relative">
-              <div className="absolute -top-6 -left-6 w-full h-full border border-[#8C635B]/10 rounded-sm"></div>
-              <img 
-                src="/images/NPC Bartender.jpg" 
-                alt="NPC Bartender" 
-                className="relative z-10 w-full grayscale-[0.2] hover:grayscale-0 transition-all duration-1000 rounded-sm shadow-2xl"
-                loading="lazy"
-              />
-            </div>
-            
-            <div className="w-full md:w-7/12 space-y-12">
-              <div className="space-y-4">
-                <h4 className="text-[#8C635B] text-sm font-bold tracking-[0.5em] uppercase">Founder & Guide</h4>
-                <h2 className="text-4xl md:text-5xl serif text-[#2D2D2D] leading-tight font-extralight tracking-tight">
-                  我是 NPC，<br />這間解憂 Bar 的 Bartender
-                </h2>
-              </div>
-              <div className="space-y-8 text-[#444] serif italic leading-[2] text-xl text-justify tracking-wide">
-                <p>這個「Bar」不是要替你下單，而是讓你在資訊很亂的時候，先把自己的交易想法整理清楚。</p>
-                <p>我就像一位旁觀的 Bartender，不問你的輸贏，<strong className="text-[#2D2D2D] font-normal underline underline-offset-8 decoration-[0.5px]">只專注於擦亮手中的杯子。</strong></p>
-                <p>這裡沒有焦慮的喊盤聲，只有讓情緒沉澱的精油香氣。我想提供一個安靜的角落，陪你過濾掉多餘的雜訊，去蕪存菁。</p>
-              </div>
-              <div className="pt-12 border-t border-[#D1D1C7]/50">
-                <p className="serif italic text-3xl text-[#2D2D2D] font-light tracking-widest">「累的時候，歡迎光臨。」</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <section className="mx-auto max-w-3xl text-center">
+      <p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">WHY FACE</p>
+      <h2 className="mt-5 serif text-3xl leading-[1.6] text-[#2D2D2D] md:text-5xl">你不需要變成別人，<br />而是需要更了解自己。</h2>
+      <p className="mt-7 text-base leading-[2.05] text-[#70665D] md:text-lg">很多交易困擾，表面上是選股、進場或停損；更深一層，常常是方法和自己的性格、生活狀態不一致。FACE 想做的，是提供一面鏡子，讓你先辨識這些差異。</p>
+    </section>
 
-      {/* ✅ LINE@ 服務連結：現在 QR Code 具備點擊跳轉功能 */}
-      <section className="py-24 bg-white/40 backdrop-blur-md border-y border-[#D1D1C7]/30 mb-32 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-16">
-          <div className="text-center md:text-left space-y-8 max-w-xl">
-            <div className="space-y-2">
-              <span className="text-xs font-black text-[#8C635B] uppercase tracking-[0.6em] block">Exclusive Support</span>
-              <h3 className="text-3xl md:text-4xl serif text-[#2D2D2D] font-light tracking-wide leading-tight">一起釐清你的交易問題</h3>
-            </div>
-            
-            <p className="text-lg md:text-xl text-[#5D554D] serif italic leading-[2] tracking-wide">
-              「有些交易盲點，需要透過對話才看得清楚。<br />
-              若想更深入解構您的交易人格，或領取每日一份專屬<span className="text-[#8C635B] font-bold">『解酒錠』</span>，歡迎入座 LINE@ 與酒保對談。」
-            </p>
+    <section className="grid items-center gap-10 border-y border-[#D1D1C7] py-12 md:grid-cols-[0.9fr_1.1fr] md:py-20">
+      <div className="relative mx-auto w-full max-w-sm"><div className="absolute -left-4 -top-4 h-full w-full border border-[#8C635B]/25" /><img src="/images/NPC Bartender.jpg" alt="FACE Founder" className="relative aspect-square w-full object-cover grayscale-[0.2]" loading="lazy" /></div>
+      <div><p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">FOUNDER'S NOTE</p><h2 className="mt-5 serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">交易不是考試，<br />但每一次選擇都值得回頭看。</h2><p className="mt-7 text-base leading-[2.05] text-[#70665D] md:text-lg">FACE 來自「上班不要 Trade」與「交易解憂 Bar」想做的一件事：讓交易者能夠把困擾說清楚，而不只是反覆追問下一檔標的。從一次測驗、一篇文章或一支影片開始，慢慢建立屬於自己的交易語言。</p></div>
+    </section>
 
-            <div className="flex items-center justify-center md:justify-start gap-4 text-[#8C7E6D]">
-              <span className="w-10 h-[0.5px] bg-[#D1D1C7]"></span>
-              <span className="text-[10px] uppercase tracking-[0.4em] font-bold">Aman Style Service</span>
-              <span className="w-10 h-[0.5px] bg-[#D1D1C7]"></span>
-            </div>
-          </div>
+    <section className="grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] md:grid-cols-3">
+      <article className="bg-white p-7 md:p-9"><p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FACE DOES</p><h2 className="mt-5 serif text-3xl text-[#2D2D2D]">幫你整理自己</h2><p className="mt-5 text-sm leading-[1.9] text-[#70665D]">從習慣、壓力反應與交易節奏，找到值得持續觀察的地方。</p></article>
+      <article className="bg-white p-7 md:p-9"><p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FACE DOES NOT</p><h2 className="mt-5 serif text-3xl text-[#2D2D2D]">不替你報明牌</h2><p className="mt-5 text-sm leading-[1.9] text-[#70665D]">它不是投資建議、心理診斷或適合度評估，也不替你決定該買什麼。</p></article>
+      <article className="bg-white p-7 md:p-9"><p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FOR YOU</p><h2 className="mt-5 serif text-3xl text-[#2D2D2D]">適合願意回頭看的人</h2><p className="mt-5 text-sm leading-[1.9] text-[#70665D]">不論剛開始交易，或已累積許多經驗，只要你想理解自己的選擇，都可以從 FACE 開始。</p></article>
+    </section>
 
-          <div className="relative group shrink-0">
-            <div className="absolute -inset-6 border border-[#8C635B]/10 rounded-sm scale-95 group-hover:scale-100 transition-all duration-1000"></div>
-            <div className="absolute -inset-3 border border-[#8C635B]/20 rounded-sm group-hover:border-[#8C635B]/40 transition-all duration-700"></div>
-            
-            {/* ✅ QR Code 容器：已嵌入連結，點擊圖片直接跳轉 LINE@ */}
-            <div className="relative bg-white p-6 shadow-2xl transition-transform duration-700 group-hover:translate-y-[-8px]">
-              <a 
-                href={socialLinks.line} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="block cursor-pointer"
-              >
-                <img 
-                  src="/images/line-qrcode.png" 
-                  alt="LINE@ QR Code" 
-                  className="w-48 h-48 grayscale hover:grayscale-0 transition-all duration-1000"
-                  loading="lazy"
-                />
-                <div className="mt-6 text-center">
-                  <p className="text-[10px] tracking-[0.5em] text-[#8C7E6D] uppercase font-black group-hover:text-[#8C635B] transition-colors">
-                    Click or Scan to Connect
-                  </p>
-                  <div className="w-4 h-[1px] bg-[#8C635B] mx-auto mt-2"></div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+    <section className="grid gap-5 md:grid-cols-3">
+      {[['01', '做測驗', '用 40 題了解目前的交易傾向。'], ['02', '看內容', '用影片與專欄，把感覺變成可以整理的觀察。'], ['03', '需要時再聊', '當問題真的困擾你，再主動進入 LINE@ 諮詢。']].map(([number, title, copy]) => <article key={number} className="border border-[#D1D1C7] bg-[#F7F4EF] p-7 md:p-8"><p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">{number}</p><h3 className="mt-8 serif text-3xl text-[#2D2D2D]">{title}</h3><p className="mt-4 text-sm leading-[1.9] text-[#70665D]">{copy}</p></article>)}
+    </section>
 
-      {/* 4. Footer Section */}
-      <section className="bg-[#1A1A1A] py-40 text-center px-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-[#8C635B]/50"></div>
-        <div className="relative z-10 space-y-20">
-          <div className="space-y-6">
-            <p className="text-white/40 serif italic tracking-[0.4em] text-xl">追蹤社群，領取每日『解酒錠』</p>
-          </div>
-          <div className="flex flex-col sm:flex-row justify-center gap-6 max-w-3xl mx-auto">
-            <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="flex-1 py-6 px-8 bg-transparent border border-white/10 text-white text-xs tracking-[0.5em] uppercase font-bold hover:bg-white hover:text-[#1A1A1A] transition-all flex items-center justify-center gap-3">
-              <i className="fa-brands fa-facebook-f"></i> Facebook
-            </a>
-            <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="flex-1 py-6 px-8 bg-white text-[#1A1A1A] text-xs tracking-[0.5em] uppercase font-bold hover:bg-[#8C635B] hover:text-white transition-all shadow-2xl flex items-center justify-center gap-3">
-              <i className="fa-brands fa-instagram"></i> Instagram
-            </a>
-            <a href={socialLinks.threads} target="_blank" rel="noopener noreferrer" className="flex-1 py-6 px-8 bg-transparent border border-white/10 text-white text-xs tracking-[0.5em] uppercase font-bold hover:bg-white hover:text-[#1A1A1A] transition-all flex items-center justify-center gap-3">
-              <i className="fa-brands fa-threads"></i> Threads
-            </a>
-          </div>
-          <div className="pt-24 border-t border-white/5 space-y-8">
-            <div className="flex items-center justify-center gap-6 opacity-20">
-              <span className="w-12 h-[0.5px] bg-white"></span>
-              <span className="serif font-light text-lg tracking-[0.5em] text-white">交易解憂 Bar</span>
-              <span className="w-12 h-[0.5px] bg-white"></span>
-            </div>
-            <p className="text-[10px] text-white/10 font-mono tracking-[0.3em] uppercase">© 2026 Trading Solace Bar. All rights reserved.</p>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-};
+    <section className="bg-[#2D2D2D] px-7 py-12 text-center text-white md:px-16 md:py-16"><p className="text-xs font-bold tracking-[0.24em] text-white/50">STAY CONNECTED</p><h2 className="mt-4 serif text-3xl leading-[1.55] md:text-4xl">想繼續聊交易，也可以從內容開始。</h2><div className="mt-8 flex flex-wrap justify-center gap-3">{socials.map((social) => <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="border border-white/30 px-5 py-3 text-sm font-bold transition hover:bg-white hover:text-[#2D2D2D]">{social.label}</a>)}<a href="https://line.me/ti/p/@227bctxh" target="_blank" rel="noopener noreferrer" className="bg-white px-5 py-3 text-sm font-bold text-[#2D2D2D] transition hover:bg-[#D9C7A9]">加入 LINE@</a></div></section>
+  </div>
+);

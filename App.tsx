@@ -5,27 +5,105 @@ import { Assessment } from './components/Assessment';
 import { FaceAssessment } from './components/FaceAssessment';
 import { Dashboard } from './components/Dashboard';
 import { RoleGallery } from './components/RoleGallery';
+import { RoleDetail } from './components/RoleDetail';
+import { CompatibilityWheel } from './components/CompatibilityWheel';
 import { ZenDnaChart } from './components/ZenDnaChart';
 import { AboutFace } from './components/AboutFace';
-import { WorryFreeBar } from './components/WorryFreeBar';
-import { DAILY_QUESTIONS } from './constants';
-import { FaceScores, UserState, DiaryEntry, AuthUser, Language } from './types';
+import { ContentHub } from './components/ContentHub';
+import { ContentDetail } from './components/ContentDetail';
+import { LandingInfo } from './components/LandingInfo';
+import { CONTENT_CATALOG, ContentItem } from './data/contentCatalog';
+import { DAILY_QUESTIONS, FACE_MAP, getFaceCode } from './constants';
+import { FaceScores, UserState, DiaryEntry, AuthUser, Language, PersonalityProfile } from './types';
 import { generateMarketAwareQuestions } from './services/geminiService';
 import { translations } from './i18n';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 
+type AppView = 'landing' | 'dna-test' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'content-hub' | 'content-detail';
+
+const viewFromPath = (path: string): AppView => {
+  if (path === '/types/compatibility') return 'compatibility';
+  if (path.startsWith('/types/')) return 'role-detail';
+  if (path === '/types') return 'role-gallery';
+  if (path.startsWith('/watch/')) return 'content-detail';
+  if (path === '/watch') return 'content-hub';
+  if (path === '/test') return 'dna-test';
+  if (path === '/about') return 'about-face';
+  return 'landing';
+};
+
+const pathForView = (view: AppView) => ({
+  landing: '/',
+  'dna-test': '/test',
+  'about-face': '/about',
+  'role-gallery': '/types',
+  compatibility: '/types/compatibility',
+  'content-hub': '/watch',
+}[view]);
+
 const App: React.FC = () => {
   const [state, setState] = useState<UserState>({ user: null, dna: null, history: [], tempDaily: null });
-  const [view, setView] = useState<'landing' | 'dna-test' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'shared-dashboard' | 'about-face' | 'worry-free-bar'>('landing');
+  const [view, setView] = useState<AppView>(() => viewFromPath(window.location.pathname));
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null);
   const [sharedDna, setSharedDna] = useState<FaceScores | null>(null);
   const [language, setLanguage] = useState<Language>('zh');
+  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(() => {
+    const slug = window.location.pathname.replace('/watch/', '');
+    return CONTENT_CATALOG.find((item) => item.slug === slug) ?? null;
+  });
+  const [selectedRoleCode, setSelectedRoleCode] = useState<string | null>(() => {
+    const code = window.location.pathname.replace('/types/', '');
+    return FACE_MAP[code]?.code ?? null;
+  });
   
   const [dynamicDailyQuestions, setDynamicDailyQuestions] = useState<any[]>(DAILY_QUESTIONS);
   const [isFetchingQuestions, setIsFetchingQuestions] = useState(false);
 
   const t = translations[language];
+
+  const navigateTo = (nextView: AppView) => {
+    const path = pathForView(nextView);
+    if (path && window.location.pathname !== path) window.history.pushState({}, '', path);
+    setView(nextView);
+  };
+
+  const openContent = (item: ContentItem) => {
+    setSelectedContent(item);
+    const path = `/watch/${item.slug}`;
+    if (window.location.pathname !== path) window.history.pushState({}, '', path);
+    setView('content-detail');
+  };
+
+  const openRole = (role: PersonalityProfile) => {
+    setSelectedRoleCode(role.code);
+    const path = `/types/${role.code}`;
+    if (window.location.pathname !== path) window.history.pushState({}, '', path);
+    setView('role-detail');
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const nextView = viewFromPath(window.location.pathname);
+      if (nextView === 'content-detail') {
+        const slug = window.location.pathname.replace('/watch/', '');
+        setSelectedContent(CONTENT_CATALOG.find((item) => item.slug === slug) ?? null);
+      }
+      if (nextView === 'role-detail') {
+        const code = window.location.pathname.replace('/types/', '');
+        setSelectedRoleCode(FACE_MAP[code]?.code ?? null);
+      }
+      setView(nextView);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // This is a single-page app, so route changes do not reset the browser's
+  // scroll position by default. Every view transition should begin at the top.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [view]);
 
   useEffect(() => {
     // 檢查是否有分享連結
@@ -56,7 +134,7 @@ const App: React.FC = () => {
         const parsed = JSON.parse(saved);
         setState(parsed);
         // 如果有 DNA，且當前是 landing 則自動進 Dashboard
-        if (parsed.dna && view === 'landing' && !dnaShare) setView('dashboard');
+        if (parsed.dna && window.location.pathname === '/' && !dnaShare) setView('dashboard');
       } catch (e) { console.error(e); }
     }
   }, []);
@@ -150,22 +228,22 @@ const App: React.FC = () => {
       hasDna={!!state.dna} 
       onLogin={handleLogin} 
       onLogout={() => setState(p => ({ ...p, user: null }))}
-      showNav={view !== 'landing' && view !== 'shared-dashboard'}
+      showNav={view !== 'shared-dashboard'}
       activeView={view}
       onViewChange={(v) => {
         if (v === 'history') {
           alert(language === 'zh' ? '資料開發中，敬請期待' : 'Coming soon...');
           return;
         }
-        setView(v);
+        navigateTo(v as AppView);
       }}
-      wide={['dashboard', 'role-gallery', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'worry-free-bar'].includes(view)}
+      wide={['dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'content-hub', 'content-detail'].includes(view)}
       isLanding={view === 'landing'}
       language={language}
       onToggleLanguage={toggleLanguage}
     >
-      {view === 'landing' && (
-        <div className="relative min-h-[72vh] md:min-h-[85vh] flex flex-col items-center justify-center fade-in px-0 sm:px-6">
+      {view === 'landing' && <>
+        <div className="relative min-h-[62vh] md:min-h-[72vh] flex flex-col items-center justify-center fade-in px-0 sm:px-6">
           <ZenDnaChart />
           
           <div className="relative z-10 flex flex-col items-center space-y-7 md:space-y-10 max-w-4xl mx-auto w-full text-center">
@@ -183,7 +261,7 @@ const App: React.FC = () => {
             <div className="w-full max-w-lg mx-auto">
               {!state.dna ? (
                 <button 
-                  onClick={() => setView('dna-test')} 
+                  onClick={() => navigateTo('dna-test')} 
                   className="w-full py-6 md:py-7 bg-[#2D2D2D] text-white text-[16px] font-bold rounded-sm shadow-xl hover:bg-black transition-all flex flex-col items-center justify-center leading-none"
                 >
                   <span className="tracking-wide serif">{t.landing.startTest}</span>
@@ -209,7 +287,13 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+        <LandingInfo
+          onStartTest={() => navigateTo('dna-test')}
+          onExploreTypes={() => setView('role-gallery')}
+          onOpenContent={() => navigateTo('content-hub')}
+          onAbout={() => navigateTo('about-face')}
+        />
+      </>}
 
       {view === 'dna-test' && <FaceAssessment onComplete={handleDnaComplete} />}
       
@@ -292,7 +376,16 @@ const App: React.FC = () => {
       )}
 
       {view === 'about-face' && <AboutFace />}
-      {view === 'worry-free-bar' && <WorryFreeBar />}
+      {view === 'content-hub' && (
+        <ContentHub
+          hasDna={!!state.dna}
+          language={language}
+          onStartTest={() => navigateTo('dna-test')}
+          onViewResult={() => setView('dashboard')}
+          onOpenContent={openContent}
+        />
+      )}
+      {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} onBack={() => navigateTo('content-hub')} />}
 
       {view === 'history' && (
         <div className="space-y-12 fade-in pb-40">
@@ -318,7 +411,9 @@ const App: React.FC = () => {
         <Dashboard dna={state.dna} daily={selectedEntry.scores} history={state.history} staticReport={selectedEntry.report} user={state.user} onLoginRequest={handleLogin} language={language} onRetest={handleRetestDna} />
       )}
       
-      {view === 'role-gallery' && <RoleGallery onBack={() => setView('dashboard')} dna={state.dna} />}
+      {view === 'role-gallery' && <RoleGallery dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} onOpenCompatibility={() => navigateTo('compatibility')} />}
+      {view === 'role-detail' && selectedRoleCode && FACE_MAP[selectedRoleCode] && <RoleDetail role={FACE_MAP[selectedRoleCode]} isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode} onBack={() => navigateTo('role-gallery')} />}
+      {view === 'compatibility' && <CompatibilityWheel dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
     </ZenLayout>
   );
 };

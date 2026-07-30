@@ -65,7 +65,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
       return { label, l1Name, l2Name, v1, v2 };
     };
     return [
-      getPairData('Focus 交易動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
+      getPairData('Focus 獲利動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
       getPairData('Analysis 決策邏輯', '理性數據 (R)', 'R', '感應直覺 (I)', 'I'),
       getPairData('Cycle 交易週期', '長期投資 (L)', 'L', '短期投機 (T)', 'T'),
       getPairData('Exposure 資金管理', '集中 (C)', 'C', '分散 (D)', 'D'),

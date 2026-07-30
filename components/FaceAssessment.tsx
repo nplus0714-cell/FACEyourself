@@ -18,14 +18,14 @@ const DIMENSION_LABELS = {
   FOCUS: 'F｜獲利動機',
   ANALYSIS: 'A｜決策邏輯',
   CYCLE: 'C｜交易週期',
-  EXPOSURE: 'E｜資金暴露',
+  EXPOSURE: 'E｜資金管理',
 } as const;
 
 const MOBILE_DIMENSION_LABELS: Record<keyof typeof DIMENSION_LABELS, string> = {
-  FOCUS: '獲利',
-  ANALYSIS: '決策',
-  CYCLE: '節奏',
-  EXPOSURE: '風險',
+  FOCUS: '獲利動機',
+  ANALYSIS: '決策邏輯',
+  CYCLE: '交易週期',
+  EXPOSURE: '資金管理',
 };
 
 const TYPE_LABELS = {
