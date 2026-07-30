@@ -65,7 +65,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
       return { label, l1Name, l2Name, v1, v2 };
     };
     return [
-      getPairData('Focus 交易動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
+      getPairData('Focus 獲利動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
       getPairData('Analysis 決策邏輯', '理性數據 (R)', 'R', '感應直覺 (I)', 'I'),
       getPairData('Cycle 交易週期', '長期投資 (L)', 'L', '短期投機 (T)', 'T'),
       getPairData('Exposure 資金管理', '集中 (C)', 'C', '分散 (D)', 'D'),
@@ -89,7 +89,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
     return (
       <div className="py-24 flex flex-col items-center justify-center space-y-6">
         <div className="w-10 h-10 border-2 border-dashed border-[#8C635B] rounded-full animate-spin"></div>
-        <p className="text-sm tracking-[0.5em] text-[#8C635B] font-bold uppercase">解碼靈魂波動中...</p>
+        <p className="text-sm tracking-[0.16em] text-[#8C635B] font-bold">正在整理你的測驗結果...</p>
       </div>
     );
   }
@@ -267,7 +267,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
           {!isSharedView && onGoToGallery && (
             <div className="pt-16 md:pt-24 flex justify-center">
               <button onClick={onGoToGallery} className="w-full max-w-md py-6 px-4 text-xs tracking-[0.5em] text-[#2D2D2D] font-black border border-[#2D2D2D] hover:bg-[#2D2D2D] hover:text-white transition-all uppercase shadow-md active:scale-95">
-                探索十六型靈魂圖鑑
+                查看 16 型交易風格
               </button>
             </div>
           )}
@@ -300,7 +300,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             </section>
 
             <section className="space-y-10">
-              <h4 className="text-[10px] md:text-sm font-black text-[#2D2D2D] uppercase tracking-[0.6em]">3. 禪式回歸建議</h4>
+              <h4 className="text-[10px] md:text-sm font-black text-[#2D2D2D] uppercase tracking-[0.3em]">3. 下一步建議</h4>
               <div className="bg-[#FBFBFA] py-12 md:py-20 px-6 md:px-10 border border-[#D1D1C7]/40 flex flex-col items-center gap-6 rounded-sm max-w-2xl mx-auto shadow-sm">
                 <span className="text-4xl md:text-5xl">🧘</span>
                 <p className="text-xl md:text-3xl text-[#2D2D2D] font-black leading-[2] serif italic px-2 md:px-8">{report.zenSolution}</p>
@@ -308,16 +308,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             </section>
 
             <div className="space-y-12 md:space-y-16">
-               <h4 className="text-[10px] md:text-sm font-black text-[#8C635B] uppercase tracking-[0.6em]">4. 保命與祝福</h4>
+               <h4 className="text-[10px] md:text-sm font-black text-[#8C635B] uppercase tracking-[0.3em]">4. 風險提醒與下一步</h4>
                <div className="grid grid-cols-1 gap-8 md:gap-10 max-w-2xl mx-auto">
                   <div className="bg-white border-y border-[#D1D1C7]/60 py-12 md:py-20 px-6 md:px-10 space-y-6 shadow-sm">
                     <span className="text-4xl md:text-5xl block opacity-80">🛡️</span>
-                    <p className="text-[10px] md:text-xs font-black text-[#8C7E6D] uppercase tracking-[0.5em]">今日保命符</p>
+                    <p className="text-[10px] md:text-xs font-black text-[#8C7E6D] uppercase tracking-[0.3em]">今天的風險提醒</p>
                     <p className="text-lg md:text-2xl font-bold text-[#2D2D2D] serif italic leading-[2] px-2 md:px-8">{report.antiHangover.lifesaver}</p>
                   </div>
                   <div className="bg-[#2D2D2D] py-16 md:py-20 px-6 md:px-10 rounded-sm text-white text-center space-y-8 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-2 bg-[#8C635B]"></div>
-                    <p className="text-[10px] md:text-xs uppercase tracking-[1em] opacity-40 font-black">Daily Blessing</p>
+                    <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] opacity-40 font-black">TODAY'S REMINDER</p>
                     <p className="text-xl md:text-4xl serif italic font-extralight leading-[2] tracking-widest">「{report.antiHangover.blessing}」</p>
                   </div>
                </div>

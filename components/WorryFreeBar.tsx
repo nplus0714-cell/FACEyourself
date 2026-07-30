@@ -32,7 +32,7 @@ export const WorryFreeBar: React.FC = () => {
   const copyBlessing = () => {
     if (!response) return;
     const shareUrl = "https://faceyourself.vercel.app";
-    const fullText = `我在「交易解憂 Bar」點了一杯【${selectedDrink}】，大師說：\n\n「${response}」\n\n測測看你的投資靈魂 DNA：${shareUrl}`;
+    const fullText = `我在「交易解憂 Bar」選了【${selectedDrink}】，收到這段提醒：\n\n「${response}」\n\n也來做 FACE 交易人格測驗：${shareUrl}`;
     navigator.clipboard.writeText(fullText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -125,7 +125,7 @@ export const WorryFreeBar: React.FC = () => {
             </p>
 
             <div className="mt-20 flex flex-col items-center md:items-start space-y-6 pt-12 border-t border-white/5">
-              <p className="text-xs tracking-[0.5em] text-white/30 uppercase font-bold">Soul Sommelier Signature</p>
+              <p className="text-xs tracking-[0.3em] text-white/30 uppercase font-bold">TODAY'S REMINDER</p>
               <div className="w-20 h-20 opacity-30">
                 <svg viewBox="0 0 100 100" className="w-full h-full stroke-white fill-none">
                   <path d="M20,50 C20,20 80,20 80,50 C80,80 20,80 20,50 Z" strokeWidth="0.5" />
