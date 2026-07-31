@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaceScores, PersonalityProfile } from '../types';
+import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
 
 interface ShareModalProps {
   dna: FaceScores;
@@ -28,7 +29,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
   };
 
   // ✅ 統一的分享文案 (您要求的格式)
-  const shareText = `你是哪一種交易風格？我在 FACE 交易人格測驗的結果是：【${profile.name}】。`;
+  const shareText = PERSONALITY_EDITORIAL[profile.code]?.shareText
+    ?? `我在 FACE 交易風格測驗的結果是「${profile.name}」。你是哪一種交易風格？`;
 
   const handleCopy = () => {
     const fullText = `${shareText}\n${generateShareUrl()}`;

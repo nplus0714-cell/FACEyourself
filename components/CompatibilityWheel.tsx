@@ -146,7 +146,7 @@ export const CompatibilityWheel: React.FC<CompatibilityWheelProps> = ({ dna, onO
 
         <section className="mt-6 border-t border-[#D1D1C7] pt-6">
           <p className="text-xs font-bold tracking-[0.18em] text-[#8C7E6D]">完全對立型</p>
-          <button type="button" onClick={() => setActiveCode(oppositeCode)} className={`mt-4 flex w-full items-center justify-between border px-3 py-3 text-left transition hover:bg-white ${activeCode === oppositeCode ? 'border-[#2D2D2D] bg-white shadow-sm' : 'border-[#BDB5AA]'}`}><span><strong className="text-sm text-[#2D2D2D]">{FACE_MAP[oppositeCode].name}</strong><span className="ml-2 text-xs text-[#8C7E6D]">{oppositeCode}</span></span><span className="text-xs font-bold text-[#2D2D2D]">最遠視角</span></button>
+          <button type="button" onClick={() => setActiveCode(oppositeCode)} className={`mt-4 flex w-full items-center justify-between border px-3 py-3 text-left transition hover:bg-white ${activeCode === oppositeCode ? 'border-[#2D2D2D] bg-white shadow-sm' : 'border-[#BDB5AA]'}`}><span><strong className="text-sm text-[#2D2D2D]">{FACE_MAP[oppositeCode].name}</strong><span className="ml-2 text-xs text-[#8C7E6D]">{oppositeCode}</span></span><span className="text-xs font-bold text-[#2D2D2D]">潛在盲點</span></button>
         </section>
 
         <div className="mt-7 border-t border-[#D1D1C7] pt-6">

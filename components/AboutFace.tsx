@@ -6,7 +6,11 @@ const socials = [
   { label: 'Threads', href: 'https://www.threads.com/@the_trading_post234?xmt=AQF0L-LuDhBrr-ph13qsPUU4fAPWhMiGrETCyAWw6c6fOHk' },
 ];
 
-export const AboutFace: React.FC = () => (
+interface AboutFaceProps {
+  onGoToMirrorTrade: () => void;
+}
+
+export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade }) => (
   <div className="mx-auto max-w-6xl space-y-20 pb-28 pt-2 fade-in md:space-y-28 md:pt-8">
     <header className="grid overflow-hidden border border-[#D1D1C7] bg-[#F4F0E9] md:grid-cols-[1.1fr_0.9fr]">
       <div className="p-8 md:p-14 lg:p-16">
@@ -39,6 +43,13 @@ export const AboutFace: React.FC = () => (
 
     <section className="grid gap-5 md:grid-cols-3">
       {[['01', '做測驗', '用 40 題了解目前的交易傾向。'], ['02', '看內容', '用影片與專欄，把感覺變成可以整理的觀察。'], ['03', '需要時再聊', '當問題真的困擾你，再主動進入 LINE@ 諮詢。']].map(([number, title, copy]) => <article key={number} className="border border-[#D1D1C7] bg-[#F7F4EF] p-7 md:p-8"><p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">{number}</p><h3 className="mt-8 serif text-3xl text-[#2D2D2D]">{title}</h3><p className="mt-4 text-sm leading-[1.9] text-[#70665D]">{copy}</p></article>)}
+    </section>
+
+    <section className="mx-auto max-w-2xl border border-[#D1D1C7] bg-[#F7F4EF] px-6 py-12 text-center md:px-12 md:py-16">
+      <p className="text-[11px] font-black tracking-[0.22em] text-[#8C635B]">NEXT STEP · RATE</p>
+      <h2 className="mt-5 serif text-2xl leading-[1.65] text-[#2D2D2D] md:text-3xl"><span className="block">認識自己用 FACE，</span><span className="block">檢驗持倉用 RATE。</span></h2>
+      <p className="mx-auto mt-5 max-w-lg text-base leading-8 text-[#5F574F]"><span className="block">用 RATE 鏡相診股，檢查真實持倉是否符合你的交易人格。</span><span className="mt-1 block">找出讓你焦慮、猶豫或抱不住的策略落差。</span></p>
+      <button type="button" onClick={onGoToMirrorTrade} className="mt-8 border border-[#2D2D2D] bg-[#2D2D2D] px-8 py-4 text-sm font-bold tracking-[0.12em] text-white transition hover:bg-transparent hover:text-[#2D2D2D]">前往 RATE 鏡相診股</button>
     </section>
 
     <section className="bg-[#2D2D2D] px-7 py-12 text-center text-white md:px-16 md:py-16"><p className="text-xs font-bold tracking-[0.24em] text-white/50">STAY CONNECTED</p><h2 className="mt-4 serif text-3xl leading-[1.55] md:text-4xl">想繼續聊交易，也可以從內容開始。</h2><div className="mt-8 flex flex-wrap justify-center gap-3">{socials.map((social) => <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="border border-white/30 px-5 py-3 text-sm font-bold transition hover:bg-white hover:text-[#2D2D2D]">{social.label}</a>)}<a href="https://line.me/ti/p/@227bctxh" target="_blank" rel="noopener noreferrer" className="bg-white px-5 py-3 text-sm font-bold text-[#2D2D2D] transition hover:bg-[#D9C7A9]">加入 LINE@</a></div></section>

@@ -6,6 +6,7 @@ import { FaceScores, ReportContent, AuthUser, DiaryEntry, Language } from '../ty
 import { FACE_MAP, getFaceCode } from '../constants';
 import { generateDynamicReport } from '../services/geminiService';
 import { ShareModal } from './ShareModal';
+import { RoleDetail } from './RoleDetail';
 import { translations } from '../i18n';
 
 interface DashboardProps {
@@ -17,6 +18,7 @@ interface DashboardProps {
   user: AuthUser | null;
   onLoginRequest: () => void;
   onGoToGallery?: () => void;
+  onGoToMirrorTrade?: () => void;
   onRetest?: () => void;
   isSharedView?: boolean;
   language: Language;
@@ -27,7 +29,7 @@ const calcRatio = (v1: number, v2: number) => {
   return total === 0 ? 50 : Math.round((v1 / total) * 100);
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, onGoToGallery, onRetest, isSharedView, language }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, onGoToGallery, onGoToMirrorTrade, onRetest, isSharedView, language }) => {
   const code = getFaceCode(dna);
   const profile = FACE_MAP[code] || FACE_MAP['ARLC'];
   const [report, setReport] = useState<ReportContent | null>(staticReport || null);
@@ -65,10 +67,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
       return { label, l1Name, l2Name, v1, v2 };
     };
     return [
-      getPairData('Focus 獲利動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
-      getPairData('Analysis 決策邏輯', '理性數據 (R)', 'R', '感應直覺 (I)', 'I'),
-      getPairData('Cycle 交易週期', '長期投資 (L)', 'L', '短期投機 (T)', 'T'),
-      getPairData('Exposure 資金管理', '集中 (C)', 'C', '分散 (D)', 'D'),
+      getPairData('獲利動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
+      getPairData('決策邏輯', '理性數據 (R)', 'R', '感應直覺 (I)', 'I'),
+      getPairData('交易週期', '長期投資 (L)', 'L', '短期投機 (T)', 'T'),
+      getPairData('資金管理', '集中 (C)', 'C', '分散 (D)', 'D'),
     ];
   }, [dna, daily]);
 
@@ -95,7 +97,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
   }
 
   return (
-    <div className="space-y-16 pb-40 fade-in px-4 md:px-8 max-w-4xl mx-auto">
+    <div className="space-y-12 pb-32 fade-in max-w-6xl mx-auto">
       
       {/* 操作按鈕區 */}
       {!isSharedView && (
@@ -119,50 +121,49 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
       )}
 
       {/* ✅ 合併後的「完整靈魂報告卷軸」 */}
-      <div className="bg-white border border-[#D1D1C7] rounded-sm shadow-sm overflow-hidden flex flex-col items-center">
+      <div className="bg-[#F7F4EF] border border-[#D1D1C7] overflow-hidden flex flex-col items-center">
         
         {/* 1. 照片區塊 */}
-        <div className="relative aspect-[16/9] md:aspect-[21/9] w-full overflow-hidden">
-          <img 
-            src={profile.imageUrl} 
-            className="w-full h-full object-cover grayscale-[0.2]" 
-            alt={profile.name} 
-            loading="lazy" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
-          <div className="absolute top-4 left-4 md:top-6 md:left-6">
-            <span className="bg-[#2D2D2D] text-white text-xs px-5 py-2 font-bold tracking-[0.2em] uppercase shadow-xl inline-block">{code}</span>
+        <div className="grid w-full border-b border-[#D1D1C7] md:grid-cols-[0.95fr_1.05fr]">
+          <div className="relative min-h-[280px] bg-white md:min-h-[420px]">
+            <img 
+              src={profile.imageUrl} 
+              className="h-full w-full object-contain p-5 grayscale-[0.15] md:p-8" 
+              alt={profile.name} 
+              loading="lazy" 
+            />
+            <div className="absolute left-4 top-4 md:left-6 md:top-6">
+              <span className="inline-block bg-[#2D2D2D] px-4 py-2 text-xs font-bold tracking-[0.2em] text-white">{code}</span>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center px-7 py-10 text-left md:px-12 md:py-14">
+            <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FACE RESULT REPORT</p>
+            <h1 className="mt-5 serif text-3xl leading-[1.45] text-[#2D2D2D] md:text-5xl">{profile.name}</h1>
+            <p className="mt-4 text-sm tracking-[0.12em] text-[#8C7E6D]">{code}　{profile.attributes}</p>
+            <div className="my-7 h-px w-16 bg-[#CDBCB1]"></div>
+            <p className="serif text-xl leading-[1.9] text-[#8C635B] md:text-2xl">「{profile.motto}」</p>
+            <p className="mt-7 text-base leading-8 text-[#5F574F]">這份報告會整理你的四個交易傾向，幫你理解什麼樣的策略，才是你能長期執行的方式。</p>
           </div>
         </div>
 
         {/* 內容區塊 Wrapper */}
-        <div className="p-6 md:p-24 space-y-20 md:space-y-32 text-center w-full">
+        <div className="w-full space-y-10 p-6 text-center md:space-y-14 md:p-10">
           
-        {/* 2. 名稱與文字敘述 (Motto) */}
-          <div className="space-y-6 md:space-y-8 pt-6 md:pt-0">
-            {/* ✅ 修正：手機版字體縮至 text-2xl (24px)，並把緊湊字距改為 tracking-widest 展現高級感 */}
-            <h1 className="text-2xl md:text-5xl serif text-[#2D2D2D] font-black tracking-widest leading-tight">
-              【{profile.name}】
-            </h1>
-            <div className="w-12 md:w-20 h-[0.5px] bg-[#D1D1C7] mx-auto"></div>
-            {/* ✅ 修正：連同下方的 Motto 一併微調為 text-lg，讓主標與副標的比例更協調 */}
-            <p className="text-lg md:text-3xl italic font-light text-[#8C635B] serif leading-[2] px-2 md:px-8">
-              「{profile.motto}」
-            </p>
-          </div>
-
-          {/* ✅ 3. 八邊圖與數據分析 (嵌入到流程中) */}
+          {/* FACE 分數 */}
           {/* 修正 1：將卡片外層的手機版上下間距縮小，space-y-12 降為 space-y-6 */}
-          <div className="bg-[#FBFBFA] border border-[#D1D1C7]/30 p-6 md:p-16 rounded-sm shadow-inner space-y-6 md:space-y-12">
-            <div className="text-center space-y-3 md:space-y-4">
-              <span className="text-[10px] md:text-xs font-black text-[#8C635B] uppercase tracking-[0.5em] block">{t.dashboard.analysis}</span>
-              <h2 className="text-2xl md:text-4xl serif text-[#2D2D2D] font-bold tracking-[0.2em]">{t.dashboard.title}</h2>
+          <div className="mx-auto grid max-w-4xl gap-6 border-y border-[#D1D1C7] py-9 text-left md:grid-cols-2 md:gap-x-8 md:gap-y-6 md:py-10">
+            <div className="grid gap-4 md:col-span-2 md:grid-cols-[9rem_1fr] md:gap-6">
+              <p className="text-sm font-bold leading-[1.7] tracking-[0.12em] text-[#8C635B]">FACE SCORE<br />四個交易面向</p>
+              <div>
+                <h2 className="serif text-2xl leading-[1.55] text-[#2D2D2D] md:text-3xl">你的 FACE 分數</h2>
+                <p className="mt-3 text-base leading-[2] text-[#5F574F]">這四組分數不是好或壞，而是你在市場中比較自然的選擇方式。</p>
+              </div>
             </div>
 
             {/* 修正 2：雷達圖高度在手機版降為 260px，並縮減 mb-12 為 mb-4 */}
-            <div className="h-[260px] md:h-[500px] w-full mb-4 md:mb-12">
+            <div className="h-[260px] w-full md:h-[360px]">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarData} outerRadius={window.innerWidth < 768 ? "65%" : "80%"} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
+                <RadarChart data={radarData} outerRadius={window.innerWidth < 768 ? "65%" : "76%"} margin={{ top: 10, right: 24, bottom: 10, left: 24 }}>
                   <PolarGrid stroke="#D1D1C7" strokeDasharray="4 4" />
                   <PolarAngleAxis 
                     dataKey="subject" 
@@ -176,27 +177,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             </div>
             
             {/* 修正 3：下方條狀圖的頂部間距 pt-12 改為 pt-6 */}
-            <div className="max-w-2xl mx-auto space-y-8 md:space-y-10 border-t border-[#D1D1C7]/40 pt-6 md:pt-12">
+            <div className="mx-auto max-w-2xl space-y-3 border-t border-[#D1D1C7] pt-4 md:mx-0 md:grid md:h-[360px] md:max-w-none md:grid-rows-[repeat(4,minmax(0,1fr))] md:gap-0 md:space-y-0 md:border-l md:border-t-0 md:pl-8 md:pt-0">
               {faceData.map((item, idx) => {
                 const deepColor = daily ? '#8C635B' : '#2D2D2D';
                 const lightColor = '#D1D1C7';
                 return (
-                  <div key={idx} className="space-y-4 md:space-y-5">
-                    <div className="text-center">
-                      <span className="text-sm md:text-base font-bold serif italic text-[#2D2D2D] tracking-[0.3em]">{item.label}</span>
+                  <div key={idx} className="border-t border-[#D1D1C7] pt-3 first:border-t-0 first:pt-0 md:flex md:min-h-0 md:flex-col md:justify-center md:py-0">
+                    <div className="mb-3 md:mb-3">
+                      <span className="serif text-[0.9rem] leading-none text-[#2D2D2D]">{item.label}</span>
                     </div>
                     <div className="relative">
-                      <div className="flex justify-between items-end mb-2 md:mb-3 px-1">
+                      <div className="mb-1 flex items-end justify-between px-1 md:mb-0.5">
                         <div className="text-left w-1/2">
-                          <p className={`text-[10px] md:text-xs font-bold tracking-widest ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l1Name}</p>
-                          <p className={`text-xl md:text-3xl font-mono font-black ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v1}%</p>
+                          <p className={`serif text-[0.68rem] ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l1Name}</p>
+                          <p className={`serif mt-0.5 text-[1.35rem] leading-none ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v1}%</p>
                         </div>
                         <div className="text-right w-1/2">
-                          <p className={`text-[10px] md:text-xs font-bold tracking-widest ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l2Name}</p>
-                          <p className={`text-xl md:text-3xl font-mono font-black ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v2}%</p>
+                          <p className={`serif text-[0.68rem] ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l2Name}</p>
+                          <p className={`serif mt-0.5 text-[1.35rem] leading-none ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v2}%</p>
                         </div>
                       </div>
-                      <div className="h-[12px] md:h-[16px] w-full bg-[#E6E6E1] rounded-full overflow-hidden flex relative shadow-inner border border-[#D1D1C7]/20">
+                      <div className="flex h-2 w-full overflow-hidden bg-[#E6E6E1]">
                         <div className="h-full transition-all duration-1000" style={{ width: `${item.v1}%`, backgroundColor: item.v1 >= item.v2 ? deepColor : lightColor }}></div>
                         <div className="h-full transition-all duration-1000" style={{ width: `${item.v2}%`, backgroundColor: item.v2 > item.v1 ? deepColor : lightColor }}></div>
                       </div>
@@ -207,6 +208,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             </div>
           </div>
 
+        </div>
+      </div>
+
+          {/* Use the same editorial content and layout as the personality catalogue. */}
+          <RoleDetail role={profile} isUserType={false} onBack={() => undefined} compact />
+
+          {false && <>
           {/* 4. 人格全貌 (Portrait) */}
           <div className="space-y-8 max-w-3xl mx-auto pt-8 md:pt-12">
              <span className="text-[10px] md:text-xs font-black text-[#8C7E6D] uppercase tracking-[0.6em] block">{t.dashboard.portrait}</span>
@@ -264,6 +272,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             <p className="text-2xl md:text-4xl serif italic font-extralight leading-[2.1] tracking-wide">「{profile.antidote}」</p>
           </div>
 
+          </>}
+
           {!isSharedView && onGoToGallery && (
             <div className="pt-16 md:pt-24 flex justify-center">
               <button onClick={onGoToGallery} className="w-full max-w-md py-6 px-4 text-xs tracking-[0.5em] text-[#2D2D2D] font-black border border-[#2D2D2D] hover:bg-[#2D2D2D] hover:text-white transition-all uppercase shadow-md active:scale-95">
@@ -271,9 +281,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
               </button>
             </div>
           )}
-        </div>
-      </div>
 
+          {!isSharedView && onGoToMirrorTrade && (
+            <section className="mx-auto mt-12 max-w-2xl border border-[#D1D1C7] bg-[#F7F4EF] px-6 py-12 text-center md:mt-16 md:px-12 md:py-16">
+              <p className="text-[11px] font-black tracking-[0.22em] text-[#8C635B]">NEXT STEP · RATE</p>
+              <h3 className="mt-5 serif text-2xl leading-[1.65] text-[#2D2D2D] md:text-3xl"><span className="block">認識自己用 FACE，</span><span className="block">檢驗持倉用 RATE。</span></h3>
+              <p className="mx-auto mt-5 max-w-lg text-base leading-8 text-[#5F574F]"><span className="block">用 RATE 鏡相診股，檢查真實持倉是否符合你的交易人格。</span><span className="mt-1 block">找出讓你焦慮、猶豫或抱不住的策略落差。</span></p>
+              <button onClick={onGoToMirrorTrade} className="mt-8 border border-[#2D2D2D] bg-[#2D2D2D] px-8 py-4 text-sm font-bold tracking-[0.12em] text-white transition hover:bg-transparent hover:text-[#2D2D2D]">前往 RATE 鏡相診股</button>
+            </section>
+          )}
       {/* 動態分析報告 (每日解憂) */}
       {daily && report && (
         <div className="bg-white border border-[#D1D1C7] rounded-sm shadow-2xl overflow-hidden animate-fade-in flex flex-col items-center mt-20 mb-32">
