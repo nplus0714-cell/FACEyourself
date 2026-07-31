@@ -7,3 +7,32 @@ body {
   font-size: 16px;
   line-height: 1.65;
 }
+
+/* MirrorTrade follows the same visual system as FACE rather than the imported demo UI. */
+.mirror-trade-demo {
+  font-family: "Noto Sans TC", sans-serif;
+}
+
+.mirror-trade-demo [class*="rounded-3xl"],
+.mirror-trade-demo [class*="rounded-2xl"],
+.mirror-trade-demo [class*="rounded-xl"],
+.mirror-trade-demo [class*="rounded-lg"] {
+  border-radius: 0.125rem !important;
+}
+
+.mirror-trade-demo [class*="shadow"] {
+  box-shadow: none !important;
+}
+
+.mirror-trade-demo .bg-white {
+  border-color: #D1D1C7;
+}
+
+.mirror-trade-demo table {
+  font-size: 0.8125rem;
+}
+
+.mirror-trade-demo th {
+  color: #8C7E6D !important;
+  letter-spacing: 0.06em;
+}

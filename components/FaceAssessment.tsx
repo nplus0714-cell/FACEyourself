@@ -60,6 +60,25 @@ const AGREEMENT_COLORS = [
 ] as const;
 
 const emptyScores = (): FaceScores => ({ A: 0, P: 0, R: 0, I: 0, L: 0, T: 0, C: 0, D: 0 });
+const LOCAL_PENDING_ASSESSMENT_KEY = 'face_pending_assessment_v1';
+
+const cacheCompletedAssessment = (
+  answers: Record<string, FaceResponse>,
+  scores: FaceScores,
+): void => {
+  try {
+    localStorage.setItem(LOCAL_PENDING_ASSESSMENT_KEY, JSON.stringify({
+      assessmentVersion: FACE_BASELINE_40_VERSION,
+      answers,
+      scores,
+      savedAt: new Date().toISOString(),
+    }));
+  } catch (error) {
+    // The result is still passed back to App below. This only affects the
+    // browser backup when storage is unavailable or full.
+    console.warn('Unable to cache FACE assessment locally', error);
+  }
+};
 
 const addScore = (scores: FaceScores, trait: FaceTrait, amount: number) => {
   scores[trait] += amount;
@@ -131,14 +150,25 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
   const finish = async (completedAnswers: Record<string, FaceResponse>) => {
     setIsSaving(true);
     setSaveError(null);
+    const { scores, scoreValues } = calculateScores(completedAnswers);
+
+    // Keep an anonymous browser copy before attempting the cloud write.
+    // App also saves the final result card into its persisted local state.
+    cacheCompletedAssessment(completedAnswers, scores);
 
     try {
       const runId = await getOrStartRun();
-      const { scores, scoreValues } = calculateScores(completedAnswers);
       await completeFaceAssessmentRun(runId, FACE_BASELINE_40_QUESTIONS, completedAnswers, scores, scoreValues);
       onComplete(scores);
     } catch (error) {
       console.error('Failed to persist FACE 40q assessment', error);
+
+      // Do not make an anonymous visitor lose a completed result because a
+      // cloud write is unavailable. The browser copy remains available until
+      // a future signed-in account can merge it.
+      onComplete(scores);
+      return;
+
       setSaveError(
         error instanceof AssessmentPersistenceError
           ? error.message

@@ -114,22 +114,15 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
             </div>
           </div>
 
-          {/* Nav - 安縵風格：極寬字距 */}
+          {/* Nav */}
           {showNav && !isAssessmentView && onViewChange && (
-            <nav className="mb-8 md:mb-10 flex flex-wrap justify-center text-xs tracking-[0.08em] sm:tracking-[0.2em] md:tracking-[0.45em] uppercase border-b border-[#D1D1C7]/60 pb-5 md:pb-8 gap-y-4 md:gap-y-6">
-              <div className="flex flex-wrap justify-center gap-x-5 sm:gap-x-8 md:gap-x-16 px-2 sm:px-6">
-                {!hasDna && <button 
+            <nav className="mb-8 md:mb-10 flex flex-wrap justify-center gap-x-5 gap-y-4 border-b border-[#D1D1C7]/60 pb-5 text-sm font-medium tracking-[0.06em] sm:gap-x-8 md:gap-x-12 md:pb-8 md:text-[15px]">
+                <button 
                   onClick={() => onViewChange('dna-test')} 
                   className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'dna-test' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}
                 >
                   開始測驗
-                </button>}
-                {hasDna && <button 
-                  onClick={() => onViewChange('dashboard')} 
-                  className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'dashboard' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}
-                >
-                  {t.nav.overview}
-                </button>}
+                </button>
                 <button 
                   onClick={() => onViewChange('role-gallery')} 
                   className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'role-gallery' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}
@@ -148,7 +141,6 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                 >
                   {t.nav.watch}
                 </button>
-              </div>
             </nav>
           )}
 

@@ -12,17 +12,24 @@ import { AboutFace } from './components/AboutFace';
 import { ContentHub } from './components/ContentHub';
 import { ContentDetail } from './components/ContentDetail';
 import { LandingInfo } from './components/LandingInfo';
+import { MirrorTrade } from './components/MirrorTrade';
+import { ResultPreview } from './components/ResultPreview';
+import { AuthDialog } from './components/AuthDialog';
 import { CONTENT_CATALOG, ContentItem } from './data/contentCatalog';
 import { DAILY_QUESTIONS, FACE_MAP, getFaceCode } from './constants';
-import { FaceScores, UserState, DiaryEntry, AuthUser, Language, PersonalityProfile } from './types';
+import { FaceScores, UserState, DiaryEntry, Language, PersonalityProfile } from './types';
 import { generateMarketAwareQuestions } from './services/geminiService';
 import { translations } from './i18n';
+import { signOut, toAuthUser } from './services/authService';
+import { getSupabaseClient } from './lib/supabase';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 
-type AppView = 'landing' | 'dna-test' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'content-hub' | 'content-detail';
+type AppView = 'landing' | 'dna-test' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'content-hub' | 'content-detail' | 'mirror-trade' | 'result-preview';
 
 const viewFromPath = (path: string): AppView => {
+  if (path === '/preview-results') return 'result-preview';
+  if (path === '/mirror-trade') return 'mirror-trade';
   if (path === '/types/compatibility') return 'compatibility';
   if (path.startsWith('/types/')) return 'role-detail';
   if (path === '/types') return 'role-gallery';
@@ -40,6 +47,8 @@ const pathForView = (view: AppView) => ({
   'role-gallery': '/types',
   compatibility: '/types/compatibility',
   'content-hub': '/watch',
+  'mirror-trade': '/mirror-trade',
+  'result-preview': '/preview-results',
 }[view]);
 
 const App: React.FC = () => {
@@ -56,6 +65,8 @@ const App: React.FC = () => {
     const code = window.location.pathname.replace('/types/', '');
     return FACE_MAP[code]?.code ?? null;
   });
+  const [previewResultCode, setPreviewResultCode] = useState<string | null>(() => new URLSearchParams(window.location.search).get('type'));
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   
   const [dynamicDailyQuestions, setDynamicDailyQuestions] = useState<any[]>(DAILY_QUESTIONS);
   const [isFetchingQuestions, setIsFetchingQuestions] = useState(false);
@@ -82,6 +93,18 @@ const App: React.FC = () => {
     setView('role-detail');
   };
 
+  const openResultPreview = (code: string) => {
+    window.history.pushState({}, '', `/preview-results?type=${code}`);
+    setPreviewResultCode(code);
+    setView('result-preview');
+  };
+
+  const backToResultPreviewList = () => {
+    window.history.pushState({}, '', '/preview-results');
+    setPreviewResultCode(null);
+    setView('result-preview');
+  };
+
   useEffect(() => {
     const handlePopState = () => {
       const nextView = viewFromPath(window.location.pathname);
@@ -92,6 +115,9 @@ const App: React.FC = () => {
       if (nextView === 'role-detail') {
         const code = window.location.pathname.replace('/types/', '');
         setSelectedRoleCode(FACE_MAP[code]?.code ?? null);
+      }
+      if (nextView === 'result-preview') {
+        setPreviewResultCode(new URLSearchParams(window.location.search).get('type'));
       }
       setView(nextView);
     };
@@ -143,14 +169,44 @@ const App: React.FC = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
   }, [state]);
 
-  const handleLogin = () => {
-    const mockUser: AuthUser = {
-      id: 'u-' + Date.now(),
-      name: language === 'zh' ? 'FACE 使用者' : 'FACE Member',
-      email: 'zen@face.diary',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
-    };
-    setState(prev => ({ ...prev, user: mockUser }));
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+
+    try {
+      const supabase = getSupabaseClient();
+
+      void supabase.auth.getSession().then(({ data }) => {
+        const authUser = data.session ? toAuthUser(data.session.user) : null;
+        setState((previous) => (
+          previous.user?.id === authUser?.id ? previous : { ...previous, user: authUser }
+        ));
+      });
+
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        const authUser = session ? toAuthUser(session.user) : null;
+        setState((previous) => (
+          previous.user?.id === authUser?.id ? previous : { ...previous, user: authUser }
+        ));
+        if (authUser) setIsAuthDialogOpen(false);
+      });
+      unsubscribe = () => data.subscription.unsubscribe();
+    } catch (error) {
+      console.warn('Supabase Auth is not configured yet', error);
+    }
+
+    return () => unsubscribe?.();
+  }, []);
+
+  const handleLogin = () => setIsAuthDialogOpen(true);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Unable to sign out', error);
+    } finally {
+      setState((previous) => ({ ...previous, user: null }));
+    }
   };
 
   const handleDnaComplete = (scores: FaceScores) => {
@@ -223,11 +279,12 @@ const App: React.FC = () => {
   };
 
   return (
+    <>
     <ZenLayout 
       user={state.user} 
       hasDna={!!state.dna} 
       onLogin={handleLogin} 
-      onLogout={() => setState(p => ({ ...p, user: null }))}
+      onLogout={() => void handleLogout()}
       showNav={view !== 'shared-dashboard'}
       activeView={view}
       onViewChange={(v) => {
@@ -237,7 +294,7 @@ const App: React.FC = () => {
         }
         navigateTo(v as AppView);
       }}
-      wide={['dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'content-hub', 'content-detail'].includes(view)}
+      wide={['dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'content-hub', 'content-detail', 'mirror-trade', 'result-preview'].includes(view)}
       isLanding={view === 'landing'}
       language={language}
       onToggleLanguage={toggleLanguage}
@@ -342,6 +399,7 @@ const App: React.FC = () => {
               setView('history');
             }} 
             onGoToGallery={() => setView('role-gallery')}
+            onGoToMirrorTrade={() => navigateTo('mirror-trade')}
             onRetest={handleRetestDna}
             language={language}
           />
@@ -375,7 +433,9 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {view === 'about-face' && <AboutFace />}
+      {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} />}
+      {view === 'mirror-trade' && <MirrorTrade user={state.user} onLogin={handleLogin} />}
+      {view === 'result-preview' && <ResultPreview selectedCode={previewResultCode} onSelectCode={openResultPreview} onBackToList={backToResultPreviewList} language={language} />}
       {view === 'content-hub' && (
         <ContentHub
           hasDna={!!state.dna}
@@ -415,6 +475,8 @@ const App: React.FC = () => {
       {view === 'role-detail' && selectedRoleCode && FACE_MAP[selectedRoleCode] && <RoleDetail role={FACE_MAP[selectedRoleCode]} isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode} onBack={() => navigateTo('role-gallery')} />}
       {view === 'compatibility' && <CompatibilityWheel dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
     </ZenLayout>
+    {isAuthDialogOpen && <AuthDialog onClose={() => setIsAuthDialogOpen(false)} />}
+    </>
   );
 };
 

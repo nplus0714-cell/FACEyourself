@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { PersonalityProfile, FaceScores } from '../types';
+import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
 
 interface RoleGalleryProps { dna: FaceScores | null; onOpenRole: (role: PersonalityProfile) => void; onStartTest: () => void; onOpenCompatibility: () => void; }
 
@@ -13,18 +14,43 @@ const FILTERS = [
 ] as const;
 
 const roleTone = (code: string) => code.startsWith('F') ? '#9A655C' : code.startsWith('P') ? '#667784' : '#7C856C';
-const dimensionLabel = (code: string) => [
-  ['獲利動機', code[0] === 'F' ? '主動尋找' : '耐心等待'],
-  ['決策邏輯', code[1] === 'R' ? '規則分析' : '直覺感受'],
-  ['交易週期', code[2] === 'L' ? '長期累積' : '順勢調整'],
-  ['資金管理', code[3] === 'C' ? '集中主軸' : '多元組合'],
-];
+const TRAIT_LABELS: Record<string, string> = {
+  A: '積極',
+  P: '保守',
+  R: '理性',
+  I: '感性',
+  L: '長期',
+  T: '短期',
+  C: '集中',
+  D: '分散',
+};
+const traitSummary = (code: string) => code.split('').map((trait) => TRAIT_LABELS[trait]).join('／');
+const resultDimensions = (scores: FaceScores) => {
+  const choose = (first: number, second: number, firstLabel: string, secondLabel: string) => {
+    const total = first + second;
+    const chooseFirst = first >= second;
+    return {
+      option: chooseFirst ? firstLabel : secondLabel,
+      percent: total === 0 ? 50 : Math.round(((chooseFirst ? first : second) / total) * 100),
+    };
+  };
+
+  return [
+    { label: '獲利動機', ...choose(scores.A, scores.P, '積極型(A)', '保守型(P)') },
+    { label: '決策邏輯', ...choose(scores.R, scores.I, '理性數據(R)', '感應直覺(I)') },
+    { label: '交易週期', ...choose(scores.L, scores.T, '長期投資(L)', '短期投機(T)') },
+    { label: '資金管理', ...choose(scores.C, scores.D, '集中型(C)', '分散型(D)') },
+  ];
+};
 
 export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onStartTest, onOpenCompatibility }) => {
-  const roles = useMemo(() => Object.values(FACE_MAP).sort((a, b) => a.code.localeCompare(b.code)), []);
+  const roles = useMemo(() => Object.values(FACE_MAP)
+    .map((role) => ({ ...role, motto: PERSONALITY_EDITORIAL[role.code]?.cardLine ?? role.motto }))
+    .sort((a, b) => a.code.localeCompare(b.code)), []);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]['id']>('all');
   const userCode = dna ? getFaceCode(dna) : null;
   const userRole = userCode ? roles.find((role) => role.code === userCode) : null;
+  const userScoreSummary = dna ? resultDimensions(dna) : [];
   const visibleRoles = filter === 'all' ? roles : roles.filter((role) => (FILTERS.find((item) => item.id === filter)?.traits ?? []).some((trait) => role.code.includes(trait)));
 
   return <div className="mx-auto max-w-7xl pb-28 pt-2 fade-in md:pt-8">
@@ -45,17 +71,17 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
     </header>
 
     {userRole ? <section className="mt-8 grid overflow-hidden border border-[#8C635B]/40 bg-white md:grid-cols-[0.82fr_1.18fr]" aria-label="你的交易風格">
-      <div className="relative flex min-h-64 items-end overflow-hidden p-8 md:p-10" style={{ backgroundColor: `${roleTone(userRole.code)}18` }}>
+      <div className="relative flex min-h-[22rem] flex-col overflow-hidden p-8 md:p-10" style={{ backgroundColor: `${roleTone(userRole.code)}18` }}>
         <span className="absolute -left-2 -top-6 serif text-[9rem] leading-none" style={{ color: `${roleTone(userRole.code)}28` }}>{userRole.code}</span>
-        <div className="relative"><p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">YOUR STYLE</p><h2 className="mt-3 serif text-4xl text-[#2D2D2D]">{userRole.name}</h2></div>
+        <p className="relative text-xs font-bold tracking-[0.22em] text-[#8C635B]">YOUR STYLE</p><img src={userRole.imageUrl} alt={userRole.name} className="relative mx-auto mt-4 h-48 w-full object-contain" /><h2 className="relative mt-auto serif text-4xl text-[#2D2D2D]">{userRole.name}</h2>
       </div>
-      <div className="p-8 md:p-10"><p className="text-lg leading-[1.9] text-[#514942]">{userRole.motto}</p><div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-[#D1D1C7] py-6">{dimensionLabel(userRole.code).map(([label, value]) => <div key={label}><p className="text-xs font-bold tracking-[0.15em] text-[#8C7E6D]">{label}</p><p className="mt-1 text-sm text-[#2D2D2D]">{value}</p></div>)}</div><button type="button" onClick={() => onOpenRole(userRole)} className="mt-7 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D]">閱讀你的完整說明 →</button></div>
+      <div className="p-8 md:p-10"><p className="text-lg leading-[1.9] text-[#514942]">{userRole.motto}</p><div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-[#D1D1C7] py-6">{userScoreSummary.map(({ label, option, percent }) => <div key={label}><p className="text-xs font-bold tracking-[0.15em] text-[#8C7E6D]">{label}</p><p className="mt-1 flex items-baseline justify-between gap-2 text-sm text-[#2D2D2D]"><span>{option}</span><strong className="serif text-2xl font-normal">{percent}%</strong></p></div>)}</div><button type="button" onClick={() => onOpenRole(userRole)} className="mt-7 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D]">閱讀你的完整說明 →</button></div>
     </section> : <section className="mt-8 flex flex-col items-start justify-between gap-5 border border-[#D1D1C7] bg-white p-7 md:flex-row md:items-center md:p-9"><div><p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">YOUR STYLE</p><p className="mt-3 text-base leading-[1.8] text-[#70665D]">完成測驗後，這裡會用一張專屬導讀卡帶你進入自己的類型。</p></div><button type="button" onClick={onStartTest} className="border border-[#2D2D2D] px-5 py-3 text-sm font-bold text-[#2D2D2D] transition hover:bg-[#2D2D2D] hover:text-white">開始測驗 →</button></section>}
 
     <section className="mt-14 md:mt-20"><div className="flex flex-col justify-between gap-5 border-b border-[#D1D1C7] pb-6 md:flex-row md:items-end"><div><p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">BROWSE THE ATLAS</p><h2 className="mt-3 serif text-3xl text-[#2D2D2D] md:text-4xl">找到你想了解的交易方式</h2></div><div className="flex flex-col items-start gap-3 md:items-end"><p className="text-sm leading-[1.8] text-[#70665D]">點一型，閱讀它在不同市場情境下的反應。</p><button type="button" onClick={onOpenCompatibility} className="border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] transition hover:text-[#8C635B]">開啟交易互補輪盤 →</button></div></div>
       <nav className="mt-6 flex gap-3 overflow-x-auto pb-2" aria-label="圖鑑篩選">{FILTERS.map((item) => <button key={item.id} type="button" onClick={() => setFilter(item.id)} className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-bold transition ${filter === item.id ? 'bg-[#2D2D2D] text-white' : 'border border-[#D1D1C7] bg-white text-[#70665D] hover:border-[#2D2D2D]'}`}>{item.label}</button>)}</nav>
-      <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{visibleRoles.map((role) => { const own = userCode === role.code; const tone = roleTone(role.code); return <button key={role.code} type="button" onClick={() => onOpenRole(role)} className={`group relative min-h-[15rem] overflow-hidden border bg-white p-6 text-left transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-4 ${own ? 'border-[#8C635B]' : 'border-[#D1D1C7]'}`}>
-        <div className="absolute inset-x-0 top-0 h-1.5" style={{ backgroundColor: tone }} /><p className="text-xs font-bold tracking-[0.18em]" style={{ color: tone }}>{role.code}</p>{own && <p className="mt-3 inline-block border px-2 py-1 text-[10px] font-bold" style={{ borderColor: `${tone}66`, color: tone }}>你的類型</p>}<h3 className="mt-8 serif text-3xl leading-[1.35] text-[#2D2D2D] group-hover:text-[#8C635B]">{role.name}</h3><p className="mt-4 line-clamp-2 text-sm leading-[1.85] text-[#70665D]">{role.motto}</p><div className="absolute bottom-6 left-6 right-6 flex items-center justify-between border-t border-[#D1D1C7] pt-4"><span className="text-[10px] font-bold tracking-[0.14em] text-[#8C7E6D]">{role.code.split('').join(' · ')}</span><span className="text-sm" style={{ color: tone }}>→</span></div>
+      <div className="mt-7 grid grid-cols-1 gap-0 border-l border-t border-[#D1D1C7] sm:grid-cols-2 lg:grid-cols-4">{visibleRoles.map((role) => { const own = userCode === role.code; const tone = roleTone(role.code); return <button key={role.code} type="button" onClick={() => onOpenRole(role)} className={`group relative min-h-[15rem] border-b border-r border-[#D1D1C7] bg-white p-7 text-left transition duration-300 hover:bg-[#F7F4EF] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-inset ${own ? 'bg-[#F4F0E9]' : ''}`}>
+        <p className="text-sm font-bold tracking-[0.16em]" style={{ color: tone }}>{role.code}</p><p className="mt-3 text-xs tracking-[0.08em] text-[#8C7E6D]">{traitSummary(role.code)}</p>{own && <p className="mt-4 w-fit border px-2 py-1 text-[10px] font-bold" style={{ borderColor: `${tone}66`, color: tone }}>你的類型</p>}<h3 className={`${own ? 'mt-7' : 'mt-11'} serif text-[1.8rem] leading-[1.4] text-[#2D2D2D] group-hover:text-[#8C635B]`}>{role.name}</h3><p className="mt-8 text-sm text-[#8C7E6D] transition group-hover:text-[#2D2D2D]">查看人格輪廓 →</p>
       </button>})}</div>
     </section>
   </div>;
