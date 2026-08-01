@@ -8,9 +8,10 @@ const socials = [
 
 interface AboutFaceProps {
   onGoToMirrorTrade: () => void;
+  onOpenCoach: () => void;
 }
 
-export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade }) => (
+export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade, onOpenCoach }) => (
   <div className="mx-auto max-w-6xl space-y-20 pb-28 pt-2 fade-in md:space-y-28 md:pt-8">
     <header className="grid overflow-hidden border border-[#D1D1C7] bg-[#F4F0E9] md:grid-cols-[1.1fr_0.9fr]">
       <div className="p-8 md:p-14 lg:p-16">
@@ -32,7 +33,7 @@ export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade }) => (
 
     <section className="grid items-center gap-10 border-y border-[#D1D1C7] py-12 md:grid-cols-[0.9fr_1.1fr] md:py-20">
       <div className="relative mx-auto w-full max-w-sm"><div className="absolute -left-4 -top-4 h-full w-full border border-[#8C635B]/25" /><img src="/images/NPC Bartender.jpg" alt="FACE Founder" className="relative aspect-square w-full object-cover grayscale-[0.2]" loading="lazy" /></div>
-      <div><p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">FOUNDER'S NOTE</p><h2 className="mt-5 serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">交易不是考試，<br />但每一次選擇都值得回頭看。</h2><p className="mt-7 text-base leading-[2.05] text-[#70665D] md:text-lg">FACE 來自「上班不要 Trade」與「交易解憂 Bar」想做的一件事：讓交易者能夠把困擾說清楚，而不只是反覆追問下一檔標的。從一次測驗、一篇文章或一支影片開始，慢慢建立屬於自己的交易語言。</p></div>
+      <div><p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">FOUNDER'S NOTE</p><h2 className="mt-5 serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">交易不是考試，<br />但每一次選擇都值得回頭看。</h2><p className="mt-7 text-base leading-[2.05] text-[#70665D] md:text-lg">FACE 來自「上班不要 Trade」與「交易解憂 Bar」想做的一件事：讓交易者能夠把困擾說清楚，而不只是反覆追問下一檔標的。從一次測驗、一篇文章或一支影片開始，慢慢建立屬於自己的交易語言。</p><button type="button" onClick={onOpenCoach} className="mt-7 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] transition hover:border-[#8C635B] hover:text-[#8C635B]">先認識陪你整理交易的人 →</button></div>
     </section>
 
     <section className="grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] md:grid-cols-3">

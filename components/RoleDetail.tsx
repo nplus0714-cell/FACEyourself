@@ -3,7 +3,15 @@ import { CalendarCheck, RefreshCw, ShieldCheck } from 'lucide-react';
 import { PersonalityProfile } from '../types';
 import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
 
-interface RoleDetailProps { role: PersonalityProfile; isUserType: boolean; onBack: () => void; compact?: boolean; }
+interface RoleDetailProps {
+  role: PersonalityProfile;
+  isUserType: boolean;
+  onBack: () => void;
+  compact?: boolean;
+  onOpenCompatibility?: () => void;
+  onOpenRate?: () => void;
+  onOpenContent?: () => void;
+}
 
 const toneFor = (code: string) => (code.startsWith('A') ? '#9A655C' : code.startsWith('P') ? '#667784' : '#7C856C');
 const TRAIT_LABELS: Record<string, string> = {
@@ -28,7 +36,17 @@ const SectionLabel: React.FC<{ number: string; title: string; tone: string }> = 
   </p>
 );
 
-export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack, compact = false }) => {
+const GentleLink: React.FC<{ eyebrow: string; description: string; link: string; onClick: () => void; tone: string }> = ({ eyebrow, description, link, onClick, tone }) => (
+  <aside className="ml-auto max-w-3xl border-t border-[#D1D1C7] pt-6 md:pl-[10rem]">
+    <p className="text-xs font-bold tracking-[0.14em]" style={{ color: tone }}>{eyebrow}</p>
+    <p className="mt-2 text-base leading-7 text-[#70665D]">{description}</p>
+    <button type="button" onClick={onClick} className="mt-3 border-b border-current pb-1 text-sm font-bold text-[#2D2D2D] transition-opacity hover:opacity-60">
+      {link} →
+    </button>
+  </aside>
+);
+
+export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack, compact = false, onOpenCompatibility, onOpenRate, onOpenContent }) => {
   const tone = toneFor(role.code);
   const editorial = PERSONALITY_EDITORIAL[role.code];
   const decision = editorial?.decision ?? { title: role.psychology.mechanism, scene: role.psychology.scene };
@@ -87,6 +105,16 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
           </div>
         </section>
 
+        {onOpenCompatibility && (
+          <GentleLink
+            eyebrow="交易互補輪盤"
+            description="每個風格都有容易忽略的一面。看看和你相近、卻能補上盲點的交易方式。"
+            link="打開完整交易互補輪盤"
+            onClick={onOpenCompatibility}
+            tone={tone}
+          />
+        )}
+
         <section className="grid gap-7 border-y border-[#D1D1C7] py-12 md:grid-cols-[10rem_1fr] md:py-14">
           <SectionLabel number="04" title="解決方法：讓心靜下來" tone={tone} />
           <div className="grid gap-5 md:grid-cols-2">
@@ -101,6 +129,16 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
             ))}
           </div>
         </section>
+
+        {onOpenRate && (
+          <GentleLink
+            eyebrow="RATE 鏡相診股"
+            description="想知道真實持倉是否符合你的交易習慣，可以用 RATE 對照你的選擇與部位。"
+            link="認識 RATE 鏡相診股"
+            onClick={onOpenRate}
+            tone={tone}
+          />
+        )}
 
         <section className="grid gap-7 border border-[#D1D1C7] bg-white p-7 md:grid-cols-[10rem_1fr] md:p-10">
           <SectionLabel number="05" title="解酒錠" tone={tone} />
@@ -122,6 +160,16 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
             </div>
           </div>
         </section>
+
+        {onOpenContent && (
+          <GentleLink
+            eyebrow="交易解憂 Bar"
+            description="想慢慢理解這些交易習慣，可以從影片與文章裡找到更貼近自己的情境。"
+            link="去交易解憂 Bar 看內容"
+            onClick={onOpenContent}
+            tone={tone}
+          />
+        )}
 
         <section className="px-8 py-12 text-center text-white md:px-16 md:py-16" style={{ backgroundColor: tone }}>
           <p className="text-sm font-bold tracking-[0.16em] text-white/70">一句話祝福</p>

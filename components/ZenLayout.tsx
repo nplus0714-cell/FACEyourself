@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { AuthUser, Language } from '../types';
 import { translations } from '../i18n';
 
@@ -33,7 +33,18 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   onToggleLanguage
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = translations[language];
+
+  const openUserMenu = () => {
+    if (menuCloseTimer.current) clearTimeout(menuCloseTimer.current);
+    setIsMenuOpen(true);
+  };
+
+  const closeUserMenuLater = () => {
+    if (menuCloseTimer.current) clearTimeout(menuCloseTimer.current);
+    menuCloseTimer.current = setTimeout(() => setIsMenuOpen(false), 350);
+  };
 
   const handleLogoClick = () => {
     onViewChange?.('landing');
@@ -73,9 +84,9 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
 
               {user ? (
                 <div 
-                  className="relative"
-                  onMouseEnter={() => setIsMenuOpen(true)}
-                  onMouseLeave={() => setIsMenuOpen(false)}
+                  className="relative -mb-3 pb-3"
+                  onMouseEnter={openUserMenu}
+                  onMouseLeave={closeUserMenuLater}
                 >
                   <div className="flex items-center gap-3 cursor-pointer p-1.5 rounded-full hover:bg-white/60 transition-all">
                     <div className="text-right hidden md:block px-1">
@@ -89,8 +100,17 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                     />
                   </div>
                   
-                  <div className={`absolute top-full right-0 mt-2 pt-2 z-50 transition-all duration-300 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
+                  <div className={`absolute top-full right-0 z-50 transition-all duration-200 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'}`}>
                     <div className="bg-white border border-[#D1D1C7] shadow-2xl rounded-sm min-w-[180px] overflow-hidden">
+                      <button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          onViewChange?.('member-home');
+                        }}
+                        className="w-full text-left px-5 py-4 text-xs tracking-[0.18em] text-[#2D2D2D] hover:bg-[#F3F0EB] transition-colors flex items-center gap-4 font-bold"
+                      >
+                        我的 FACE
+                      </button>
                       <button 
                         onClick={() => {
                           setIsMenuOpen(false);

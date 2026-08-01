@@ -3,7 +3,13 @@ import { FACE_MAP, getFaceCode } from '../constants';
 import { PersonalityProfile, FaceScores } from '../types';
 import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
 
-interface RoleGalleryProps { dna: FaceScores | null; onOpenRole: (role: PersonalityProfile) => void; onStartTest: () => void; onOpenCompatibility: () => void; }
+interface RoleGalleryProps {
+  dna: FaceScores | null;
+  onOpenRole: (role: PersonalityProfile) => void;
+  onStartTest: () => void;
+  onOpenCompatibility: () => void;
+  onOpenMyFace: () => void;
+}
 
 const FILTERS = [
   { id: 'all', label: '全部 16 型', traits: [] },
@@ -43,7 +49,7 @@ const resultDimensions = (scores: FaceScores) => {
   ];
 };
 
-export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onStartTest, onOpenCompatibility }) => {
+export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onStartTest, onOpenCompatibility, onOpenMyFace }) => {
   const roles = useMemo(() => Object.values(FACE_MAP)
     .map((role) => ({ ...role, motto: PERSONALITY_EDITORIAL[role.code]?.cardLine ?? role.motto }))
     .sort((a, b) => a.code.localeCompare(b.code)), []);
@@ -75,7 +81,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
         <span className="absolute -left-2 -top-6 serif text-[9rem] leading-none" style={{ color: `${roleTone(userRole.code)}28` }}>{userRole.code}</span>
         <p className="relative text-xs font-bold tracking-[0.22em] text-[#8C635B]">YOUR STYLE</p><img src={userRole.imageUrl} alt={userRole.name} className="relative mx-auto mt-4 h-48 w-full object-contain" /><h2 className="relative mt-auto serif text-4xl text-[#2D2D2D]">{userRole.name}</h2>
       </div>
-      <div className="p-8 md:p-10"><p className="text-lg leading-[1.9] text-[#514942]">{userRole.motto}</p><div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-[#D1D1C7] py-6">{userScoreSummary.map(({ label, option, percent }) => <div key={label}><p className="text-xs font-bold tracking-[0.15em] text-[#8C7E6D]">{label}</p><p className="mt-1 flex items-baseline justify-between gap-2 text-sm text-[#2D2D2D]"><span>{option}</span><strong className="serif text-2xl font-normal">{percent}%</strong></p></div>)}</div><button type="button" onClick={() => onOpenRole(userRole)} className="mt-7 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D]">閱讀你的完整說明 →</button></div>
+      <div className="p-8 md:p-10"><p className="text-lg leading-[1.9] text-[#514942]">{userRole.motto}</p><div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-y border-[#D1D1C7] py-6">{userScoreSummary.map(({ label, option, percent }) => <div key={label}><p className="text-xs font-bold tracking-[0.15em] text-[#8C7E6D]">{label}</p><p className="mt-1 flex items-baseline justify-between gap-2 text-sm text-[#2D2D2D]"><span>{option}</span><strong className="serif text-2xl font-normal">{percent}%</strong></p></div>)}</div><button type="button" onClick={onOpenMyFace} className="mt-7 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D]">閱讀你的完整說明 →</button></div>
     </section> : <section className="mt-8 flex flex-col items-start justify-between gap-5 border border-[#D1D1C7] bg-white p-7 md:flex-row md:items-center md:p-9"><div><p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">YOUR STYLE</p><p className="mt-3 text-base leading-[1.8] text-[#70665D]">完成測驗後，這裡會用一張專屬導讀卡帶你進入自己的類型。</p></div><button type="button" onClick={onStartTest} className="border border-[#2D2D2D] px-5 py-3 text-sm font-bold text-[#2D2D2D] transition hover:bg-[#2D2D2D] hover:text-white">開始測驗 →</button></section>}
 
     <section className="mt-14 md:mt-20"><div className="flex flex-col justify-between gap-5 border-b border-[#D1D1C7] pb-6 md:flex-row md:items-end"><div><p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">BROWSE THE ATLAS</p><h2 className="mt-3 serif text-3xl text-[#2D2D2D] md:text-4xl">找到你想了解的交易方式</h2></div><div className="flex flex-col items-start gap-3 md:items-end"><p className="text-sm leading-[1.8] text-[#70665D]">點一型，閱讀它在不同市場情境下的反應。</p><button type="button" onClick={onOpenCompatibility} className="border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] transition hover:text-[#8C635B]">開啟交易互補輪盤 →</button></div></div>
