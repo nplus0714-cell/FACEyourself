@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FaceScores, PersonalityProfile } from '../types';
 import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
 
@@ -8,218 +8,187 @@ interface ShareModalProps {
   onClose: () => void;
 }
 
-export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose }) => {
-  const [copied, setCopied] = useState(false);
-  const [igCopied, setIgCopied] = useState(false);
+type CopyState = 'idle' | 'copied';
 
-  // 當彈窗開啟時，鎖定背景滾動
+export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose }) => {
+  const [copyState, setCopyState] = useState<CopyState>('idle');
+  const [canUseNativeShare, setCanUseNativeShare] = useState(false);
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+    setCanUseNativeShare(typeof navigator !== 'undefined' && Boolean(navigator.share));
+
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, []);
 
-  // 指定分享的基礎網址
-  const shareBaseUrl = "https://faceyourself.vercel.app";
+  const shareUrl = useMemo(() => {
+    const scores = Object.entries(dna).map(([key, value]) => `${key}${value}`).join('_');
+    return `https://faceyourself.vercel.app?dna_share=${scores}`;
+  }, [dna]);
 
-  const generateShareUrl = () => {
-    const scores = Object.entries(dna).map(([k, v]) => `${k}${v}`).join('_');
-    return `${shareBaseUrl}?dna_share=${scores}`;
-  };
-
-  // ✅ 統一的分享文案 (您要求的格式)
   const shareText = PERSONALITY_EDITORIAL[profile.code]?.shareText
-    ?? `我在 FACE 交易風格測驗的結果是「${profile.name}」。你是哪一種交易風格？`;
+    ?? `我完成 FACE 交易風格測驗，結果是「${profile.name}」。`;
 
-  const handleCopy = () => {
-    const fullText = `${shareText}\n${generateShareUrl()}`;
-    navigator.clipboard.writeText(fullText).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-
-  const handleIgCopy = () => {
-    const fullText = `${shareText}\n${generateShareUrl()}`;
-    navigator.clipboard.writeText(fullText).then(() => {
-      setIgCopied(true);
-      setTimeout(() => setIgCopied(false), 2000);
-    });
-  };
-
-  // ✅ LINE 分享：明確分離 text 和 url 參數
-  const shareToLine = () => {
-    const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(generateShareUrl())}&text=${encodeURIComponent(shareText)}`;
-    window.open(url, '_blank', 'width=600,height=400');
-  };
-
-  // ✅ FB 分享：FB 的 API 規定只能傳 u (url)，傳 text 會被忽略或報錯
-  const shareToFB = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(generateShareUrl())}`;
-    window.open(url, '_blank', 'width=600,height=400');
-  };
-
-  // ✅ Threads 分享：可以將 text 和 url 串在一起當作 text 傳送
-  const shareToThreads = () => {
-    const url = `https://www.threads.net/intent/post?text=${encodeURIComponent(shareText + '\n' + generateShareUrl())}`;
-    window.open(url, '_blank', 'width=600,height=600');
-  };
-
-  // ✅ X (Twitter) 分享：支援 text 和 url 參數分離
-  const shareToX = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(generateShareUrl())}`;
-    window.open(url, '_blank', 'width=600,height=400');
-  };
-
-  // ✅ 系統原生分享 (手機端最順暢)
-  const handleNativeShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'FACE 投資人格日記',
-        text: shareText,
-        url: generateShareUrl(),
-      }).catch(console.error);
-    } else {
-      handleCopy();
+  const copyShareMessage = async () => {
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState('idle'), 2200);
+    } catch (error) {
+      console.error('Unable to copy the sharing message', error);
     }
   };
 
+  const openShareWindow = (url: string, name: string) => {
+    window.open(url, name, 'noopener,noreferrer,width=640,height=640');
+  };
+
+  const shareToLine = () => {
+    openShareWindow(
+      `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+      'face-share-line',
+    );
+  };
+
+  const shareToFacebook = () => {
+    openShareWindow(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+      'face-share-facebook',
+    );
+  };
+
+  const shareToThreads = () => {
+    openShareWindow(
+      `https://www.threads.net/intent/post?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`,
+      'face-share-threads',
+    );
+  };
+
+  const shareToX = () => {
+    openShareWindow(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      'face-share-x',
+    );
+  };
+
+  const nativeShare = async () => {
+    try {
+      await navigator.share({
+        title: '我的 FACE 交易風格',
+        text: shareText,
+        url: shareUrl,
+      });
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') console.error('Unable to open native sharing', error);
+    }
+  };
+
+  const secondaryActions = [
+    { label: 'Facebook', icon: 'fa-facebook-f', color: 'text-[#1877F2]', onClick: shareToFacebook },
+    { label: 'Instagram', icon: 'fa-instagram', color: 'text-[#C13584]', onClick: copyShareMessage },
+    { label: 'Threads', icon: 'fa-threads', color: 'text-[#2D2D2D]', onClick: shareToThreads },
+    { label: 'X', icon: 'fa-x-twitter', color: 'text-[#2D2D2D]', onClick: shareToX },
+  ];
+
   return (
-    <div 
-      className="fixed inset-0 z-[110] flex justify-center items-start bg-[#2D2D2D]/80 backdrop-blur-sm p-4 overflow-y-auto pt-12 md:pt-20 fade-in overscroll-contain"
+    <div
+      className="fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-[#2D2D2D]/70 p-4 py-8 backdrop-blur-sm md:items-center md:p-8"
       onClick={onClose}
+      role="presentation"
     >
-      <div 
-        className="bg-white w-full max-w-xs border border-[#D1D1C7] shadow-2xl relative overflow-hidden flex flex-col items-center animate-fade-in-down mb-20"
-        onClick={e => e.stopPropagation()}
+      <section
+        aria-labelledby="share-dialog-title"
+        aria-modal="true"
+        role="dialog"
+        className="relative my-auto w-full max-w-[40rem] border border-[#D1D1C7] bg-[#FCFBF8] shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
       >
-        {/* Decorative Header */}
-        <div className="w-full h-1 bg-[#8C635B]"></div>
-        <button 
-          onClick={onClose} 
-          className="absolute top-2 right-3 text-2xl text-[#8C7E6D] hover:text-[#2D2D2D] transition-colors z-10"
+        <div className="h-1 w-full bg-[#8C635B]" />
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="關閉分享視窗"
+          className="absolute right-4 top-4 grid h-10 w-10 place-items-center text-2xl leading-none text-[#8C7E6D] transition-colors hover:bg-[#F0ECE6] hover:text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#8C635B]"
         >
-          &times;
+          ×
         </button>
-        
-        <div className="p-6 md:p-8 space-y-5 w-full text-center">
-          <div className="space-y-1">
-            <span className="text-[9px] tracking-[0.4em] text-[#8C7E6D] uppercase font-black block">Share Session</span>
-            <h3 className="text-xl serif text-[#2D2D2D] font-bold tracking-wide">分享我的交易風格</h3>
-            <div className="w-6 h-[0.5px] bg-[#D1D1C7] mx-auto mt-1"></div>
+
+        <div className="px-6 py-8 sm:px-10 sm:py-10">
+          <div className="border-b border-[#D1D1C7] pb-7 pr-10">
+            <p className="text-[11px] font-bold tracking-[0.24em] text-[#8C635B]">SHARE YOUR RESULT</p>
+            <h2 id="share-dialog-title" className="mt-3 serif text-[28px] leading-[1.45] text-[#2D2D2D] sm:text-[34px]">
+              分享你的交易風格
+            </h2>
+            <p className="mt-3 max-w-xl text-[15px] leading-7 text-[#6F655B] sm:text-base">
+              把結果分享給朋友，一起看看你們在市場中的自然選擇有什麼不同。
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-1.5 w-full">
-            {/* 1. 複製連結 */}
-            <button 
-              onClick={handleCopy}
-              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] transition-all bg-[#FBFBFA]/50"
-            >
-              <div className="flex flex-col items-start text-left">
-                <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 01</span>
-                <span className="text-[11px] font-bold text-[#2D2D2D] serif uppercase tracking-[0.1em]">
-                  {copied ? '已複製內容！' : '複製文案與連結'}
-                </span>
-              </div>
-              <i className="fa-solid fa-link text-[#8C7E6D] group-hover:text-[#2D2D2D] transition-colors text-base"></i>
-            </button>
-
-            {/* 2. 分享至 LINE */}
-            <button 
+          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
               onClick={shareToLine}
-              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#06C755] hover:bg-[#06C755]/5 transition-all"
+              className="group flex min-h-[76px] items-center justify-between border border-[#06C755] bg-[#06C755] px-5 text-left text-white transition-colors hover:bg-[#05ad4a] focus:outline-none focus:ring-2 focus:ring-[#2D2D2D] focus:ring-offset-2"
             >
-              <div className="flex flex-col items-start text-left">
-                <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 02</span>
-                <span className="text-[11px] font-bold text-[#2D2D2D] serif uppercase tracking-[0.1em]">分享至 LINE</span>
-              </div>
-              <i className="fa-brands fa-line text-xl text-[#06C755]"></i>
+              <span>
+                <span className="block text-[11px] font-bold tracking-[0.18em] text-white/70">RECOMMENDED</span>
+                <span className="mt-1 block text-base font-bold">分享至 LINE</span>
+              </span>
+              <i className="fa-brands fa-line text-2xl" aria-hidden="true" />
             </button>
 
-            {/* 3. 分享至 FB (僅網址) */}
-            <button 
-              onClick={shareToFB}
-              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#1877F2] hover:bg-[#1877F2]/5 transition-all"
-            >
-              <div className="flex flex-col items-start text-left">
-                <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 03</span>
-                <span className="text-[11px] font-bold text-[#2D2D2D] serif uppercase tracking-[0.1em]">分享至 FB</span>
-              </div>
-              <i className="fa-brands fa-facebook-f text-lg text-[#1877F2]"></i>
-            </button>
-
-            {/* 4. 複製給 IG */}
-            <button 
-              onClick={handleIgCopy}
-              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#E4405F] hover:bg-[#E4405F]/5 transition-all"
-            >
-              <div className="flex flex-col items-start text-left">
-                <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 04</span>
-                <span className="text-[11px] font-bold text-[#2D2D2D] serif uppercase tracking-[0.1em]">
-                   {igCopied ? '已複製內容！' : '複製給 Instagram'}
-                </span>
-              </div>
-              <i className="fa-brands fa-instagram text-xl text-[#E4405F]"></i>
-            </button>
-
-            {/* 5. 分享至 Threads */}
-            <button 
-              onClick={shareToThreads}
-              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] hover:bg-black/5 transition-all"
-            >
-              <div className="flex flex-col items-start text-left">
-                <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 05</span>
-                <span className="text-[11px] font-bold text-[#2D2D2D] serif uppercase tracking-[0.1em]">分享至 Threads</span>
-              </div>
-              <i className="fa-brands fa-threads text-lg text-[#2D2D2D]"></i>
-            </button>
-
-            {/* 6. 分享至 X (Twitter) */}
-            <button 
-              onClick={shareToX}
-              className="group flex items-center justify-between px-8 py-3 border border-[#D1D1C7]/40 hover:border-[#2D2D2D] hover:bg-black/5 transition-all"
-            >
-              <div className="flex flex-col items-start text-left">
-                <span className="text-[7px] font-mono text-[#8C7E6D] uppercase tracking-widest mb-0.5">Method 06</span>
-                <span className="text-[11px] font-bold text-[#2D2D2D] serif uppercase tracking-[0.1em]">分享至 X (Twitter)</span>
-              </div>
-              <i className="fa-brands fa-x-twitter text-lg text-[#2D2D2D]"></i>
-            </button>
-
-            {/* 7. 系統原生分享 (手機端首選) */}
-            {navigator.share && (
-              <button 
-                onClick={handleNativeShare}
-                className="group flex items-center justify-between px-8 py-3 bg-[#2D2D2D] text-white hover:bg-black transition-all mt-1"
+            {canUseNativeShare ? (
+              <button
+                type="button"
+                onClick={nativeShare}
+                className="group flex min-h-[76px] items-center justify-between bg-[#2D2D2D] px-5 text-left text-white transition-colors hover:bg-[#151515] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-2"
               >
-                <div className="flex flex-col items-start text-left">
-                  <span className="text-[7px] font-mono opacity-50 uppercase tracking-widest mb-0.5">Method 07</span>
-                  <span className="text-[11px] font-bold serif uppercase tracking-[0.1em]">系統原生分享</span>
-                </div>
-                <i className="fa-solid fa-share-nodes text-base"></i>
+                <span>
+                  <span className="block text-[11px] font-bold tracking-[0.18em] text-white/55">MOBILE</span>
+                  <span className="mt-1 block text-base font-bold">更多分享方式</span>
+                </span>
+                <i className="fa-solid fa-share-nodes text-xl" aria-hidden="true" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={copyShareMessage}
+                className="group flex min-h-[76px] items-center justify-between bg-[#2D2D2D] px-5 text-left text-white transition-colors hover:bg-[#151515] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-2"
+              >
+                <span>
+                  <span className="block text-[11px] font-bold tracking-[0.18em] text-white/55">STEP 1</span>
+                  <span className="mt-1 block text-base font-bold">{copyState === 'copied' ? '已複製分享文字' : '複製分享文字'}</span>
+                </span>
+                <i className="fa-solid fa-copy text-lg" aria-hidden="true" />
               </button>
             )}
           </div>
 
-          <p className="text-[9px] text-[#8C7E6D] italic serif leading-relaxed opacity-60 px-2 mt-2">
-            「測完快分享給朋友！在交流中完善真實的自己。」
-          </p>
+          <div className="mt-8 border-t border-[#D1D1C7] pt-6">
+            <p className="text-sm font-bold text-[#2D2D2D]">其他平台</p>
+            <p className="mt-1 text-sm leading-6 text-[#8C7E6D]">Instagram 會先複製文字與連結，再貼到貼文或限時動態。</p>
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {secondaryActions.map(({ label, icon, color, onClick }) => (
+                <button
+                  type="button"
+                  key={label}
+                  onClick={onClick}
+                  className="flex min-h-[62px] items-center justify-center gap-2 border border-[#D1D1C7] bg-white px-3 text-sm font-semibold text-[#2D2D2D] transition-colors hover:border-[#8C635B] hover:bg-[#F7F4EF] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-2"
+                >
+                  <i className={`fa-brands ${icon} ${color}`} aria-hidden="true" />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-7 border-l-2 border-[#CDBCB1] bg-[#F7F4EF] px-4 py-3 text-sm leading-6 text-[#6F655B]">
+            朋友打開連結後，只會看到這次的交易風格結果，不會看到你的帳號、測驗答案或歷史紀錄。
+          </div>
         </div>
-        
-        <div className="w-full p-3 bg-[#F5F5F0] border-t border-[#D1D1C7]/30 text-center">
-            <p className="text-[7px] tracking-[0.2em] font-mono text-[#8C7E6D] uppercase font-bold">Soul Diary Protocol V3.4</p>
-        </div>
-      </div>
-      <style>{`
-        @keyframes fadeInDown {
-          from { opacity: 0; transform: translateY(-20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-down {
-          animation: fadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}</style>
+      </section>
     </div>
   );
 };

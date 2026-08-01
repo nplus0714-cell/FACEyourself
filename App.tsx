@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ZenLayout } from './components/ZenLayout';
 import { Assessment } from './components/Assessment';
 import { FaceAssessment } from './components/FaceAssessment';
@@ -9,12 +9,14 @@ import { RoleDetail } from './components/RoleDetail';
 import { CompatibilityWheel } from './components/CompatibilityWheel';
 import { ZenDnaChart } from './components/ZenDnaChart';
 import { AboutFace } from './components/AboutFace';
+import { CoachProfile } from './components/CoachProfile';
 import { ContentHub } from './components/ContentHub';
 import { ContentDetail } from './components/ContentDetail';
 import { LandingInfo } from './components/LandingInfo';
 import { MirrorTrade } from './components/MirrorTrade';
 import { ResultPreview } from './components/ResultPreview';
 import { AuthDialog } from './components/AuthDialog';
+import { MemberHome } from './components/MemberHome';
 import { CONTENT_CATALOG, ContentItem } from './data/contentCatalog';
 import { DAILY_QUESTIONS, FACE_MAP, getFaceCode } from './constants';
 import { FaceScores, UserState, DiaryEntry, Language, PersonalityProfile } from './types';
@@ -22,13 +24,15 @@ import { generateMarketAwareQuestions } from './services/geminiService';
 import { translations } from './i18n';
 import { signOut, toAuthUser } from './services/authService';
 import { getSupabaseClient } from './lib/supabase';
+import { claimPendingGuestAssessment } from './services/guestResultClaim';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 
-type AppView = 'landing' | 'dna-test' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'content-hub' | 'content-detail' | 'mirror-trade' | 'result-preview';
+type AppView = 'landing' | 'dna-test' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'mirror-trade' | 'result-preview' | 'member-home';
 
 const viewFromPath = (path: string): AppView => {
   if (path === '/preview-results') return 'result-preview';
+  if (path === '/me') return 'member-home';
   if (path === '/mirror-trade') return 'mirror-trade';
   if (path === '/types/compatibility') return 'compatibility';
   if (path.startsWith('/types/')) return 'role-detail';
@@ -37,6 +41,7 @@ const viewFromPath = (path: string): AppView => {
   if (path === '/watch') return 'content-hub';
   if (path === '/test') return 'dna-test';
   if (path === '/about') return 'about-face';
+  if (path === '/coach') return 'coach-profile';
   return 'landing';
 };
 
@@ -44,11 +49,13 @@ const pathForView = (view: AppView) => ({
   landing: '/',
   'dna-test': '/test',
   'about-face': '/about',
+  'coach-profile': '/coach',
   'role-gallery': '/types',
   compatibility: '/types/compatibility',
   'content-hub': '/watch',
   'mirror-trade': '/mirror-trade',
   'result-preview': '/preview-results',
+  'member-home': '/me',
 }[view]);
 
 const App: React.FC = () => {
@@ -67,6 +74,7 @@ const App: React.FC = () => {
   });
   const [previewResultCode, setPreviewResultCode] = useState<string | null>(() => new URLSearchParams(window.location.search).get('type'));
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const claimedGuestResultRef = useRef(false);
   
   const [dynamicDailyQuestions, setDynamicDailyQuestions] = useState<any[]>(DAILY_QUESTIONS);
   const [isFetchingQuestions, setIsFetchingQuestions] = useState(false);
@@ -180,6 +188,12 @@ const App: React.FC = () => {
         setState((previous) => (
           previous.user?.id === authUser?.id ? previous : { ...previous, user: authUser }
         ));
+        if (authUser && !claimedGuestResultRef.current) {
+          claimedGuestResultRef.current = true;
+          void claimPendingGuestAssessment().catch((error) => console.warn('Unable to claim the guest result yet', error));
+        } else if (!authUser) {
+          claimedGuestResultRef.current = false;
+        }
       });
 
       const { data } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -187,7 +201,15 @@ const App: React.FC = () => {
         setState((previous) => (
           previous.user?.id === authUser?.id ? previous : { ...previous, user: authUser }
         ));
-        if (authUser) setIsAuthDialogOpen(false);
+        if (authUser) {
+          setIsAuthDialogOpen(false);
+          if (!claimedGuestResultRef.current) {
+            claimedGuestResultRef.current = true;
+            void claimPendingGuestAssessment().catch((error) => console.warn('Unable to claim the guest result yet', error));
+          }
+        } else {
+          claimedGuestResultRef.current = false;
+        }
       });
       unsubscribe = () => data.subscription.unsubscribe();
     } catch (error) {
@@ -294,7 +316,7 @@ const App: React.FC = () => {
         }
         navigateTo(v as AppView);
       }}
-      wide={['dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'content-hub', 'content-detail', 'mirror-trade', 'result-preview'].includes(view)}
+      wide={['dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'mirror-trade', 'result-preview', 'member-home'].includes(view)}
       isLanding={view === 'landing'}
       language={language}
       onToggleLanguage={toggleLanguage}
@@ -400,6 +422,9 @@ const App: React.FC = () => {
             }} 
             onGoToGallery={() => setView('role-gallery')}
             onGoToMirrorTrade={() => navigateTo('mirror-trade')}
+            onOpenContent={() => navigateTo('content-hub')}
+            onOpenMemberHome={() => navigateTo('member-home')}
+            onOpenCompatibility={() => navigateTo('compatibility')}
             onRetest={handleRetestDna}
             language={language}
           />
@@ -433,8 +458,11 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} />}
+      {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} onOpenCoach={() => navigateTo('coach-profile')} />}
+      {view === 'coach-profile' && <CoachProfile onStartTest={() => navigateTo('dna-test')} onBackToAbout={() => navigateTo('about-face')} />}
       {view === 'mirror-trade' && <MirrorTrade user={state.user} onLogin={handleLogin} />}
+      {view === 'member-home' && state.user && <MemberHome user={state.user} dna={state.dna} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onOpenRate={() => navigateTo('mirror-trade')} />}
+      {view === 'member-home' && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">登入後可以保存測驗結果、回看變化，並使用 RATE 鏡相診股。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">登入並保存結果</button></div>}
       {view === 'result-preview' && <ResultPreview selectedCode={previewResultCode} onSelectCode={openResultPreview} onBackToList={backToResultPreviewList} language={language} />}
       {view === 'content-hub' && (
         <ContentHub
@@ -471,7 +499,7 @@ const App: React.FC = () => {
         <Dashboard dna={state.dna} daily={selectedEntry.scores} history={state.history} staticReport={selectedEntry.report} user={state.user} onLoginRequest={handleLogin} language={language} onRetest={handleRetestDna} />
       )}
       
-      {view === 'role-gallery' && <RoleGallery dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} onOpenCompatibility={() => navigateTo('compatibility')} />}
+      {view === 'role-gallery' && <RoleGallery dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} onOpenCompatibility={() => navigateTo('compatibility')} onOpenMyFace={() => navigateTo('member-home')} />}
       {view === 'role-detail' && selectedRoleCode && FACE_MAP[selectedRoleCode] && <RoleDetail role={FACE_MAP[selectedRoleCode]} isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode} onBack={() => navigateTo('role-gallery')} />}
       {view === 'compatibility' && <CompatibilityWheel dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
     </ZenLayout>

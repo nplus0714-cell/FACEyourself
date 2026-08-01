@@ -7,6 +7,7 @@ import { FACE_MAP, getFaceCode } from '../constants';
 import { generateDynamicReport } from '../services/geminiService';
 import { ShareModal } from './ShareModal';
 import { RoleDetail } from './RoleDetail';
+import { BookOpen, RotateCcw, Share2 } from 'lucide-react';
 import { translations } from '../i18n';
 
 interface DashboardProps {
@@ -19,6 +20,9 @@ interface DashboardProps {
   onLoginRequest: () => void;
   onGoToGallery?: () => void;
   onGoToMirrorTrade?: () => void;
+  onOpenContent?: () => void;
+  onOpenMemberHome?: () => void;
+  onOpenCompatibility?: () => void;
   onRetest?: () => void;
   isSharedView?: boolean;
   language: Language;
@@ -29,7 +33,7 @@ const calcRatio = (v1: number, v2: number) => {
   return total === 0 ? 50 : Math.round((v1 / total) * 100);
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, onGoToGallery, onGoToMirrorTrade, onRetest, isSharedView, language }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenMemberHome, onOpenCompatibility, onRetest, isSharedView, language }) => {
   const code = getFaceCode(dna);
   const profile = FACE_MAP[code] || FACE_MAP['ARLC'];
   const [report, setReport] = useState<ReportContent | null>(staticReport || null);
@@ -100,8 +104,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
     <div className="space-y-12 pb-32 fade-in max-w-6xl mx-auto">
       
       {/* 操作按鈕區 */}
-      {!isSharedView && (
-        <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-6 mb-12 pt-8">
+      {false && !isSharedView && (
+        <div className="space-y-5 pt-8">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-6">
           <button 
             onClick={() => setIsShareModalOpen(true)}
             className="flex justify-center items-center gap-4 px-10 py-5 border border-[#2D2D2D] text-xs tracking-[0.5em] uppercase font-bold hover:bg-[#2D2D2D] hover:text-white transition-all shadow-md group active:scale-95"
@@ -117,6 +122,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             <i className="fa-solid fa-rotate-right text-[10px]"></i>
             <span>{t.common.retestDna}</span>
           </button>
+          </div>
+
+          <section className="grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] text-left md:grid-cols-2">
+            <button type="button" onClick={onGoToGallery} className="bg-white p-6 transition hover:bg-[#F7F4EF] md:p-7">
+              <p className="text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">YOUR RESULT</p>
+              <h2 className="mt-3 serif text-2xl text-[#2D2D2D]">查看我的人格輪廓</h2>
+              <p className="mt-3 text-sm leading-7 text-[#70665D]">從你的結果延伸閱讀完整的交易風格說明。</p>
+            </button>
+            <button type="button" onClick={onOpenContent} className="bg-white p-6 transition hover:bg-[#F7F4EF] md:p-7">
+              <p className="text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">WORRY-FREE BAR</p>
+              <h2 className="mt-3 serif text-2xl text-[#2D2D2D]">看交易解憂 Bar</h2>
+              <p className="mt-3 text-sm leading-7 text-[#70665D]">用影片與文章了解交易心態、人格與決策習慣。</p>
+            </button>
+            {user ? <button type="button" onClick={onOpenMemberHome} className="bg-[#F7F4EF] p-6 transition hover:bg-[#EEE9E1] md:p-7"><p className="text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">MY FACE</p><h2 className="mt-3 serif text-2xl text-[#2D2D2D]">結果已保存</h2><p className="mt-3 text-sm leading-7 text-[#70665D]">回到我的 FACE，日後可查看測驗變化與 RATE。</p></button> : <button type="button" onClick={onLoginRequest} className="bg-[#F7F4EF] p-6 transition hover:bg-[#EEE9E1] md:p-7"><p className="text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">SAVE MY FACE</p><h2 className="mt-3 serif text-2xl text-[#2D2D2D]">保存我的測驗結果</h2><p className="mt-3 text-sm leading-7 text-[#70665D]">登入後可記錄日後變化，並開啟 RATE 鏡相診股。</p></button>}
+            <a href="https://line.me/ti/p/@227bctxh" target="_blank" rel="noreferrer" className="bg-[#2D2D2D] p-6 text-white transition hover:bg-black md:p-7"><p className="text-[11px] font-bold tracking-[0.18em] text-white/55">FIRST CONVERSATION</p><h2 className="mt-3 serif text-2xl">覺得交易卡住？</h2><p className="mt-3 text-sm leading-7 text-white/75">可聊交易壓力、決策流程與 FACE／RATE 的使用方式。</p><p className="mt-3 text-xs leading-5 text-white/50">不提供個別股票買賣建議、進出場時點、目標價、持股比例或報酬預估。</p></a>
+          </section>
         </div>
       )}
 
@@ -212,7 +233,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
       </div>
 
           {/* Use the same editorial content and layout as the personality catalogue. */}
-          <RoleDetail role={profile} isUserType={false} onBack={() => undefined} compact />
+          <RoleDetail
+            role={profile}
+            isUserType={false}
+            onBack={() => undefined}
+            compact
+            onOpenCompatibility={onOpenCompatibility}
+            onOpenRate={onGoToMirrorTrade}
+            onOpenContent={onOpenContent}
+          />
+
+          {!isSharedView && (
+            <div className="mx-auto flex max-w-xl flex-wrap justify-center gap-3 border-t border-stone-200 pt-8">
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="inline-flex items-center gap-2 border border-stone-900 px-6 py-3 text-sm font-bold tracking-[0.08em] text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
+              >
+                <Share2 size={16} strokeWidth={1.7} aria-hidden="true" />
+                分享我的結果
+              </button>
+              <button
+                onClick={onRetest}
+                className="inline-flex items-center gap-2 border border-stone-300 px-6 py-3 text-sm font-bold tracking-[0.08em] text-stone-600 transition-colors hover:border-stone-900 hover:text-stone-900"
+              >
+                <RotateCcw size={16} strokeWidth={1.7} aria-hidden="true" />
+                重新測驗
+              </button>
+              {onGoToGallery && (
+                <button
+                  onClick={onGoToGallery}
+                  className="inline-flex items-center gap-2 border border-stone-300 px-6 py-3 text-sm font-bold tracking-[0.08em] text-stone-600 transition-colors hover:border-stone-900 hover:text-stone-900"
+                >
+                  <BookOpen size={16} strokeWidth={1.7} aria-hidden="true" />
+                  查看圖鑑
+                </button>
+              )}
+            </div>
+          )}
 
           {false && <>
           {/* 4. 人格全貌 (Portrait) */}
@@ -274,22 +331,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
 
           </>}
 
-          {!isSharedView && onGoToGallery && (
-            <div className="pt-16 md:pt-24 flex justify-center">
-              <button onClick={onGoToGallery} className="w-full max-w-md py-6 px-4 text-xs tracking-[0.5em] text-[#2D2D2D] font-black border border-[#2D2D2D] hover:bg-[#2D2D2D] hover:text-white transition-all uppercase shadow-md active:scale-95">
-                查看 16 型交易風格
-              </button>
-            </div>
-          )}
-
-          {!isSharedView && onGoToMirrorTrade && (
-            <section className="mx-auto mt-12 max-w-2xl border border-[#D1D1C7] bg-[#F7F4EF] px-6 py-12 text-center md:mt-16 md:px-12 md:py-16">
-              <p className="text-[11px] font-black tracking-[0.22em] text-[#8C635B]">NEXT STEP · RATE</p>
-              <h3 className="mt-5 serif text-2xl leading-[1.65] text-[#2D2D2D] md:text-3xl"><span className="block">認識自己用 FACE，</span><span className="block">檢驗持倉用 RATE。</span></h3>
-              <p className="mx-auto mt-5 max-w-lg text-base leading-8 text-[#5F574F]"><span className="block">用 RATE 鏡相診股，檢查真實持倉是否符合你的交易人格。</span><span className="mt-1 block">找出讓你焦慮、猶豫或抱不住的策略落差。</span></p>
-              <button onClick={onGoToMirrorTrade} className="mt-8 border border-[#2D2D2D] bg-[#2D2D2D] px-8 py-4 text-sm font-bold tracking-[0.12em] text-white transition hover:bg-transparent hover:text-[#2D2D2D]">前往 RATE 鏡相診股</button>
-            </section>
-          )}
       {/* 動態分析報告 (每日解憂) */}
       {daily && report && (
         <div className="bg-white border border-[#D1D1C7] rounded-sm shadow-2xl overflow-hidden animate-fade-in flex flex-col items-center mt-20 mb-32">

@@ -10,6 +10,7 @@ import {
   completeFaceAssessmentRun,
   startAssessmentRun,
 } from '../services/assessmentPersistence';
+import { getSupabaseClient } from '../lib/supabase';
 import type { AssessmentAnswer, FaceQuestion, FaceScores, FaceTrait } from '../types';
 
 type FaceResponse = AssessmentAnswer['selected_option'];
@@ -159,6 +160,10 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
     try {
       const runId = await getOrStartRun();
       await completeFaceAssessmentRun(runId, FACE_BASELINE_40_QUESTIONS, completedAnswers, scores, scoreValues);
+      const { data: { session } } = await getSupabaseClient().auth.getSession();
+      if (session?.user && !session.user.is_anonymous) {
+        localStorage.removeItem(LOCAL_PENDING_ASSESSMENT_KEY);
+      }
       onComplete(scores);
     } catch (error) {
       console.error('Failed to persist FACE 40q assessment', error);
