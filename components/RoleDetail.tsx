@@ -2,6 +2,12 @@ import React from 'react';
 import { CalendarCheck, RefreshCw, ShieldCheck } from 'lucide-react';
 import { PersonalityProfile } from '../types';
 import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
+import { FACE_MAP } from '../constants';
+
+const NAME_TO_CODE: Record<string, string> = Object.values(FACE_MAP).reduce((map, role) => {
+  map[role.name] = role.code;
+  return map;
+}, {} as Record<string, string>);
 
 interface RoleDetailProps {
   role: PersonalityProfile;
@@ -11,6 +17,7 @@ interface RoleDetailProps {
   onOpenCompatibility?: () => void;
   onOpenRate?: () => void;
   onOpenContent?: () => void;
+  onOpenRole?: (code: string) => void;
 }
 
 const toneFor = (code: string) => (code.startsWith('A') ? '#9A655C' : code.startsWith('P') ? '#667784' : '#7C856C');
@@ -46,10 +53,10 @@ const GentleLink: React.FC<{ eyebrow: string; description: string; link: string;
   </aside>
 );
 
-export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack, compact = false, onOpenCompatibility, onOpenRate, onOpenContent }) => {
+export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack, compact = false, onOpenCompatibility, onOpenRate, onOpenContent, onOpenRole }) => {
   const tone = toneFor(role.code);
   const editorial = PERSONALITY_EDITORIAL[role.code];
-  const decision = editorial?.decision ?? { title: role.psychology.mechanism, scene: role.psychology.scene };
+  const decision = editorial?.decision ?? { title: role.psychology.mechanism, scene: role.psychology.scene, desireTitle: '', desireScene: '' };
   const pressurePoints = editorial?.pressurePoints ?? role.blindSpots.map(({ title, description, behavior }) => ({ title, description, action: behavior }));
   const actions = editorial?.actions ?? role.exercises.map(({ title, technique, effect }) => ({ title, description: effect, steps: [technique] }));
   const pouches = editorial?.pouches ?? role.pouches;
@@ -80,11 +87,21 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
           <section className="border-y border-[#D1D1C7] py-7">
             <div className="grid gap-5 md:grid-cols-[10rem_1fr]">
               <p className="text-sm font-bold leading-[1.8] tracking-[0.12em]" style={{ color: tone }}>人格速寫</p>
-              <div>
-                {editorial.slangName && <p className="serif text-2xl leading-[1.6] text-[#2D2D2D] md:text-3xl">{editorial.slangName}</p>}
-                {editorial.statusLine && <p className="mt-2 text-base leading-[1.9] text-[#5F574F] md:text-lg">{editorial.statusLine}</p>}
+              <div className="space-y-6">
+                {editorial.slangName && (
+                  <div>
+                    <p className="text-xs font-bold tracking-[0.16em]" style={{ color: tone }}>別人眼中的你</p>
+                    <p className="mt-1.5 serif text-2xl leading-[1.6] text-[#2D2D2D] md:text-3xl">{editorial.slangName}</p>
+                  </div>
+                )}
+                {editorial.statusLine && (
+                  <div>
+                    <p className="text-xs font-bold tracking-[0.16em]" style={{ color: tone }}>你眼中的自己</p>
+                    <p className="mt-1.5 text-base leading-[1.9] text-[#5F574F] md:text-lg">{editorial.statusLine}</p>
+                  </div>
+                )}
                 {editorial.tags && (
-                  <ul className="mt-5 flex flex-wrap gap-2" aria-label="人格關鍵字">
+                  <ul className="flex flex-wrap gap-2" aria-label="人格關鍵字">
                     {editorial.tags.map((tag) => <li key={tag} className="border border-[#D1D1C7] bg-white px-3 py-1.5 text-xs tracking-[0.08em] text-[#70665D]">{tag}</li>)}
                   </ul>
                 )}
@@ -103,7 +120,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
                 <p className="text-xs font-bold tracking-[0.14em]" style={{ color: tone }}>傳奇大師</p>
                 <h2 className="mt-3 serif text-2xl leading-[1.6] text-[#2D2D2D]">{editorial.master.name}</h2>
                 <p className="mt-3 text-base leading-[1.9] text-[#5F574F]">{editorial.master.description}</p>
-                <p className="mt-5 border-t border-[#D1D1C7] pt-4 serif text-xl leading-[1.8] text-[#70665D]">「{editorial.master.quote}」</p>
+                <p className="mt-5 border-t border-[#D1D1C7] pt-4 serif text-xl leading-[1.8] text-[#70665D]">{editorial.master.quote}</p>
               </div>
             )}
           </div>
@@ -148,16 +165,6 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
           </div>
         </section>
 
-        {onOpenCompatibility && (
-          <GentleLink
-            eyebrow="交易互補輪盤"
-            description="每個風格都有容易忽略的一面。看看和你相近、卻能補上盲點的交易方式。"
-            link="打開完整交易互補輪盤"
-            onClick={onOpenCompatibility}
-            tone={tone}
-          />
-        )}
-
         <section className="grid gap-7 border-y border-[#D1D1C7] py-12 md:grid-cols-[10rem_1fr] md:py-14">
           <SectionLabel number="04" title={editorial?.actionsTitle ?? '解決方法：讓心靜下來'} tone={tone} />
           <div className="grid gap-5 md:grid-cols-2">
@@ -175,7 +182,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
 
         {editorial?.superpower && (
           <section className="grid gap-7 md:grid-cols-[10rem_1fr]">
-            <SectionLabel number="05" title="隱藏超能力" tone={tone} />
+            <SectionLabel number="05" title="隱藏能力" tone={tone} />
             <div>
               <h2 className="serif text-2xl leading-[1.7] text-[#2D2D2D] md:text-3xl">{editorial.superpower.title}</h2>
               <ReadableText text={editorial.superpower.description} className="mt-4 text-base leading-[2] text-[#5F574F] md:text-lg" />
@@ -201,7 +208,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
               {[
                 { label: '保命', text: pouches.safety, hint: '先替自己設一道保護線', Icon: ShieldCheck },
                 { label: '轉念', text: pouches.mindset, hint: '換個角度，讓情緒慢下來', Icon: RefreshCw },
-                { label: '小錦囊', text: pouches.behavior, hint: '今天就能做的小行動', Icon: CalendarCheck },
+                { label: '行動', text: pouches.behavior, hint: '今天就能做的小行動', Icon: CalendarCheck },
               ].map(({ label, text, hint, Icon }) => (
                 <div key={label} className="border-t border-[#D1D1C7] pt-4">
                   <Icon aria-hidden="true" className="mb-4" size={26} strokeWidth={1.4} style={{ color: tone }} />
@@ -232,29 +239,62 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
 
         {editorial?.relationships && (
           <section className="grid gap-7 md:grid-cols-[10rem_1fr]">
-            <SectionLabel number="08" title={editorial.relationshipsTitle ?? '關係圖譜'} tone={tone} />
+            <SectionLabel number="08" title={editorial.relationshipsTitle ?? '思維轉換與自我救贖'} tone={tone} />
             <div>
-              <div className="divide-y divide-[#D1D1C7] border-y border-[#D1D1C7]">
-                {editorial.relationships.map((relationship) => (
-                  <div key={relationship.label} className="grid gap-2 py-5 sm:grid-cols-[7rem_1fr]">
-                    <p className="text-sm font-bold" style={{ color: tone }}>{relationship.label}</p>
-                    <p className="text-base leading-[1.9] text-[#5F574F]">{relationship.text}</p>
-                  </div>
-                ))}
+              <div className="grid gap-4 sm:grid-cols-3">
+                {editorial.relationships.map((relationship) => {
+                  const neighbour = FACE_MAP[relationship.code];
+                  return (
+                    <button
+                      key={relationship.code}
+                      type="button"
+                      onClick={() => onOpenRole?.(relationship.code)}
+                      disabled={!onOpenRole}
+                      className="group flex flex-col items-center border border-[#D1D1C7] bg-white p-5 text-center transition enabled:hover:border-[#8C635B] enabled:hover:bg-[#F7F4EF] disabled:cursor-default"
+                    >
+                      <span className="text-xs font-bold tracking-[0.18em]" style={{ color: tone }}>{relationship.label}</span>
+                      <span className="mt-3 aspect-square w-full overflow-hidden bg-[#F4F0E9]">
+                        {neighbour && <img src={neighbour.sketchImageUrl} alt={relationship.name} className="h-full w-full object-contain mix-blend-multiply transition duration-500 group-hover:scale-105" />}
+                      </span>
+                      <span className="mt-3 text-xs tracking-[0.18em] text-[#8C7E6D]">{relationship.code}</span>
+                      <span className="serif text-lg leading-[1.5] text-[#2D2D2D] group-hover:text-[#8C635B]">{relationship.name}</span>
+                    </button>
+                  );
+                })}
               </div>
+              {onOpenCompatibility && (
+                <div className="mt-8 flex flex-col gap-4 border border-[#D1D1C7] bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-bold tracking-[0.16em]" style={{ color: tone }}>交易互補輪盤</p>
+                    <p className="mt-2 text-sm leading-[1.8] text-[#70665D]">從你的類型出發，查看相鄰人格與完全鏡像如何補上盲點。</p>
+                  </div>
+                  <button type="button" onClick={onOpenCompatibility} className="shrink-0 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] transition hover:text-[#8C635B]">開啟交易互補輪盤 →</button>
+                </div>
+              )}
               {editorial.transformationGuide && (
                 <div className="mt-8 border border-[#D1D1C7] bg-[#F7F4EF] p-6 md:p-8">
-                  <h3 className="serif text-2xl leading-[1.6] text-[#2D2D2D]">當你覺得卡卡的：往鄰居找解藥</h3>
+                  <h3 className="serif text-2xl leading-[1.6] text-[#2D2D2D]">當你感覺「不舒服」時，試著看看其他交易者</h3>
                   <p className="mt-3 text-base leading-[1.9] text-[#5F574F]">{editorial.transformationGuide.intro}</p>
-                  <div className="mt-6 divide-y divide-[#D1D1C7] border-y border-[#D1D1C7]">
-                    {editorial.transformationGuide.rows.map((row) => (
-                      <div key={`${row.feeling}-${row.target}`} className="grid gap-2 py-5 text-sm leading-[1.8] text-[#514942] md:grid-cols-[1.2fr_0.8fr_1fr_1.4fr] md:gap-5">
-                        <p><span className="font-bold md:hidden" style={{ color: tone }}>卡住時｜</span>{row.feeling}</p>
-                        <p><span className="font-bold md:hidden" style={{ color: tone }}>調整｜</span>{row.dimension}</p>
-                        <p className="font-bold text-[#2D2D2D]"><span className="md:hidden" style={{ color: tone }}>鄰居｜</span>{row.target}</p>
-                        <p><span className="font-bold md:hidden" style={{ color: tone }}>解藥｜</span>{row.advice}</p>
-                      </div>
-                    ))}
+                  <div className="mt-6 hidden grid-cols-[1.3fr_0.7fr_1.7fr] gap-5 border-b border-[#D1D1C7] pb-3 text-xs font-bold tracking-[0.12em] md:grid" style={{ color: tone }}>
+                    <span>當你感覺到</span><span>思維轉換</span><span>自我救贖</span>
+                  </div>
+                  <div className="divide-y divide-[#D1D1C7] border-b border-[#D1D1C7]">
+                    {editorial.transformationGuide.rows.map((row) => {
+                      const saviorCode = NAME_TO_CODE[row.saviorName];
+                      return (
+                        <div key={`${row.feeling}-${row.saviorName}`} className="grid gap-2 py-5 text-sm leading-[1.8] text-[#514942] md:grid-cols-[1.3fr_0.7fr_1.7fr] md:gap-5">
+                          <p><span className="font-bold md:hidden" style={{ color: tone }}>當你感覺到｜</span>{row.feeling}</p>
+                          <p style={{ color: tone }}><span className="font-bold text-[#514942] md:hidden">思維轉換｜</span>{row.shift}</p>
+                          <p>
+                            <span className="font-bold md:hidden" style={{ color: tone }}>自我救贖｜</span>
+                            {saviorCode && onOpenRole
+                              ? <button type="button" onClick={() => onOpenRole(saviorCode)} className="font-bold text-[#2D2D2D] underline decoration-[#8C635B]/50 underline-offset-2 transition hover:text-[#8C635B]">{row.saviorName}</button>
+                              : <span className="font-bold text-[#2D2D2D]">{row.saviorName}</span>}
+                            <span className="text-[#5F574F]">{row.saviorQuote}</span>
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

@@ -7,112 +7,154 @@ interface RoleGalleryProps {
   dna: FaceScores | null;
   onOpenRole: (role: PersonalityProfile) => void;
   onStartTest: () => void;
-  onOpenCompatibility: () => void;
   onOpenMyFace: () => void;
 }
 
-const FILTERS = [
-  { id: 'all', label: '全部 16 型', traits: [] },
-  { id: 'focus', label: '獲利動機', traits: ['A', 'P'] },
-  { id: 'analysis', label: '決策邏輯', traits: ['R', 'I'] },
-  { id: 'cycle', label: '交易週期', traits: ['L', 'T'] },
-  { id: 'exposure', label: '資金管理', traits: ['C', 'D'] },
+const roleTone = (code: string) => (code.startsWith('A') ? '#9A655C' : code.startsWith('P') ? '#667784' : '#7C856C');
+const TRAIT_CN: Record<string, string> = { A: '積極', P: '保守', R: '理性', I: '感性', L: '長期', T: '短期', C: '集中', D: '分散' };
+const traitSummary = (code: string) => code.split('').map((t) => TRAIT_CN[t]).join('／');
+
+const AXES = [
+  { en: 'Focus', label: '獲利動機', a: ['A', '積極', '進攻擴張'], b: ['P', '保守', '守護抗跌'] },
+  { en: 'Analysis', label: '決策邏輯', a: ['R', '理性', '數據回測'], b: ['I', '感性', '盤感直覺'] },
+  { en: 'Cycle', label: '交易週期', a: ['L', '長期', '複利時間'], b: ['T', '短期', '波段價差'] },
+  { en: 'Exposure', label: '資金管理', a: ['C', '集中', '重壓深度'], b: ['D', '分散', '配置平衡'] },
 ] as const;
 
-const roleTone = (code: string) => code.startsWith('F') ? '#9A655C' : code.startsWith('P') ? '#667784' : '#7C856C';
-const TRAIT_LABELS: Record<string, string> = {
-  A: '積極（A）',
-  P: '保守（P）',
-  R: '理性（R）',
-  I: '感性（I）',
-  L: '長期（L）',
-  T: '短期（T）',
-  C: '集中（C）',
-  D: '分散（D）',
-};
-const traitSummary = (code: string) => code.split('').map((trait) => TRAIT_LABELS[trait]).join('／');
-const resultDimensions = (scores: FaceScores) => {
-  const choose = (first: number, second: number, firstLabel: string, secondLabel: string) => {
-    const total = first + second;
-    const chooseFirst = first >= second;
-    return {
-      option: chooseFirst ? firstLabel : secondLabel,
-      percent: total === 0 ? 50 : Math.round(((chooseFirst ? first : second) / total) * 100),
-    };
-  };
+const CN_NUM = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六'];
 
-  return [
-    { label: '獲利動機', ...choose(scores.A, scores.P, '積極型(A)', '保守型(P)') },
-    { label: '決策邏輯', ...choose(scores.R, scores.I, '理性數據(R)', '感應直覺(I)') },
-    { label: '交易週期', ...choose(scores.L, scores.T, '長期投資(L)', '短期投機(T)') },
-    { label: '資金管理', ...choose(scores.C, scores.D, '集中型(C)', '分散型(D)') },
-  ];
-};
-
-export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onStartTest, onOpenCompatibility, onOpenMyFace }) => {
+export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onStartTest, onOpenMyFace }) => {
   const roles = useMemo(() => Object.values(FACE_MAP)
-    .map((role) => ({ ...role, motto: PERSONALITY_EDITORIAL[role.code]?.cardLine ?? role.motto }))
-    .sort((a, b) => a.code.localeCompare(b.code)), []);
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]['id']>('all');
+    .map((role) => ({
+      ...role,
+      slang: PERSONALITY_EDITORIAL[role.code]?.slangName ?? '',
+      cardLine: PERSONALITY_EDITORIAL[role.code]?.cardLine ?? role.motto,
+    })), []);
+
   const userCode = dna ? getFaceCode(dna) : null;
-  const userRole = userCode ? roles.find((role) => role.code === userCode) : null;
-  const userScoreSummary = dna ? resultDimensions(dna) : [];
-  const visibleRoles = filter === 'all' ? roles : roles.filter((role) => (FILTERS.find((item) => item.id === filter)?.traits ?? []).some((trait) => role.code.includes(trait)));
+  const userRole = userCode ? roles.find((r) => r.code === userCode) : null;
 
-  return <div className="mx-auto max-w-7xl pb-28 pt-2 fade-in md:pt-8">
-    <header className="grid overflow-hidden border border-[#D1D1C7] bg-[#F4F0E9] md:grid-cols-[1.1fr_0.9fr]">
-      <div className="p-8 md:p-14 lg:p-16">
-        <p className="text-xs font-bold tracking-[0.3em] text-[#8C635B]">FACE TYPE ATLAS</p>
-        <h1 className="mt-6 serif text-4xl leading-[1.55] text-[#2D2D2D] md:text-6xl">人格圖鑑</h1>
-        <p className="mt-7 max-w-xl text-base leading-[2.05] text-[#70665D] md:text-lg">交易沒有一種正確姿勢。從你看機會、做判斷、掌握節奏與配置風險的習慣，理解你比較適合怎麼走。</p>
-      </div>
-      <div className="relative min-h-60 overflow-hidden bg-[#2D2D2D] p-8 text-white md:p-14">
-        <span className="absolute -right-9 -top-12 serif text-[15rem] leading-none text-white/[0.06]">F</span>
-        <p className="relative text-xs font-bold tracking-[0.24em] text-white/50">HOW TO READ THE ATLAS</p>
-        <div className="relative mt-10 grid grid-cols-2 gap-x-8 gap-y-8">
-          {[['F', '獲利動機'], ['A', '決策邏輯'], ['C', '交易週期'], ['E', '資金管理']].map(([letter, label]) => <div key={letter} className="border-l border-white/25 pl-4"><p className="serif text-3xl">{letter}</p><p className="mt-1 text-sm text-white/70">{label}</p></div>)}
+  const [pattern, setPattern] = useState<(string | null)[]>([null, null, null, null]);
+  const activeFilter = pattern.some(Boolean);
+  const visibleRoles = roles.filter((r) => pattern.every((p, i) => !p || r.code[i] === p));
+  const soleMatchCode = activeFilter && visibleRoles.length === 1 ? visibleRoles[0].code : null;
+
+  const toggle = (axis: number, val: string) => setPattern((prev) => prev.map((p, i) => (i === axis ? (p === val ? null : val) : p)));
+  const reset = () => setPattern([null, null, null, null]);
+
+  return (
+    <div className="mx-auto max-w-7xl pb-28 fade-in">
+      {/* HERO */}
+      <header className="relative overflow-hidden border border-[#D1D1C7]">
+        <img
+          src="/images/homepage-trading-salon.png"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[center_35%] opacity-70"
+        />
+        <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#FBFAF7]/70 via-[#FBFAF7]/80 to-[#FBFAF7]" aria-hidden="true" />
+        <div className="relative px-6 py-20 text-center md:py-28">
+          <p className="text-xs font-bold tracking-[0.32em] text-[#8C635B]">FACE TYPE ATLAS</p>
+          <h1 className="mt-6 serif text-5xl leading-[1.15] text-[#2D2D2D] md:text-7xl">交易人格 16 型</h1>
+          <p className="mt-5 serif text-base tracking-[0.5em] text-[#8C7E6D] md:text-lg">F　A　C　E</p>
+          <p className="mx-auto mt-7 max-w-xl text-base leading-[2] text-[#5F574F] md:text-lg">
+            四個維度、十六種靈魂。從獲利動機、決策邏輯、交易週期到資金管理，找出屬於你的那頭獸——以及牠的天賦、盲點與自我救贖。
+          </p>
         </div>
-        <p className="relative mt-8 text-sm leading-[1.85] text-white/60">每一型都是四個字母的組合。點進任何一型，就能看見它在交易中的樣子。</p>
-      </div>
-    </header>
+      </header>
 
-    {userRole ? <section className="mt-8 grid overflow-hidden border border-[#8C635B]/40 bg-white md:grid-cols-[0.82fr_1.18fr]" aria-label="你的交易人格">
-      <div className="relative flex min-h-[22rem] flex-col overflow-hidden p-8 md:p-10" style={{ backgroundColor: `${roleTone(userRole.code)}18` }}>
-        <span className="absolute -left-2 -top-6 serif text-[9rem] leading-none" style={{ color: `${roleTone(userRole.code)}28` }}>{userRole.code}</span>
-        <p className="relative text-xs font-bold tracking-[0.22em] text-[#8C635B]">YOUR STYLE</p><img src={userRole.sketchImageUrl} alt={userRole.name} className="relative mx-auto mt-4 h-48 w-full object-contain" /><h2 className="relative mt-auto serif text-4xl text-[#2D2D2D]">{userRole.name}</h2>
-      </div>
-      <div className="p-8 md:p-10"><p className="text-lg leading-[2] text-[#514942]">{userRole.motto}</p><div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 border-y border-[#D1D1C7] py-6">{userScoreSummary.map(({ label, option, percent }) => <div key={label}><p className="text-xs font-bold tracking-[0.15em] text-[#8C7E6D]">{label}</p><p className="mt-2 flex items-baseline justify-between gap-2 text-sm text-[#2D2D2D]"><span>{option}</span><strong className="serif text-2xl font-normal">{percent}%</strong></p></div>)}</div><button type="button" onClick={onOpenMyFace} className="mt-7 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D]">閱讀你的完整說明 →</button></div>
-    </section> : <section className="relative mt-8 min-h-[14rem] overflow-hidden border border-[#D1D1C7] bg-[#F4F0E9]">
-      <img src="/images/homepage-trading-salon-lineart.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-65 mix-blend-multiply" />
-      <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#FBFAF7]/95 via-[#FBFAF7]/80 to-[#FBFAF7]/90" aria-hidden="true" />
-      <div className="relative z-10 flex min-h-[14rem] flex-col items-start justify-between gap-5 p-7 md:flex-row md:items-center md:p-9">
-        <div><p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">YOUR STYLE</p><p className="mt-3 text-base leading-[1.8] text-[#70665D]">完成測驗後，這裡會用一張專屬導讀卡帶你進入自己的類型。</p></div>
-        <button type="button" onClick={onStartTest} className="border border-[#2D2D2D] bg-[#FBFAF7]/80 px-5 py-3 text-sm font-bold text-[#2D2D2D] transition hover:bg-[#2D2D2D] hover:text-white">開始測驗 →</button>
-      </div>
-    </section>}
+      {/* FACE 四維 + 快速篩選 + 正式測驗 */}
+      <section className="mt-8 border border-[#D1D1C7] bg-[#F7F4EF] p-6 md:p-9" aria-labelledby="dimension-title">
+        <p className="text-xs font-bold tracking-[0.28em] text-[#8C635B]">FIND YOUR TYPE</p>
+        <h2 id="dimension-title" className="mt-3 max-w-4xl serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-5xl">四個維度，描繪交易人格輪廓</h2>
+        <p className="mt-4 text-base leading-[1.9] text-[#70665D]">在每個維度選擇較接近你的一側，快速查看對應的人格；若想獲得完整判讀，可以進行 40 題正式測驗。</p>
 
-    <section className="mt-14 md:mt-20">
-      <div data-testid="atlas-browse-hero" className="flex flex-col justify-between gap-5 border-b border-[#D1D1C7] pb-6 md:flex-row md:items-end">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="FACE 四個維度">
+          {AXES.map((ax, i) => (
+            <div key={ax.en} className="relative border border-[#D1D1C7] bg-white p-5">
+              <span className="absolute inset-y-0 left-0 w-1 bg-[#8C635B]/70" aria-hidden="true" />
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#8C635B]">{ax.en}</p>
+              <h3 className="mt-2 serif text-2xl text-[#2D2D2D]">{ax.label}</h3>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {[ax.a, ax.b].map(([letter, name, hint]) => {
+                  const on = pattern[i] === letter;
+                  return (
+                    <button
+                      key={letter}
+                      type="button"
+                      onClick={() => toggle(i, letter)}
+                      aria-pressed={on}
+                      title={hint}
+                      className={`border px-3 py-3 text-left transition ${on ? 'border-[#2D2D2D] bg-[#2D2D2D] text-white' : 'border-[#D1D1C7] bg-[#FBFAF7] text-[#70665D] hover:border-[#8C635B]'}`}
+                    >
+                      <span className="block text-xs font-bold tracking-[0.16em] opacity-70">{letter}</span>
+                      <span className="mt-1 block text-sm font-bold">{name}</span>
+                      <span className="mt-1 block text-[11px] leading-[1.5] opacity-60">{hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 grid gap-5 border-t border-[#D1D1C7] pt-6 md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">BROWSE THE ATLAS</p>
-            <h2 className="mt-3 serif text-3xl text-[#2D2D2D] md:text-4xl">找到你想了解的交易方式</h2>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#70665D]">
+              <span>
+                {!activeFilter
+                  ? '目前顯示全部 16 型'
+                  : visibleRoles.length === 1
+                    ? <>你選出的輪廓是 <b className="serif text-lg font-normal text-[#8C635B]">{visibleRoles[0].name}</b></>
+                    : <>目前符合 <b className="text-[#8C635B]">{CN_NUM[visibleRoles.length] ?? visibleRoles.length}</b> 型</>}
+              </span>
+              {activeFilter && <button type="button" onClick={reset} className="border-b border-current pb-0.5 transition hover:text-[#2D2D2D]">重設選擇</button>}
+            </div>
+            {userRole && <p className="mt-2 text-sm text-[#70665D]">你的正式測驗結果：<button type="button" onClick={onOpenMyFace} className="font-bold text-[#2D2D2D] underline decoration-[#8C635B]/50 underline-offset-4">{userRole.name} {userRole.code}</button></p>}
           </div>
-          <div className="flex flex-col items-start gap-3 md:items-end">
-            <p className="text-sm leading-[1.8] text-[#70665D]">點一型，閱讀它在不同市場情境下的反應。</p>
-            <button type="button" onClick={onOpenCompatibility} className="border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] transition hover:text-[#8C635B]">開啟交易互補輪盤 →</button>
-          </div>
-      </div>
-      <nav className="mt-6 flex gap-3 overflow-x-auto pb-2" aria-label="圖鑑篩選">{FILTERS.map((item) => <button key={item.id} type="button" onClick={() => setFilter(item.id)} className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-bold transition ${filter === item.id ? 'bg-[#2D2D2D] text-white' : 'border border-[#D1D1C7] bg-white text-[#70665D] hover:border-[#2D2D2D]'}`}>{item.label}</button>)}</nav>
-      <div className="mt-7 grid grid-cols-1 gap-0 border-l border-t border-[#D1D1C7] sm:grid-cols-2 lg:grid-cols-4">{visibleRoles.map((role) => { const own = userCode === role.code; const tone = roleTone(role.code); return <button key={role.code} type="button" onClick={() => onOpenRole(role)} className={`group relative aspect-square min-h-0 overflow-hidden border-b border-r border-[#D1D1C7] bg-white p-7 text-left transition duration-300 hover:bg-[#F7F4EF] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-inset ${own ? 'bg-[#F4F0E9]' : ''}`}>
-        <span className="pointer-events-none absolute inset-0 z-0 h-full w-full" aria-hidden="true">
-          <img src={role.sketchImageUrl} alt="" className="absolute inset-0 h-full w-full object-contain opacity-[0.38] transition duration-500 group-hover:opacity-[0.68] group-hover:contrast-125 group-focus:opacity-[0.68] group-focus:contrast-125" />
-        </span>
-        <span className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-white/80 via-white/10 to-white/85 transition duration-500 group-hover:from-white/55 group-hover:to-white/70 group-focus:from-white/55 group-focus:to-white/70" aria-hidden="true" />
-        <div className="relative z-10">
-        <p className="text-sm font-bold tracking-[0.16em]" style={{ color: tone }}>{role.code}</p><p className="mt-4 text-xs leading-6 tracking-[0.04em] text-[#8C7E6D]">{traitSummary(role.code)}</p>{own && <p className="mt-4 w-fit border px-2 py-1 text-[10px] font-bold" style={{ borderColor: `${tone}66`, color: tone }}>你的類型</p>}<h3 className={`${own ? 'mt-7' : 'mt-10'} serif text-[1.8rem] leading-[1.55] text-[#2D2D2D] group-hover:text-[#8C635B]`}>{role.name}</h3><p className="mt-8 text-sm text-[#8C7E6D] transition group-hover:text-[#2D2D2D]">查看人格輪廓 →</p>
+          <button type="button" onClick={onStartTest} className="w-full border border-[#2D2D2D] bg-white px-6 py-4 text-sm font-bold text-[#2D2D2D] transition hover:bg-[#2D2D2D] hover:text-white md:w-auto">{userRole ? '重新測驗' : '開始 40 題測驗'} →</button>
         </div>
-      </button>})}</div>
+      </section>
 
-    </section>
-  </div>;
+      {/* 十六型畫廊 */}
+      <section className="mt-10" aria-labelledby="sixteen-types-title">
+        <div className="border-b border-[#D1D1C7] pb-5">
+          <p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">THE SIXTEEN</p>
+          <h2 id="sixteen-types-title" className="mt-2 serif text-3xl text-[#2D2D2D] md:text-4xl">十六型人物誌</h2>
+        </div>
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {visibleRoles.map((role) => {
+          const own = userCode === role.code;
+          const sole = soleMatchCode === role.code;
+          const tone = roleTone(role.code);
+          return (
+            <button
+              key={role.code}
+              type="button"
+              onClick={() => onOpenRole(role)}
+              className={`group overflow-hidden border bg-white text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_34px_-20px_rgba(45,45,45,0.35)] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-2 ${sole ? 'border-[#8C635B] ring-2 ring-[#8C635B]/30' : own ? 'border-[#8C635B]' : 'border-[#D1D1C7] hover:border-[#8C635B]'}`}
+            >
+              <div className="relative aspect-[16/9] overflow-hidden bg-[#F4F0E9]">
+                <img src={role.landscapeImageUrl} alt={role.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
+                {own && <span className="absolute left-3 top-3 bg-[#8C635B] px-2 py-1 text-[10px] font-bold tracking-[0.1em] text-white">你的類型</span>}
+              </div>
+              <div className="border-t border-[#D1D1C7] px-5 py-4">
+                <p className="text-[11px] font-bold tracking-[0.28em]" style={{ color: tone }}>{role.code}</p>
+                <p className="mt-1.5 text-xs tracking-[0.04em] text-[#8C7E6D]">{traitSummary(role.code)}</p>
+                <h3 className="mt-3 serif text-2xl leading-[1.5] text-[#2D2D2D]">{role.name}</h3>
+                {role.slang && <p className="mt-2 border-t border-dashed border-[#D1D1C7] pt-3 text-sm leading-[1.7] text-[#70665D]">{role.slang}</p>}
+              </div>
+            </button>
+          );
+        })}
+        </div>
+      </section>
+
+      <section className="mt-14 overflow-hidden rounded-[0.7rem] bg-[#344A38] px-7 py-14 text-center text-[#F5F0E5] md:px-14 md:py-20">
+        <p className="text-xs font-bold tracking-[0.34em] text-[#E7DFCE]/75">FACE · TRADING PERSONA</p>
+        <h2 className="mt-7 serif text-4xl leading-[1.4] md:text-5xl">認識自己，是交易的第一課</h2>
+        <p className="mx-auto mt-6 max-w-3xl text-base leading-[2] text-[#E7DFCE]/85 md:text-lg">每一型都有天賦，也都有盲點。看懂你的獸，也看懂牠的鄰居——當你卡關時，答案往往就藏在隔壁那一型身上。</p>
+      </section>
+    </div>
+  );
 };

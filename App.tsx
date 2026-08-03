@@ -520,8 +520,8 @@ const App: React.FC = () => {
         <Dashboard dna={state.dna} daily={selectedEntry.scores} history={state.history} staticReport={selectedEntry.report} user={state.user} onLoginRequest={handleLogin} language={language} onRetest={handleRetestDna} />
       )}
       
-      {view === 'role-gallery' && <RoleGallery dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} onOpenCompatibility={() => navigateTo('compatibility')} onOpenMyFace={() => navigateTo('dashboard')} />}
-      {view === 'role-detail' && selectedRoleCode && FACE_MAP[selectedRoleCode] && <RoleDetail role={FACE_MAP[selectedRoleCode]} isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode} onBack={() => navigateTo('role-gallery')} />}
+      {view === 'role-gallery' && <RoleGallery dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} onOpenMyFace={() => navigateTo('dashboard')} />}
+      {view === 'role-detail' && selectedRoleCode && FACE_MAP[selectedRoleCode] && <RoleDetail role={FACE_MAP[selectedRoleCode]} isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode} onBack={() => navigateTo('role-gallery')} onOpenCompatibility={() => navigateTo('compatibility')} onOpenRole={(code) => { const next = FACE_MAP[code]; if (next) { openRole(next); window.scrollTo({ top: 0 }); } }} />}
       {view === 'compatibility' && <CompatibilityWheel dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
     </ZenLayout>
     {isAuthDialogOpen && <AuthDialog onClose={() => setIsAuthDialogOpen(false)} />}
