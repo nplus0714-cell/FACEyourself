@@ -321,7 +321,18 @@ const App: React.FC = () => {
       onToggleLanguage={toggleLanguage}
     >
       {view === 'landing' && <>
-        <div className="relative min-h-[62vh] md:min-h-[72vh] flex flex-col items-center justify-center fade-in px-0 sm:px-6">
+        <div className="relative isolate min-h-[62vh] overflow-hidden md:min-h-[72vh] flex flex-col items-center justify-center fade-in px-0 sm:px-6">
+          <img
+            src="/images/homepage-trading-salon-lineart.png"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center opacity-[0.58] mix-blend-multiply"
+          />
+          <span
+            className="pointer-events-none absolute inset-0 z-[1]"
+            style={{ background: 'radial-gradient(ellipse at center, rgba(251,250,247,0.94) 0%, rgba(251,250,247,0.82) 38%, rgba(251,250,247,0.48) 72%, rgba(251,250,247,0.28) 100%)' }}
+            aria-hidden="true"
+          />
           <ZenDnaChart />
           
           <div className="relative z-10 flex flex-col items-center space-y-7 md:space-y-10 max-w-4xl mx-auto w-full text-center">

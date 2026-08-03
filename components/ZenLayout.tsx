@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { AuthUser, Language } from '../types';
 import { translations } from '../i18n';
+import { FaceWordmark } from './FaceWordmark';
 
 interface ZenLayoutProps {
   children: React.ReactNode;
@@ -65,22 +66,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
               onClick={handleLogoClick}
               title="返回首頁"
             >
-               {/* ✅ LOGO 放大 */}
-               <svg viewBox="0 0 64 72" className="h-14 w-12 shrink-0 overflow-visible text-[#8C635B] transition-transform duration-300 group-hover:scale-105 sm:h-16 sm:w-14" aria-label="FACE mirror chalice mark">
-                 <ellipse cx="32" cy="11" rx="22" ry="4.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                 <path d="M10 11c.4 13.5 5.5 25.4 18 30.5v13.2c0 4.2-3.2 7-8.7 8.4M54 11c-.4 13.5-5.5 25.4-18 30.5v13.2c0 4.2 3.2 7 8.7 8.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
-                 <path d="M16 64h32" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
-                 <path d="M27.5 23c-2.8 1.8-4.2 4.4-4.2 7.4 0 2.2 1 3.8 2.7 5.1l-2.3 1.8 2.7 1.6c.7 2.1 2.1 3.5 4.3 4.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.35" />
-                 <path d="M36.5 23c2.8 1.8 4.2 4.4 4.2 7.4 0 2.2-1 3.8-2.7 5.1l2.3 1.8-2.7 1.6c-.7 2.1-2.1 3.5-4.3 4.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.35" />
-               </svg>
-               <div className="hidden">
-                  {/* ✅ 主標題與副標題字體同步放大 */}
-                  <h1 className={`text-xs sm:text-sm font-black tracking-[0.2em] sm:tracking-[0.3em] leading-none text-[#2D2D2D]`}>FACE</h1>
-                  <p className={`hidden sm:block text-[11px] tracking-[0.12em] mt-1.5 text-[#8C7E6D] font-medium`}>Trading style journal</p>
-               </div>
-               <div>
-                 <span className="serif block text-[1.9rem] leading-none tracking-[0.16em] text-[#2D2D2D] sm:text-[2.15rem]">FACE</span>
-               </div>
+               <FaceWordmark className="h-auto w-[8.25rem] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 sm:w-[9.75rem]" />
             </div>
 
             <div className="flex shrink-0 items-center gap-2 sm:gap-6">

@@ -157,6 +157,13 @@ export const CompatibilityWheel: React.FC<CompatibilityWheelProps> = ({ dna, onO
       </aside>
     </section>
 
-    {!measuredCode && <section className="mt-10 flex flex-col gap-5 border border-[#D1D1C7] bg-[#EEE8DF] p-7 md:flex-row md:items-center md:justify-between md:p-9"><div><p className="serif text-2xl text-[#2D2D2D]">想從自己的類型開始？</p><p className="mt-2 text-sm leading-[1.8] text-[#70665D]">完成測驗後，輪盤會自動以你的 FACE 結果為中心。</p></div><button type="button" onClick={onStartTest} className="shrink-0 bg-[#2D2D2D] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-black">開始測驗 →</button></section>}
+    {!measuredCode && <section className="relative mt-10 min-h-[15rem] overflow-hidden border border-[#D1D1C7] bg-[#EEE8DF]">
+      <img src="/images/homepage-trading-salon-lineart.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-65 mix-blend-multiply" />
+      <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#FBFAF7]/92 via-[#FBFAF7]/76 to-[#EEE8DF]/86" aria-hidden="true" />
+      <div className="relative z-10 flex min-h-[15rem] flex-col gap-5 p-7 md:flex-row md:items-center md:justify-between md:p-9">
+        <div><p className="serif text-2xl text-[#2D2D2D]">想從自己的類型開始？</p><p className="mt-2 text-sm leading-[1.8] text-[#70665D]">完成測驗後，輪盤會自動以你的 FACE 結果為中心。</p></div>
+        <button type="button" onClick={onStartTest} className="shrink-0 bg-[#2D2D2D] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-black">開始測驗 →</button>
+      </div>
+    </section>}
   </main>;
 };

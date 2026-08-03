@@ -20,6 +20,12 @@ export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade, onOpenC
         <p className="mt-7 max-w-xl text-base leading-[2] text-[#70665D] md:text-lg">FACE 是一套交易自我覺察工具。它不替你選標的，也不告訴你買賣答案；它幫你看見自己習慣怎麼面對機會、波動、決策與風險。</p>
       </div>
       <div className="relative min-h-72 overflow-hidden bg-[#2D2D2D] p-8 text-white md:p-14">
+        <img
+          src="/images/homepage-trading-salon.png"
+          alt="FACE 動物交易沙龍"
+          className="absolute inset-0 h-full w-full object-cover object-[58%_50%]"
+        />
+        <span className="absolute inset-0 bg-gradient-to-br from-[#252525]/90 via-[#252525]/68 to-[#252525]/38" aria-hidden="true" />
         <span className="absolute -right-6 -top-10 serif text-[14rem] leading-none text-white/[0.06]">F</span>
         <div className="relative flex h-full flex-col justify-between"><p className="text-xs font-bold tracking-[0.24em] text-white/50">TRADING SELF-AWARENESS</p><p className="max-w-sm serif text-3xl leading-[1.65] md:text-4xl">投資沒有標準答案，只有比較適合你的交易方式。</p></div>
       </div>

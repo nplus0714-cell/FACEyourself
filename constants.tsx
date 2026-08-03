@@ -125,11 +125,11 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
     "imageUrl": "/images/personalities/face-05-landscape.png",
     "sketchImageUrl": "/images/personalities/face-05-sketch.png",
     "landscapeImageUrl": "/images/personalities/face-05-landscape.png",
-    "portrait": "投資的是「未來」而非股票。對破壞式創新有宗教般的熱忱，能無視嘲笑與暴跌，用「鑽石手」死抱直到未來實現或歸零。",
+    "portrait": "投資的是「未來」而非股票。\n\n對破壞式創新有宗教般的熱忱，能無視嘲笑與暴跌，用「鑽石手」死抱直到未來實現或歸零。別人在崩盤群組裡發哭哭表情，你在發你剛讀完的第 47 篇技術白皮書。",
     "motto": "別人笑我太瘋癲，我笑他人看不穿；我買的不是代碼，而是人類的下一個紀元。",
     "psychology": {
       "mechanism": "信仰綁架與身分認同。將標的與價值觀綁定，只聽利多訊息，有著「孤獨先知感」。",
-      "scene": "最難受的是「漫長的死寂」。股價盤整多年而傳產股創新高時，會產生信仰無法變現的無力感。"
+      "scene": "最難受的是「漫長的死寂」。股價盤整多年而傳產股創新高時，會產生信仰無法變現的無力感。你渴望的不是財富，而是「在別人都看不懂的時候，我看懂了」的先知感；越渴望被證明是對的，就越害怕面對自己可能錯了的證據。"
     },
     "blindSpots": [
       { "title": "估值盲區", "description": "只看市場規模與成長率卻忽略價格，易在題材最熱、本益比最高時進場。", "behavior": "在歷史最高點 All in，導致需要消化長達十年的泡沫。" },

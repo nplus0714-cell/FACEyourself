@@ -89,19 +89,36 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
           <div>
             <h2 className="serif text-2xl leading-[1.7] text-[#2D2D2D] md:text-3xl">{decision.title}</h2>
             <ReadableText text={decision.scene} className="mt-3 text-base leading-[2] text-[#5F574F] md:text-lg" />
+            {decision.desireTitle && decision.desireScene && (
+              <div className="mt-8 border-t border-[#D1D1C7] pt-7">
+                <h3 className="text-xl font-bold leading-[1.7] text-[#2D2D2D] md:text-2xl">{decision.desireTitle}</h3>
+                <ReadableText text={decision.desireScene} className="mt-3 text-base leading-[2] text-[#5F574F] md:text-lg" />
+              </div>
+            )}
           </div>
         </section>
 
         <section className="grid gap-7 md:grid-cols-[10rem_1fr]">
           <SectionLabel number="03" title="投資盲區與危機" tone={tone} />
-          <div className="grid gap-5 sm:grid-cols-2">
-            {pressurePoints.map((point) => (
-              <div key={point.title} className={`border border-[#D1D1C7] bg-white p-7 ${pressurePoints.length === 1 ? 'sm:col-span-2' : ''}`}>
-                <h3 className="text-xl font-bold leading-[1.5] text-[#2D2D2D]">{point.title}</h3>
-                <ReadableText text={point.description} className="mt-3 text-base leading-[2] text-[#5F574F]" />
-                <ReadableText text={point.action} className="mt-5 border-t border-[#D1D1C7] pt-4 text-base font-bold leading-[1.9]" />
+          <div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              {pressurePoints.map((point) => (
+                <div key={point.title} className={`border border-[#D1D1C7] bg-white p-7 ${pressurePoints.length === 1 ? 'sm:col-span-2' : ''}`}>
+                  <h3 className="text-xl font-bold leading-[1.5] text-[#2D2D2D]">{point.title}</h3>
+                  <ReadableText text={point.description} className="mt-3 text-base leading-[2] text-[#5F574F]" />
+                  <ReadableText text={point.action} className="mt-5 border-t border-[#D1D1C7] pt-4 text-base font-bold leading-[1.9]" />
+                </div>
+              ))}
+            </div>
+            {editorial?.checklist && (
+              <div className="mt-6 border border-[#D1D1C7] bg-[#F7F4EF] p-7">
+                <h3 className="text-xl font-bold text-[#2D2D2D]">本週自我檢核</h3>
+                <p className="mt-3 text-base leading-[1.9] text-[#5F574F]">{editorial.checklist.intro}</p>
+                <ul className="mt-5 space-y-3 text-base leading-[1.8] text-[#514942]">
+                  {editorial.checklist.items.map((item) => <li key={item} className="flex gap-3"><span className="mt-1.5 h-3.5 w-3.5 shrink-0 border" style={{ borderColor: tone }} aria-hidden="true" /><span>{item}</span></li>)}
+                </ul>
               </div>
-            ))}
+            )}
           </div>
         </section>
 
@@ -130,6 +147,16 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
           </div>
         </section>
 
+        {editorial?.superpower && (
+          <section className="grid gap-7 md:grid-cols-[10rem_1fr]">
+            <SectionLabel number="05" title="隱藏超能力" tone={tone} />
+            <div>
+              <h2 className="serif text-2xl leading-[1.7] text-[#2D2D2D] md:text-3xl">{editorial.superpower.title}</h2>
+              <ReadableText text={editorial.superpower.description} className="mt-4 text-base leading-[2] text-[#5F574F] md:text-lg" />
+            </div>
+          </section>
+        )}
+
         {onOpenRate && (
           <GentleLink
             eyebrow="RATE 鏡相診股"
@@ -141,7 +168,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
         )}
 
         <section className="grid gap-7 border border-[#D1D1C7] bg-white p-7 md:grid-cols-[10rem_1fr] md:p-10">
-          <SectionLabel number="05" title="解酒錠" tone={tone} />
+          <SectionLabel number={editorial?.superpower ? "06" : "05"} title="解酒錠" tone={tone} />
           <div>
             <h2 className="serif text-2xl leading-[1.5] text-[#2D2D2D] md:text-3xl">給你的三個錦囊</h2>
             <div className="mt-7 grid gap-6 md:grid-cols-3">
@@ -160,6 +187,36 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
             </div>
           </div>
         </section>
+
+        {editorial?.future && (
+          <section className="grid gap-7 border-y border-[#D1D1C7] py-12 md:grid-cols-[10rem_1fr] md:py-14">
+            <SectionLabel number="07" title="三個月後的你" tone={tone} />
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="border border-[#D1D1C7] bg-white p-7">
+                <h3 className="text-lg font-bold" style={{ color: tone }}>劇本 A｜沒有修正</h3>
+                <ReadableText text={editorial.future.withoutChange} className="mt-4 text-base leading-[2] text-[#5F574F]" />
+              </div>
+              <div className="border border-[#D1D1C7] bg-[#F7F4EF] p-7">
+                <h3 className="text-lg font-bold" style={{ color: tone }}>劇本 B｜開始修正</h3>
+                <ReadableText text={editorial.future.withChange} className="mt-4 text-base leading-[2] text-[#5F574F]" />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {editorial?.relationships && (
+          <section className="grid gap-7 md:grid-cols-[10rem_1fr]">
+            <SectionLabel number="08" title="關係圖譜" tone={tone} />
+            <div className="divide-y divide-[#D1D1C7] border-y border-[#D1D1C7]">
+              {editorial.relationships.map((relationship) => (
+                <div key={relationship.label} className="grid gap-2 py-5 sm:grid-cols-[7rem_1fr]">
+                  <p className="text-sm font-bold" style={{ color: tone }}>{relationship.label}</p>
+                  <p className="text-base leading-[1.9] text-[#5F574F]">{relationship.text}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {onOpenContent && (
           <GentleLink
