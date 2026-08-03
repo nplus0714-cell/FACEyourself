@@ -16,6 +16,7 @@ export const MirrorTradeDemo: React.FC = () => {
   const [totalCapital, setTotalCapital] = useState(5000000);
   const [compareTarget, setCompareTarget] = useState('market'); 
   const [enabledIds, setEnabledIds] = useState<string[]>([]);
+  const [isDemoPortfolio, setIsDemoPortfolio] = useState(false);
   
   // 推薦彈窗狀態
   const [recModalData, setRecModalData] = useState<any>(null);
@@ -110,6 +111,30 @@ export const MirrorTradeDemo: React.FC = () => {
 
   const [stocksState, setStocksState] = useState<any[]>([]);
 
+  const loadDemoPortfolio = () => {
+    // Educational sample only: the user's own portfolio remains empty by default.
+    const demoWeights: Record<string, number> = {
+      '2330': 35,
+      '3017': 20,
+      '2303': 15,
+      '2317': 15,
+      '2324': 15,
+    };
+    const demoStocks = stockDatabase
+      .filter((stock) => demoWeights[stock.id] !== undefined)
+      .map((stock) => ({
+        ...stock,
+        targetWeight: demoWeights[stock.id],
+        manualPrice: undefined,
+        shares: undefined,
+      }));
+
+    setStocksState(demoStocks);
+    setEnabledIds(demoStocks.map((stock) => stock.id));
+    setIsDemoPortfolio(true);
+    setActiveTab('risk');
+  };
+
   const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -196,6 +221,7 @@ export const MirrorTradeDemo: React.FC = () => {
 
         setStocksState(newStocks);
         setEnabledIds(newStocks.map(s => s.id));
+        setIsDemoPortfolio(false);
         setImportModalOpen(false);
       } else {
         alert('無法解析出股票資訊，請確認 CSV 內容。');
@@ -721,6 +747,14 @@ ${getIndicatorAnalysis('產業強弱', totalScores['產業強弱'], portfolioAvg
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={loadDemoPortfolio}
+              className="flex items-center gap-2 border border-[#8C635B] bg-[#F7F4EF] px-4 py-2 text-xs font-bold tracking-[0.08em] text-[#6E4A43] transition-all hover:bg-[#8C635B] hover:text-white"
+            >
+              <Sparkles size={14} />
+              載入示範分析
+            </button>
             <button 
               onClick={() => setImportModalOpen(true)}
               className="flex items-center gap-2 border border-[#2D2D2D] bg-white px-4 py-2 text-xs font-bold tracking-[0.08em] text-[#2D2D2D] transition-all hover:bg-[#2D2D2D] hover:text-white"
@@ -734,6 +768,13 @@ ${getIndicatorAnalysis('產業強弱', totalScores['產業強弱'], portfolioAvg
             </div>
           </div>
         </div>
+
+        {isDemoPortfolio && (
+          <div className="flex flex-col gap-2 border border-[#D8C9C2] bg-[#F7F4EF] px-5 py-4 text-sm leading-7 text-[#5F574F] sm:flex-row sm:items-center sm:justify-between">
+            <p><strong className="font-bold text-[#6E4A43]">示範資料</strong>　這組五檔持股與權重僅用來說明 RATE 的分析方式，不代表推薦標的、買賣建議或資產配置建議。</p>
+            <button type="button" onClick={() => { setStocksState([]); setEnabledIds([]); setIsDemoPortfolio(false); }} className="shrink-0 text-left text-xs font-bold tracking-[0.08em] text-[#6E4A43] underline underline-offset-4">清空示範</button>
+          </div>
+        )}
 
         {stocksState.length === 0 ? (
           <section className="border border-[#D1D1C7] bg-[#F7F4EF] px-6 py-14 md:px-12 md:py-20">
@@ -780,7 +821,11 @@ ${getIndicatorAnalysis('產業強弱', totalScores['產業強弱'], portfolioAvg
               <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">尚未輸入持股</p>
               <h3 className="mt-4 serif text-2xl leading-[1.6] text-[#2D2D2D]">先放進你的持股，<br className="hidden sm:block" />再看投資方式是否真的像你。</h3>
               <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#5F574F]">可直接匯入 CSV 持股清單。資料目前只用於這次瀏覽器中的試算，不會自動公開或分享。</p>
-              <button type="button" onClick={() => setImportModalOpen(true)} className="mt-8 bg-[#2D2D2D] px-7 py-4 text-sm font-bold tracking-[0.1em] text-white transition hover:bg-black">開始 RATE 持倉檢驗</button>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                <button type="button" onClick={loadDemoPortfolio} className="border border-[#8C635B] bg-[#F7F4EF] px-7 py-4 text-sm font-bold tracking-[0.1em] text-[#6E4A43] transition hover:bg-[#8C635B] hover:text-white">先看示範分析</button>
+                <button type="button" onClick={() => setImportModalOpen(true)} className="bg-[#2D2D2D] px-7 py-4 text-sm font-bold tracking-[0.1em] text-white transition hover:bg-black">開始 RATE 持倉檢驗</button>
+              </div>
+              <p className="mt-4 text-xs leading-6 text-[#8C7E6D]">示範配置含五檔假設持股，權重合計 100%；可隨時清空後再輸入自己的持股。</p>
             </div>
           </section>
         ) : activeTab === 'risk' ? (

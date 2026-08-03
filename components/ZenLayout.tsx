@@ -43,7 +43,8 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
 
   const closeUserMenuLater = () => {
     if (menuCloseTimer.current) clearTimeout(menuCloseTimer.current);
-    menuCloseTimer.current = setTimeout(() => setIsMenuOpen(false), 350);
+    // Leave enough time for the pointer to travel from the avatar to the menu.
+    menuCloseTimer.current = setTimeout(() => setIsMenuOpen(false), 700);
   };
 
   const handleLogoClick = () => {
@@ -58,18 +59,27 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
         
         {/* Header - 質感深度優化 */}
         <header className={`${isAssessmentView ? 'mb-5 md:mb-8' : 'mb-10 md:mb-16'} text-center relative`}>
-          <div className="flex justify-between items-center gap-3 mb-6 md:mb-8">
+          <div className="flex justify-between items-center gap-3 mb-7 md:mb-9">
             <div 
-              className="flex items-center gap-4 cursor-pointer group" 
+              className="flex items-center gap-3 cursor-pointer group"
               onClick={handleLogoClick}
               title="返回首頁"
             >
                {/* ✅ LOGO 放大 */}
-               <div className={`w-10 h-10 border border-[#2D2D2D] flex items-center justify-center font-bold text-sm transition-all group-hover:bg-[#2D2D2D] group-hover:text-white`}>F</div>
-               <div className="text-left">
+               <svg viewBox="0 0 64 72" className="h-14 w-12 shrink-0 overflow-visible text-[#8C635B] transition-transform duration-300 group-hover:scale-105 sm:h-16 sm:w-14" aria-label="FACE mirror chalice mark">
+                 <ellipse cx="32" cy="11" rx="22" ry="4.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                 <path d="M10 11c.4 13.5 5.5 25.4 18 30.5v13.2c0 4.2-3.2 7-8.7 8.4M54 11c-.4 13.5-5.5 25.4-18 30.5v13.2c0 4.2 3.2 7 8.7 8.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+                 <path d="M16 64h32" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+                 <path d="M27.5 23c-2.8 1.8-4.2 4.4-4.2 7.4 0 2.2 1 3.8 2.7 5.1l-2.3 1.8 2.7 1.6c.7 2.1 2.1 3.5 4.3 4.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.35" />
+                 <path d="M36.5 23c2.8 1.8 4.2 4.4 4.2 7.4 0 2.2-1 3.8-2.7 5.1l2.3 1.8-2.7 1.6c-.7 2.1-2.1 3.5-4.3 4.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.35" />
+               </svg>
+               <div className="hidden">
                   {/* ✅ 主標題與副標題字體同步放大 */}
                   <h1 className={`text-xs sm:text-sm font-black tracking-[0.2em] sm:tracking-[0.3em] leading-none text-[#2D2D2D]`}>FACE</h1>
                   <p className={`hidden sm:block text-[11px] tracking-[0.12em] mt-1.5 text-[#8C7E6D] font-medium`}>Trading style journal</p>
+               </div>
+               <div>
+                 <span className="serif block text-[1.9rem] leading-none tracking-[0.16em] text-[#2D2D2D] sm:text-[2.15rem]">FACE</span>
                </div>
             </div>
 
@@ -136,7 +146,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
 
           {/* Nav */}
           {showNav && !isAssessmentView && onViewChange && (
-            <nav className="mb-8 md:mb-10 flex flex-wrap justify-center gap-x-5 gap-y-4 border-b border-[#D1D1C7]/60 pb-5 text-sm font-medium tracking-[0.06em] sm:gap-x-8 md:gap-x-12 md:pb-8 md:text-[15px]">
+            <nav className="mb-8 md:mb-10 flex flex-wrap justify-center gap-x-5 gap-y-4 border-b border-[#D1D1C7]/60 pb-5 text-[15px] font-medium leading-6 tracking-[0.06em] sm:gap-x-8 md:gap-x-12 md:pb-8 md:text-base">
                 <button 
                   onClick={() => onViewChange('dna-test')} 
                   className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'dna-test' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}

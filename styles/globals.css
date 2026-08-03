@@ -1,11 +1,48 @@
+:root {
+  --face-ink: #2D2D2D;
+  --face-muted: #70665D;
+  --face-accent: #8C635B;
+  --face-line: #D1D1C7;
+  --face-paper: #FBFAF7;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
+  margin: 0;
+  background: var(--face-paper);
+  color: var(--face-ink);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   font-size: 16px;
-  line-height: 1.65;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.serif {
+  font-family: "Noto Serif TC", "PingFang TC", serif;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--face-accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #E9DDD7;
+  color: var(--face-ink);
 }
 
 /* MirrorTrade follows the same visual system as FACE rather than the imported demo UI. */

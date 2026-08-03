@@ -128,7 +128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             <button type="button" onClick={onGoToGallery} className="bg-white p-6 transition hover:bg-[#F7F4EF] md:p-7">
               <p className="text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">YOUR RESULT</p>
               <h2 className="mt-3 serif text-2xl text-[#2D2D2D]">查看我的人格輪廓</h2>
-              <p className="mt-3 text-sm leading-7 text-[#70665D]">從你的結果延伸閱讀完整的交易風格說明。</p>
+              <p className="mt-3 text-sm leading-7 text-[#70665D]">從你的結果延伸閱讀完整的交易人格說明。</p>
             </button>
             <button type="button" onClick={onOpenContent} className="bg-white p-6 transition hover:bg-[#F7F4EF] md:p-7">
               <p className="text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">WORRY-FREE BAR</p>
@@ -250,7 +250,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
                 className="inline-flex items-center gap-2 border border-stone-900 px-6 py-3 text-sm font-bold tracking-[0.08em] text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
               >
                 <Share2 size={16} strokeWidth={1.7} aria-hidden="true" />
-                分享我的結果
+                分享結果
               </button>
               <button
                 onClick={onRetest}

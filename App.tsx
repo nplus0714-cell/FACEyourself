@@ -17,6 +17,7 @@ import { MirrorTrade } from './components/MirrorTrade';
 import { ResultPreview } from './components/ResultPreview';
 import { AuthDialog } from './components/AuthDialog';
 import { MemberHome } from './components/MemberHome';
+import { LastAssessmentCard } from './components/LastAssessmentCard';
 import { CONTENT_CATALOG, ContentItem } from './data/contentCatalog';
 import { DAILY_QUESTIONS, FACE_MAP, getFaceCode } from './constants';
 import { FaceScores, UserState, DiaryEntry, Language, PersonalityProfile } from './types';
@@ -167,8 +168,6 @@ const App: React.FC = () => {
       try {
         const parsed = JSON.parse(saved);
         setState(parsed);
-        // 如果有 DNA，且當前是 landing 則自動進 Dashboard
-        if (parsed.dna && window.location.pathname === '/' && !dnaShare) setView('dashboard');
       } catch (e) { console.error(e); }
     }
   }, []);
@@ -363,6 +362,17 @@ const App: React.FC = () => {
                   </button>
                 </div>
               )}
+              <div className="mt-4">
+                <LastAssessmentCard
+                  user={state.user}
+                  localScores={state.dna}
+                  localCompletedAt={state.history.find((entry) => entry.isBaseline)?.date}
+                  onViewResult={(scores) => {
+                    setState((previous) => ({ ...previous, dna: scores, tempDaily: null }));
+                    navigateTo('dashboard');
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -434,7 +444,7 @@ const App: React.FC = () => {
       {view === 'shared-dashboard' && sharedDna && (
         <div className="space-y-8 flex flex-col items-center">
           <div className="text-center space-y-2 py-8">
-            <h2 className="text-2xl md:text-3xl serif text-[#2D2D2D]">{language === 'zh' ? '交易風格分享' : 'Trading Style Shared'}</h2>
+            <h2 className="text-2xl md:text-3xl serif text-[#2D2D2D]">{language === 'zh' ? '交易人格分享' : 'Trading Personality Shared'}</h2>
             <p className="text-[#8C7E6D] text-[10px] tracking-[0.2em] font-bold uppercase">Shared Trading Style</p>
           </div>
           <Dashboard 
@@ -499,7 +509,7 @@ const App: React.FC = () => {
         <Dashboard dna={state.dna} daily={selectedEntry.scores} history={state.history} staticReport={selectedEntry.report} user={state.user} onLoginRequest={handleLogin} language={language} onRetest={handleRetestDna} />
       )}
       
-      {view === 'role-gallery' && <RoleGallery dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} onOpenCompatibility={() => navigateTo('compatibility')} onOpenMyFace={() => navigateTo('member-home')} />}
+      {view === 'role-gallery' && <RoleGallery dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} onOpenCompatibility={() => navigateTo('compatibility')} onOpenMyFace={() => navigateTo('dashboard')} />}
       {view === 'role-detail' && selectedRoleCode && FACE_MAP[selectedRoleCode] && <RoleDetail role={FACE_MAP[selectedRoleCode]} isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode} onBack={() => navigateTo('role-gallery')} />}
       {view === 'compatibility' && <CompatibilityWheel dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
     </ZenLayout>

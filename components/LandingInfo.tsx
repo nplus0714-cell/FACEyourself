@@ -19,14 +19,14 @@ export const LandingInfo: React.FC<LandingInfoProps> = ({ onStartTest, onExplore
     <div className="grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] md:grid-cols-3">
       <button type="button" onClick={onStartTest} className="group min-h-64 bg-[#F7F4EF] p-8 text-left transition hover:bg-white md:p-10">
         <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">01 · TEST</p>
-        <h3 className="mt-12 serif text-3xl text-[#2D2D2D]">交易風格測驗</h3>
+        <h3 className="mt-12 serif text-3xl text-[#2D2D2D]">交易人格測驗</h3>
         <p className="mt-5 text-base leading-[1.9] text-[#70665D]">用 40 題，整理你在真實交易情境裡的第一反應。</p>
         <p className="mt-8 text-sm font-bold text-[#2D2D2D] group-hover:text-[#8C635B]">開始探索 →</p>
       </button>
       <button type="button" onClick={onExploreTypes} className="group min-h-64 bg-white p-8 text-left transition hover:bg-[#F7F4EF] md:p-10">
         <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">02 · TYPES</p>
-        <h3 className="mt-12 serif text-3xl text-[#2D2D2D]">16 型交易風格</h3>
-        <p className="mt-5 text-base leading-[1.9] text-[#70665D]">先看看不同交易風格的優勢、盲點與壓力反應。</p>
+        <h3 className="mt-12 serif text-3xl text-[#2D2D2D]">人格圖鑑</h3>
+        <p className="mt-5 text-base leading-[1.9] text-[#70665D]">先看看不同交易人格的優勢、盲點與壓力反應。</p>
         <p className="mt-8 text-sm font-bold text-[#2D2D2D] group-hover:text-[#8C635B]">瀏覽 16 型 →</p>
       </button>
       <button type="button" onClick={onOpenContent} className="group min-h-64 bg-[#F7F4EF] p-8 text-left transition hover:bg-white md:p-10">

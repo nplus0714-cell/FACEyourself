@@ -5,7 +5,7 @@ export const translations: Record<Language, any> = {
   zh: {
     nav: {
       overview: '我的結果',
-      gallery: '16 型交易風格',
+      gallery: '人格圖鑑',
       about: '關於 FACE',
       bar: '解憂 Bar',
       watch: '內容中心'
@@ -27,7 +27,7 @@ export const translations: Record<Language, any> = {
       retest: '重新測驗',
       retestDna: '重新做 40 題測驗',
       back: '返回',
-      share: '分享我的結果',
+      share: '分享結果',
       archive: '儲存今日回顧',
       loadingQuestions: '正在整理今日市場資訊...',
       zenMotto: '完成後，看看今天的市場讓你的想法偏向哪一邊。',
@@ -38,7 +38,7 @@ export const translations: Record<Language, any> = {
       title: '你的四個交易面向',
       baseEnergy: '原始結果',
       todayStatus: '今日狀態',
-      portrait: '你的交易風格',
+      portrait: '你的交易人格',
       psychology: '你的決策習慣',
       blindSpots: '可能的盲點',
       kit: '實用提醒',

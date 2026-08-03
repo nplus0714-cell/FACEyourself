@@ -41,14 +41,14 @@ export const MemberHome: React.FC<MemberHomeProps> = ({ user, dna, onViewResult,
       </div>
       <div className="border border-[#D1D1C7] bg-[#F7F4EF] p-6 md:p-7">
         <p className="text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">LATEST RESULT</p>
-        {currentCode ? <><p className="mt-3 serif text-3xl text-[#2D2D2D]">{currentCode}</p><p className="mt-3 text-sm leading-6 text-[#70665D]">最近一次完成的 FACE 交易風格。</p></> : <p className="mt-3 text-sm leading-7 text-[#70665D]">完成測驗後，結果會顯示在這裡。</p>}
+        {currentCode ? <><p className="mt-3 serif text-3xl text-[#2D2D2D]">{currentCode}</p><p className="mt-3 text-sm leading-6 text-[#70665D]">最近一次完成的 FACE 交易人格測驗。</p></> : <p className="mt-3 text-sm leading-7 text-[#70665D]">完成測驗後，結果會顯示在這裡。</p>}
       </div>
     </div>
 
     <div className="mt-8 grid gap-5 md:grid-cols-3">
       <article className="border border-[#D1D1C7] bg-white p-7"><p className="text-[11px] font-bold tracking-[0.2em] text-[#8C635B]">01 · FACE</p><h2 className="mt-5 serif text-2xl text-[#2D2D2D]">查看目前結果</h2><p className="mt-4 text-sm leading-7 text-[#70665D]">回到你的結果頁，重看人格輪廓、分數與行動建議。</p><button type="button" onClick={currentCode ? onViewResult : onStartTest} className="mt-7 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D]">{currentCode ? '查看我的結果 →' : '開始第一次測驗 →'}</button></article>
       <article className="border border-[#D1D1C7] bg-white p-7"><p className="text-[11px] font-bold tracking-[0.2em] text-[#8C635B]">02 · HISTORY</p><h2 className="mt-5 serif text-2xl text-[#2D2D2D]">測驗記錄</h2><div className="mt-4 min-h-14 text-sm leading-7 text-[#70665D]">{isLoading ? '正在讀取你的記錄…' : loadError ? '暫時無法讀取記錄，請稍後再試。' : displayedRecords.length ? displayedRecords.map((record) => <p key={record.id}>{formatDate(record.completedAt)} · {record.code}</p>) : '尚未有已保存的測驗記錄。'}</div><button type="button" onClick={onStartTest} className="mt-7 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D]">重新測驗並記錄 →</button></article>
-      <article className="border border-[#2D2D2D] bg-[#2D2D2D] p-7 text-white"><p className="text-[11px] font-bold tracking-[0.2em] text-white/55">03 · RATE</p><h2 className="mt-5 serif text-2xl">RATE 鏡相診股</h2><p className="mt-4 text-sm leading-7 text-white/75">輸入自選股，整理你的持股結構是否符合 FACE 交易風格。</p><button type="button" onClick={onOpenRate} className="mt-7 border-b border-white/70 pb-1 text-sm font-bold">開啟 RATE 鏡相診股 →</button></article>
+      <article className="border border-[#2D2D2D] bg-[#2D2D2D] p-7 text-white"><p className="text-[11px] font-bold tracking-[0.2em] text-white/55">03 · RATE</p><h2 className="mt-5 serif text-2xl">RATE 鏡相診股</h2><p className="mt-4 text-sm leading-7 text-white/75">輸入自選股，整理你的持股結構是否符合 FACE 交易人格。</p><button type="button" onClick={onOpenRate} className="mt-7 border-b border-white/70 pb-1 text-sm font-bold">開啟 RATE 鏡相診股 →</button></article>
     </div>
   </section>;
 };

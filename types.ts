@@ -79,7 +79,10 @@ export interface PersonalityProfile {
   code: string;
   name: string;
   attributes: string;
+  /** Legacy/default artwork. Keep this pointed at the full-colour landscape asset. */
   imageUrl: string;
+  sketchImageUrl: string;
+  landscapeImageUrl: string;
   portrait: string; // PDF 中的角色描述
   motto: string;    // PDF 中的座右銘
   psychology: {

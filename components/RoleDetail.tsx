@@ -63,12 +63,12 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
 
       {!compact && <header className="mt-7 grid overflow-hidden border border-[#D1D1C7] bg-white md:mt-10 md:grid-cols-2">
         <div className="relative min-h-[22rem] overflow-hidden" style={{ backgroundColor: `${tone}16` }}>
-          <img src={role.imageUrl} alt={role.name} className="absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply" />
+          <img src={role.landscapeImageUrl} alt={role.name} className="absolute inset-0 h-full w-full object-contain object-center mix-blend-multiply" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         </div>
         <div className="flex flex-col justify-center p-8 md:p-12">
           <p className="text-sm font-bold tracking-[0.18em]" style={{ color: tone }}>FACE TYPE PROFILE</p>
-          {isUserType && <p className="mt-5 w-fit px-3 py-1.5 text-sm font-bold text-white" style={{ backgroundColor: tone }}>你的交易風格</p>}
+          {isUserType && <p className="mt-5 w-fit px-3 py-1.5 text-sm font-bold text-white" style={{ backgroundColor: tone }}>你的交易人格</p>}
           <h1 className="mt-6 serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-5xl">{role.name}</h1>
           <p className="mt-3 text-base font-bold tracking-[0.08em] text-[#70665D]"><span className="mr-4 tracking-[0.16em]" style={{ color: tone }}>{role.code}</span>{traitSummary}</p>
           <div className="mt-7 border-t border-[#D1D1C7] pt-5"><p className="text-sm font-bold tracking-[0.14em]" style={{ color: tone }}>座右銘</p><p className="mt-3 serif text-xl leading-[1.9] text-[#70665D] md:text-2xl">{editorial?.motto ?? role.motto}</p></div>

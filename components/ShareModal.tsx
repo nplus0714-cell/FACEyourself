@@ -29,7 +29,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
   }, [dna]);
 
   const shareText = PERSONALITY_EDITORIAL[profile.code]?.shareText
-    ?? `我完成 FACE 交易風格測驗，結果是「${profile.name}」。`;
+    ?? `我完成 FACE 交易人格測驗，結果是「${profile.name}」。`;
 
   const copyShareMessage = async () => {
     try {
@@ -76,7 +76,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
   const nativeShare = async () => {
     try {
       await navigator.share({
-        title: '我的 FACE 交易風格',
+        title: '我的 FACE 交易人格',
         text: shareText,
         url: shareUrl,
       });
@@ -119,7 +119,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
           <div className="border-b border-[#D1D1C7] pb-7 pr-10">
             <p className="text-[11px] font-bold tracking-[0.24em] text-[#8C635B]">SHARE YOUR RESULT</p>
             <h2 id="share-dialog-title" className="mt-3 serif text-[28px] leading-[1.45] text-[#2D2D2D] sm:text-[34px]">
-              分享你的交易風格
+              分享你的交易人格
             </h2>
             <p className="mt-3 max-w-xl text-[15px] leading-7 text-[#6F655B] sm:text-base">
               把結果分享給朋友，一起看看你們在市場中的自然選擇有什麼不同。
@@ -185,7 +185,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
           </div>
 
           <div className="mt-7 border-l-2 border-[#CDBCB1] bg-[#F7F4EF] px-4 py-3 text-sm leading-6 text-[#6F655B]">
-            朋友打開連結後，只會看到這次的交易風格結果，不會看到你的帳號、測驗答案或歷史紀錄。
+            朋友打開連結後，只會看到這次的交易人格結果，不會看到你的帳號、測驗答案或歷史紀錄。
           </div>
         </div>
       </section>
