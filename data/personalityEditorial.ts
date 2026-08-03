@@ -2,15 +2,27 @@
 export interface PersonalityEditorial {
   cardLine: string;
   motto: string;
+  slangName?: string;
+  statusLine?: string;
+  tags?: string[];
   portrait: string;
+  master?: { name: string; description: string; quote: string };
   decision: { title: string; scene: string; desireTitle?: string; desireScene?: string };
   pressurePoints: Array<{ title: string; description: string; action: string }>;
+  blindSpotSummary?: string;
   checklist?: { intro: string; items: string[] };
   actions: Array<{ title: string; description: string; steps: string[] }>;
+  actionsTitle?: string;
   superpower?: { title: string; description: string };
   pouches: { safety: string; mindset: string; behavior: string };
-  future?: { withoutChange: string; withChange: string };
+  pouchesTitle?: string;
+  future?: { title?: string; withoutChange: string; withChange: string };
+  relationshipsTitle?: string;
   relationships?: Array<{ label: string; text: string }>;
+  transformationGuide?: {
+    intro: string;
+    rows: Array<{ feeling: string; dimension: string; target: string; advice: string }>;
+  };
   reminder: string;
   shareText: string;
 }
@@ -195,7 +207,15 @@ export const PERSONALITY_EDITORIAL: Partial<Record<string, PersonalityEditorial>
   "AILC": {
     "cardLine": "投資的是「未來」而非股票。",
     "motto": "別人笑我太瘋癲，我笑他人看不穿；我買的不是代碼，而是人類的下一個紀元。",
+    "slangName": "投資界的戀愛腦",
+    "statusLine": "認準一個就愛一輩子，公司倒了都不分手。",
+    "tags": ["願景", "信仰", "成長", "破壞式創新", "趨勢", "靈感", "重壓", "鑽石手", "決心", "偏執"],
     "portrait": "投資的是「未來」而非股票。\n\n對破壞式創新有宗教般的熱忱，能無視嘲笑與暴跌，用「鑽石手」死抱直到未來實現或歸零。別人在崩盤群組裡發哭哭表情，你在發你剛讀完的第 47 篇技術白皮書。",
+    "master": {
+      "name": "凱薩琳·伍德（木頭姐）× 孫正義",
+      "description": "對破壞式創新有宗教般信仰，集中重押未來、無視短期暴跌的鑽石手。",
+      "quote": "我買的不是股票，是下一個世代。"
+    },
     "decision": {
       "title": "信仰綁架與身分認同",
       "scene": "將標的與價值觀綁定，只聽利多訊息，有著「孤獨先知感」。\n\n最難受的是「漫長的死寂」。股價盤整多年而傳產股創新高時，會產生信仰無法變現的無力感。",
@@ -214,6 +234,7 @@ export const PERSONALITY_EDITORIAL: Partial<Record<string, PersonalityEditorial>
         "action": "對財報中的現金流警訊視而不見，容易踩到下市地雷。"
       }
     ],
+    "blindSpotSummary": "捨不得放手——把股票當真愛，對明顯的危機視而不見。",
     "checklist": {
       "intro": "若你本週出現以下 3 項以上，代表信仰已經開始綁架你的判斷：",
       "items": [
@@ -240,19 +261,23 @@ export const PERSONALITY_EDITORIAL: Partial<Record<string, PersonalityEditorial>
         ]
       }
     ],
+    "actionsTitle": "解酒液：清醒不再宿醉",
     "superpower": {
       "title": "你的信仰，是別人偷不走的超能力。",
       "description": "當市場恐慌性拋售時，別人在算「還會跌多少」，你在算「這離我的願景還有多遠」。這種穿越噪音的定力，是頂尖長線投資人共有的天賦——差別只在於，你有沒有先確認自己信的是對的教。"
     },
     "pouches": {
-      "safety": "嚴禁槓桿信仰。 絕對不准使用融資。槓桿會倒在黎明前的最後下殺。",
-      "mindset": "愛產品不要愛股票。 公司是賺錢工具不是孩子，基本面改變時要斬斷情絲。",
-      "behavior": "遠離邪教。 退出攻擊異己或造神運動的討論區，傳教士需要的是冷靜教堂。"
+      "safety": "嚴禁槓桿信仰。絕對不准使用融資，槓桿會倒在黎明前的最後下殺。",
+      "mindset": "愛產品不要愛股票。公司是賺錢工具不是孩子，基本面改變時要斬斷情絲。",
+      "behavior": "遠離邪教。退出攻擊異己或造神運動的討論區，傳教士需要的是冷靜的教堂。"
     },
+    "pouchesTitle": "三個錦囊",
     "future": {
+      "title": "未來幾個月你可能會…",
       "withoutChange": "你依然滿倉，社群裡只剩下同樣狂熱的人互相取暖。股價又腰斬一次，這次你告訴自己「這是最後一次加碼」。",
       "withChange": "你留了現金部位，也定期讀一篇做空報告。股價腰斬時你依然難受，但你活著，帳戶也還有子彈。十年後，你可能真的等到了那個未來——而你還在場上。"
     },
+    "relationshipsTitle": "關係圖譜與轉型指南",
     "relationships": [
       {
         "label": "天生戰友",
@@ -264,9 +289,18 @@ export const PERSONALITY_EDITORIAL: Partial<Record<string, PersonalityEditorial>
       },
       {
         "label": "完全鏡像",
-        "text": "PRTD 大象守衛員（理性、短期、分散、步步為營，是你最好的照妖鏡——牠會問「如果你錯了呢」）"
+        "text": "PRTD 大象守衛員（四個面向全部相反——保守、理性、短線、分散、步步為營，是你最好的照妖鏡——牠會問「如果你錯了呢」）"
       }
     ],
+    "transformationGuide": {
+      "intro": "你不必推翻自己，只要在某一個面向上，往隔壁那型借一點特質：",
+      "rows": [
+        { "feeling": "衝得太前面、想安穩點", "dimension": "動機 A → P", "target": "13 犀牛護衛隊", "advice": "轉攻為守，守護你真正信任的。" },
+        { "feeling": "情緒起伏大、只聽利多", "dimension": "決策 I → R", "target": "01 殺人鯨領主", "advice": "建立一套經得起做空報告考驗的邏輯。" },
+        { "feeling": "等待太漫長、信仰無法變現", "dimension": "節奏 L → T", "target": "07 劍齒虎猛獸", "advice": "用一次波段兌現一點信仰。" },
+        { "feeling": "重押睡不好、怕歸零", "dimension": "籌碼 C → D", "target": "06 松鼠策劃家", "advice": "把信仰撒向好幾個未來。" }
+      ]
+    },
     "reminder": "夢想很貴要用閒錢買；信仰很重不要揹著槓桿去扛。",
     "shareText": "黑豹傳教士｜夢想很貴要用閒錢買；信仰很重不要揹著槓桿去扛。"
   },

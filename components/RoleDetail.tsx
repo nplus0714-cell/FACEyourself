@@ -76,11 +76,36 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
       </header>}
 
       <div className="mx-auto mt-12 max-w-4xl space-y-14 md:mt-16 md:space-y-20">
+        {(editorial?.slangName || editorial?.statusLine || editorial?.tags) && (
+          <section className="border-y border-[#D1D1C7] py-7">
+            <div className="grid gap-5 md:grid-cols-[10rem_1fr]">
+              <p className="text-sm font-bold leading-[1.8] tracking-[0.12em]" style={{ color: tone }}>人格速寫</p>
+              <div>
+                {editorial.slangName && <p className="serif text-2xl leading-[1.6] text-[#2D2D2D] md:text-3xl">{editorial.slangName}</p>}
+                {editorial.statusLine && <p className="mt-2 text-base leading-[1.9] text-[#5F574F] md:text-lg">{editorial.statusLine}</p>}
+                {editorial.tags && (
+                  <ul className="mt-5 flex flex-wrap gap-2" aria-label="人格關鍵字">
+                    {editorial.tags.map((tag) => <li key={tag} className="border border-[#D1D1C7] bg-white px-3 py-1.5 text-xs tracking-[0.08em] text-[#70665D]">{tag}</li>)}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="grid gap-7 md:grid-cols-[10rem_1fr]">
           <SectionLabel number="01" title="你的靈魂畫像" tone={tone} />
           <div>
             <p className="text-base font-bold tracking-[0.08em]" style={{ color: tone }}>角色描述</p>
             <ReadableText text={editorial?.portrait ?? role.portrait} className="mt-3 serif text-xl leading-[2] text-[#2D2D2D] md:text-2xl" />
+            {editorial?.master && (
+              <div className="mt-8 border border-[#D1D1C7] bg-[#F7F4EF] p-7">
+                <p className="text-xs font-bold tracking-[0.14em]" style={{ color: tone }}>傳奇大師</p>
+                <h2 className="mt-3 serif text-2xl leading-[1.6] text-[#2D2D2D]">{editorial.master.name}</h2>
+                <p className="mt-3 text-base leading-[1.9] text-[#5F574F]">{editorial.master.description}</p>
+                <p className="mt-5 border-t border-[#D1D1C7] pt-4 serif text-xl leading-[1.8] text-[#70665D]">「{editorial.master.quote}」</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -101,6 +126,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
         <section className="grid gap-7 md:grid-cols-[10rem_1fr]">
           <SectionLabel number="03" title="投資盲區與危機" tone={tone} />
           <div>
+            {editorial?.blindSpotSummary && <p className="mb-6 border-l-2 pl-5 serif text-xl leading-[1.9] text-[#2D2D2D] md:text-2xl" style={{ borderColor: tone }}>{editorial.blindSpotSummary}</p>}
             <div className="grid gap-5 sm:grid-cols-2">
               {pressurePoints.map((point) => (
                 <div key={point.title} className={`border border-[#D1D1C7] bg-white p-7 ${pressurePoints.length === 1 ? 'sm:col-span-2' : ''}`}>
@@ -133,7 +159,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
         )}
 
         <section className="grid gap-7 border-y border-[#D1D1C7] py-12 md:grid-cols-[10rem_1fr] md:py-14">
-          <SectionLabel number="04" title="解決方法：讓心靜下來" tone={tone} />
+          <SectionLabel number="04" title={editorial?.actionsTitle ?? '解決方法：讓心靜下來'} tone={tone} />
           <div className="grid gap-5 md:grid-cols-2">
             {actions.map((action) => (
               <div key={action.title} className={`border border-[#D1D1C7] bg-[#F7F4EF] p-7 ${actions.length === 1 ? 'md:col-span-2' : ''}`}>
@@ -168,7 +194,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
         )}
 
         <section className="grid gap-7 border border-[#D1D1C7] bg-white p-7 md:grid-cols-[10rem_1fr] md:p-10">
-          <SectionLabel number={editorial?.superpower ? "06" : "05"} title="解酒錠" tone={tone} />
+          <SectionLabel number={editorial?.superpower ? "06" : "05"} title={editorial?.pouchesTitle ?? '解酒錠'} tone={tone} />
           <div>
             <h2 className="serif text-2xl leading-[1.5] text-[#2D2D2D] md:text-3xl">給你的三個錦囊</h2>
             <div className="mt-7 grid gap-6 md:grid-cols-3">
@@ -190,7 +216,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
 
         {editorial?.future && (
           <section className="grid gap-7 border-y border-[#D1D1C7] py-12 md:grid-cols-[10rem_1fr] md:py-14">
-            <SectionLabel number="07" title="三個月後的你" tone={tone} />
+            <SectionLabel number="07" title={editorial.future.title ?? '三個月後的你'} tone={tone} />
             <div className="grid gap-5 md:grid-cols-2">
               <div className="border border-[#D1D1C7] bg-white p-7">
                 <h3 className="text-lg font-bold" style={{ color: tone }}>劇本 A｜沒有修正</h3>
@@ -206,14 +232,32 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
 
         {editorial?.relationships && (
           <section className="grid gap-7 md:grid-cols-[10rem_1fr]">
-            <SectionLabel number="08" title="關係圖譜" tone={tone} />
-            <div className="divide-y divide-[#D1D1C7] border-y border-[#D1D1C7]">
-              {editorial.relationships.map((relationship) => (
-                <div key={relationship.label} className="grid gap-2 py-5 sm:grid-cols-[7rem_1fr]">
-                  <p className="text-sm font-bold" style={{ color: tone }}>{relationship.label}</p>
-                  <p className="text-base leading-[1.9] text-[#5F574F]">{relationship.text}</p>
+            <SectionLabel number="08" title={editorial.relationshipsTitle ?? '關係圖譜'} tone={tone} />
+            <div>
+              <div className="divide-y divide-[#D1D1C7] border-y border-[#D1D1C7]">
+                {editorial.relationships.map((relationship) => (
+                  <div key={relationship.label} className="grid gap-2 py-5 sm:grid-cols-[7rem_1fr]">
+                    <p className="text-sm font-bold" style={{ color: tone }}>{relationship.label}</p>
+                    <p className="text-base leading-[1.9] text-[#5F574F]">{relationship.text}</p>
+                  </div>
+                ))}
+              </div>
+              {editorial.transformationGuide && (
+                <div className="mt-8 border border-[#D1D1C7] bg-[#F7F4EF] p-6 md:p-8">
+                  <h3 className="serif text-2xl leading-[1.6] text-[#2D2D2D]">當你覺得卡卡的：往鄰居找解藥</h3>
+                  <p className="mt-3 text-base leading-[1.9] text-[#5F574F]">{editorial.transformationGuide.intro}</p>
+                  <div className="mt-6 divide-y divide-[#D1D1C7] border-y border-[#D1D1C7]">
+                    {editorial.transformationGuide.rows.map((row) => (
+                      <div key={`${row.feeling}-${row.target}`} className="grid gap-2 py-5 text-sm leading-[1.8] text-[#514942] md:grid-cols-[1.2fr_0.8fr_1fr_1.4fr] md:gap-5">
+                        <p><span className="font-bold md:hidden" style={{ color: tone }}>卡住時｜</span>{row.feeling}</p>
+                        <p><span className="font-bold md:hidden" style={{ color: tone }}>調整｜</span>{row.dimension}</p>
+                        <p className="font-bold text-[#2D2D2D]"><span className="md:hidden" style={{ color: tone }}>鄰居｜</span>{row.target}</p>
+                        <p><span className="font-bold md:hidden" style={{ color: tone }}>解藥｜</span>{row.advice}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           </section>
         )}

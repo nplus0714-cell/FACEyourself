@@ -6,6 +6,9 @@
 
 This contains everything you need to run your app locally.
 
+For Claude Code project context, architecture, routes, personality data sources,
+and editing rules, read [`CLAUDE.md`](CLAUDE.md) first.
+
 View your app in AI Studio: https://ai.studio/apps/drive/1lNvVNAeiOHmtBo-ZyFNf4gsdtUIS7PGl
 
 ## Run Locally
