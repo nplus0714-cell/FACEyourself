@@ -25,6 +25,21 @@ After removing a key from frontend code, rotate the old Gemini key in Google AI
 Studio and replace it in Vercel. Removing the reference does not revoke an
 already exposed credential.
 
+## ECPay payments
+
+The paid plan uses ECPay's hosted All-in-One checkout. In stage mode it uses
+ECPay's published stage merchant automatically. Apply the payment migration,
+then configure `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` so orders and
+verified callbacks can be stored.
+
+When testing through a public tunnel or preview domain, set
+`ECPAY_PUBLIC_ORIGIN` to that HTTPS origin so ECPay can reach the callback URLs.
+
+For production, set `ECPAY_ENV=production` and configure `ECPAY_MERCHANT_ID`,
+`ECPAY_HASH_KEY`, and `ECPAY_HASH_IV` with the values from the ECPay merchant
+console. These values must remain server-only and must never use a `VITE_`
+prefix.
+
 ## Local development
 
 `vite` serves only the frontend. Use Vercel's local development environment

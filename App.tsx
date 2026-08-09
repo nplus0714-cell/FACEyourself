@@ -321,6 +321,15 @@ const App: React.FC = () => {
       onToggleLanguage={toggleLanguage}
     >
       {view === 'landing' && <>
+        {new URLSearchParams(window.location.search).get('payment') && (
+          <div className={`mb-8 border px-5 py-4 text-sm leading-7 ${new URLSearchParams(window.location.search).get('payment') === 'success' ? 'border-[#78947A] bg-[#EEF4EE] text-[#314D35]' : 'border-[#B98A83] bg-[#F8EFED] text-[#75463F]'}`} role="status">
+            {new URLSearchParams(window.location.search).get('payment') === 'success'
+              ? '付款已完成，我們正在準備你的 FACE 交易生存包。'
+              : new URLSearchParams(window.location.search).get('payment') === 'cancelled'
+                ? '你已返回 FACE，這筆付款尚未完成。'
+                : '付款未完成或驗證失敗，請重新操作；若已扣款請先聯絡我們確認。'}
+          </div>
+        )}
         <div className="relative isolate min-h-[62vh] overflow-hidden md:min-h-[72vh] flex flex-col items-center justify-center fade-in px-0 sm:px-6">
           <img
             src="/images/homepage-trading-salon-lineart.png"

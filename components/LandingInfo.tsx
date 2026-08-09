@@ -1,4 +1,5 @@
 import React from 'react';
+import { SurvivalKitPricing } from './SurvivalKitPricing';
 
 interface LandingInfoProps {
   onStartTest: () => void;
@@ -36,5 +37,7 @@ export const LandingInfo: React.FC<LandingInfoProps> = ({ onStartTest, onExplore
         <p className="mt-8 text-sm font-bold text-[#2D2D2D] group-hover:text-[#8C635B]">進入內容中心 →</p>
       </button>
     </div>
+
+    <SurvivalKitPricing />
   </section>
 );

@@ -2,7 +2,10 @@ import React from 'react';
 import { CalendarCheck, RefreshCw, ShieldCheck } from 'lucide-react';
 import { PersonalityProfile } from '../types';
 import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
+import { PERSONALITY_EDITORIAL_V2 } from '../data/personalityEditorialV2';
+import { MASTER_PORTRAIT_BY_CODE } from '../data/masterPortraits';
 import { FACE_MAP } from '../constants';
+import { RoleDetailV2 } from './RoleDetailV2';
 
 const NAME_TO_CODE: Record<string, string> = Object.values(FACE_MAP).reduce((map, role) => {
   map[role.name] = role.code;
@@ -54,8 +57,25 @@ const GentleLink: React.FC<{ eyebrow: string; description: string; link: string;
 );
 
 export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack, compact = false, onOpenCompatibility, onOpenRate, onOpenContent, onOpenRole }) => {
+  // 已遷移到 V2 圖鑑內容的代碼改用 V2 版型；其餘沿用舊版。
+  if (PERSONALITY_EDITORIAL_V2[role.code]) {
+    return (
+      <RoleDetailV2
+        role={role}
+        isUserType={isUserType}
+        onBack={onBack}
+        compact={compact}
+        onOpenCompatibility={onOpenCompatibility}
+        onOpenRate={onOpenRate}
+        onOpenContent={onOpenContent}
+        onOpenRole={onOpenRole}
+      />
+    );
+  }
+
   const tone = toneFor(role.code);
   const editorial = PERSONALITY_EDITORIAL[role.code];
+  const masterPortraitUrl = MASTER_PORTRAIT_BY_CODE[role.code];
   const decision = editorial?.decision ?? { title: role.psychology.mechanism, scene: role.psychology.scene, desireTitle: '', desireScene: '' };
   const pressurePoints = editorial?.pressurePoints ?? role.blindSpots.map(({ title, description, behavior }) => ({ title, description, action: behavior }));
   const actions = editorial?.actions ?? role.exercises.map(({ title, technique, effect }) => ({ title, description: effect, steps: [technique] }));
@@ -116,11 +136,24 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
             <p className="text-base font-bold tracking-[0.08em]" style={{ color: tone }}>角色描述</p>
             <ReadableText text={editorial?.portrait ?? role.portrait} className="mt-3 serif text-xl leading-[2] text-[#2D2D2D] md:text-2xl" />
             {editorial?.master && (
-              <div className="mt-8 border border-[#D1D1C7] bg-[#F7F4EF] p-7">
-                <p className="text-xs font-bold tracking-[0.14em]" style={{ color: tone }}>傳奇大師</p>
-                <h2 className="mt-3 serif text-2xl leading-[1.6] text-[#2D2D2D]">{editorial.master.name}</h2>
-                <p className="mt-3 text-base leading-[1.9] text-[#5F574F]">{editorial.master.description}</p>
-                <p className="mt-5 border-t border-[#D1D1C7] pt-4 serif text-xl leading-[1.8] text-[#70665D]">{editorial.master.quote}</p>
+              <div className="mt-8 border border-[#D1D1C7] bg-[#F7F4EF] p-5 md:p-7">
+                <div className="grid gap-6 sm:grid-cols-[10.5rem_1fr] sm:items-start">
+                  {masterPortraitUrl && (
+                    <figure className="overflow-hidden border border-[#D1D1C7] bg-[#FBFAF7]">
+                      <img
+                        src={masterPortraitUrl}
+                        alt={`${editorial.master.name} 的投資大師肖像`}
+                        className="aspect-square h-full w-full object-contain"
+                      />
+                    </figure>
+                  )}
+                  <div>
+                    <p className="text-xs font-bold tracking-[0.14em]" style={{ color: tone }}>傳奇大師</p>
+                    <h2 className="mt-3 serif text-2xl leading-[1.6] text-[#2D2D2D]">{editorial.master.name}</h2>
+                    <p className="mt-3 text-base leading-[1.9] text-[#5F574F]">{editorial.master.description}</p>
+                    <p className="mt-5 border-t border-[#D1D1C7] pt-4 serif text-xl leading-[1.8] text-[#70665D]">{editorial.master.quote}</p>
+                  </div>
+                </div>
               </div>
             )}
           </div>

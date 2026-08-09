@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { PersonalityProfile, FaceScores } from '../types';
 import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
+import { PERSONALITY_EDITORIAL_V2 } from '../data/personalityEditorialV2';
 
 interface RoleGalleryProps {
   dna: FaceScores | null;
@@ -21,13 +22,11 @@ const AXES = [
   { en: 'Exposure', label: '資金管理', a: ['C', '集中', '重壓深度'], b: ['D', '分散', '配置平衡'] },
 ] as const;
 
-const CN_NUM = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六'];
-
 export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onStartTest, onOpenMyFace }) => {
   const roles = useMemo(() => Object.values(FACE_MAP)
     .map((role) => ({
       ...role,
-      slang: PERSONALITY_EDITORIAL[role.code]?.slangName ?? '',
+      slang: PERSONALITY_EDITORIAL_V2[role.code]?.slangName ?? PERSONALITY_EDITORIAL[role.code]?.slangName ?? '',
       cardLine: PERSONALITY_EDITORIAL[role.code]?.cardLine ?? role.motto,
     })), []);
 
@@ -106,7 +105,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
                   ? '目前顯示全部 16 型'
                   : visibleRoles.length === 1
                     ? <>你選出的輪廓是 <b className="serif text-lg font-normal text-[#8C635B]">{visibleRoles[0].name}</b></>
-                    : <>目前符合 <b className="text-[#8C635B]">{CN_NUM[visibleRoles.length] ?? visibleRoles.length}</b> 型</>}
+                    : <>目前符合 <b className="text-[#8C635B]">{visibleRoles.length}</b> 型</>}
               </span>
               {activeFilter && <button type="button" onClick={reset} className="border-b border-current pb-0.5 transition hover:text-[#2D2D2D]">重設選擇</button>}
             </div>

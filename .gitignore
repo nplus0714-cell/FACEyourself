@@ -27,3 +27,8 @@ dist-ssr
 *.sw?
 .vercel
 .env*
+
+# Local agent tooling and generated working files
+.claude/
+compound-engineering-plugin/
+tmp/

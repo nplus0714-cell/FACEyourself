@@ -1,0 +1,18 @@
+[
+  {"number":1,"code":"ARLC","name_zh":"華倫·巴菲特","name_en":"Warren Buffett","file":"master-01-warren-buffett.png"},
+  {"number":2,"code":"ARLD","name_zh":"瑞·達利歐","name_en":"Ray Dalio","file":"master-02-ray-dalio.png"},
+  {"number":3,"code":"ARTC","name_zh":"喬治·索羅斯","name_en":"George Soros","file":"master-03-george-soros.png"},
+  {"number":4,"code":"ARTD","name_zh":"詹姆斯·西蒙斯","name_en":"James Simons","file":"master-04-james-simons.png"},
+  {"number":5,"code":"AILC","name_zh":"凱薩琳·伍德 × 孫正義","name_en":"Cathie Wood × Masayoshi Son","file":"master-05-cathie-wood-masayoshi-son.png"},
+  {"number":6,"code":"AILD","name_zh":"彼得·林區","name_en":"Peter Lynch","file":"master-06-peter-lynch.png"},
+  {"number":7,"code":"AITC","name_zh":"傑西·李佛摩","name_en":"Jesse Livermore","file":"master-07-jesse-livermore.png"},
+  {"number":8,"code":"AITD","name_zh":"威廉·歐尼爾","name_en":"William O'Neil","file":"master-08-william-oneil.png"},
+  {"number":9,"code":"PRLC","name_zh":"查理·芒格","name_en":"Charlie Munger","file":"master-09-charlie-munger.png"},
+  {"number":10,"code":"PRLD","name_zh":"約翰·柏格","name_en":"John Bogle","file":"master-10-john-bogle.png"},
+  {"number":11,"code":"PRTC","name_zh":"麥可·貝瑞","name_en":"Michael Burry","file":"master-11-michael-burry.png"},
+  {"number":12,"code":"PRTD","name_zh":"史丹利·德魯肯米勒","name_en":"Stanley Druckenmiller","file":"master-12-stanley-druckenmiller.png"},
+  {"number":13,"code":"PILC","name_zh":"菲利普·費雪","name_en":"Philip Fisher","file":"master-13-philip-fisher.png"},
+  {"number":14,"code":"PILD","name_zh":"安德烈·科斯托蘭尼","name_en":"André Kostolany","file":"master-14-andre-kostolany.png"},
+  {"number":15,"code":"PITC","name_zh":"納西姆·塔雷伯","name_en":"Nassim Nicholas Taleb","file":"master-15-nassim-taleb.png"},
+  {"number":16,"code":"PITD","name_zh":"大衛·泰珀","name_en":"David Tepper","file":"master-16-david-tepper.png"}
+]
