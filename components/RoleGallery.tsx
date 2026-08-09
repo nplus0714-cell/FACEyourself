@@ -126,6 +126,10 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
           const own = userCode === role.code;
           const sole = soleMatchCode === role.code;
           const tone = roleTone(role.code);
+          const editorialV2 = PERSONALITY_EDITORIAL_V2[role.code];
+          const textImageUrl = editorialV2
+            ? `/images/personalities-v2-text/v2-${String(editorialV2.index).padStart(2, '0')}-${editorialV2.slug}-text.png`
+            : role.landscapeImageUrl;
           return (
             <button
               key={role.code}
@@ -134,7 +138,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
               className={`group overflow-hidden border bg-white text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_34px_-20px_rgba(45,45,45,0.35)] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-2 ${sole ? 'border-[#8C635B] ring-2 ring-[#8C635B]/30' : own ? 'border-[#8C635B]' : 'border-[#D1D1C7] hover:border-[#8C635B]'}`}
             >
               <div className="relative aspect-[16/9] overflow-hidden bg-[#F4F0E9]">
-                <img src={role.landscapeImageUrl} alt={role.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
+                <img src={textImageUrl} alt={role.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
                 {own && <span className="absolute left-3 top-3 bg-[#8C635B] px-2 py-1 text-[10px] font-bold tracking-[0.1em] text-white">你的類型</span>}
               </div>
               <div className="border-t border-[#D1D1C7] px-5 py-4">

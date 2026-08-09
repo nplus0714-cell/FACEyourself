@@ -7,7 +7,6 @@ import { Dashboard } from './components/Dashboard';
 import { RoleGallery } from './components/RoleGallery';
 import { RoleDetail } from './components/RoleDetail';
 import { CompatibilityWheel } from './components/CompatibilityWheel';
-import { ZenDnaChart } from './components/ZenDnaChart';
 import { AboutFace } from './components/AboutFace';
 import { CoachProfile } from './components/CoachProfile';
 import { ContentHub } from './components/ContentHub';
@@ -315,7 +314,7 @@ const App: React.FC = () => {
         }
         navigateTo(v as AppView);
       }}
-      wide={['dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'mirror-trade', 'result-preview', 'member-home'].includes(view)}
+      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'mirror-trade', 'result-preview', 'member-home'].includes(view)}
       isLanding={view === 'landing'}
       language={language}
       onToggleLanguage={toggleLanguage}
@@ -330,71 +329,103 @@ const App: React.FC = () => {
                 : '付款未完成或驗證失敗，請重新操作；若已扣款請先聯絡我們確認。'}
           </div>
         )}
-        <div className="relative isolate min-h-[62vh] overflow-hidden md:min-h-[72vh] flex flex-col items-center justify-center fade-in px-0 sm:px-6">
-          <img
-            src="/images/homepage-trading-salon-lineart.png"
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-center opacity-[0.58] mix-blend-multiply"
-          />
-          <span
-            className="pointer-events-none absolute inset-0 z-[1]"
-            style={{ background: 'radial-gradient(ellipse at center, rgba(251,250,247,0.94) 0%, rgba(251,250,247,0.82) 38%, rgba(251,250,247,0.48) 72%, rgba(251,250,247,0.28) 100%)' }}
-            aria-hidden="true"
-          />
-          <ZenDnaChart />
-          
-          <div className="relative z-10 flex flex-col items-center space-y-7 md:space-y-10 max-w-4xl mx-auto w-full text-center">
-            <h1 className="text-center text-3xl md:text-5xl lg:text-6xl serif text-[#2D2D2D] tracking-tight leading-[1.75] md:leading-[1.68] font-normal whitespace-pre-line">
-              {t.landing.title}
-            </h1>
-            
-            <p className="mx-auto max-w-3xl text-center text-[#8C7E6D] text-3xl md:text-4xl tracking-wide font-medium leading-[1.7]">
-              {t.landing.motto}
-            </p>
-            <p className="mx-auto max-w-3xl -translate-y-2 text-center text-[#6F6258] text-[34px] md:text-[44px] tracking-wide leading-[1.7]">
-              {t.landing.supportingLine}
-            </p>
+        <div className="-mx-4 fade-in sm:-mx-6 md:mx-0">
+          <section className="relative isolate min-h-[760px] overflow-hidden border-y border-[#CFC6B8] bg-[#F6F1E9] sm:min-h-[850px] lg:min-h-[880px] lg:border">
+            <div className="absolute inset-x-0 bottom-0 h-[38%] overflow-hidden sm:h-[48%] lg:h-[62%]" aria-hidden="true">
+              <img
+                src="/images/homepage-trading-salon.png"
+                alt=""
+                className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-[52%_center] opacity-70 mix-blend-multiply saturate-[0.82] contrast-[0.92]"
+              />
+              <span className="absolute inset-0 bg-[linear-gradient(to_bottom,#F6F1E9_0%,rgba(246,241,233,0.96)_8%,rgba(246,241,233,0.72)_24%,rgba(246,241,233,0.18)_52%,rgba(246,241,233,0.04)_76%)]" />
+              <span className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(246,241,233,0.48)_100%)]" />
+            </div>
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,253,248,0.9),transparent_45%)]" aria-hidden="true" />
 
-            <div className="w-full max-w-lg mx-auto">
-              {!state.dna ? (
-                <button 
-                  onClick={() => navigateTo('dna-test')} 
-                  className="w-full py-6 md:py-7 bg-[#2D2D2D] text-white text-[16px] font-bold rounded-sm shadow-xl hover:bg-black transition-all flex flex-col items-center justify-center leading-none"
-                >
-                  <span className="tracking-wide serif">{t.landing.startTest}</span>
-                  <span className="text-[10px] tracking-[0.28em] opacity-60 mt-3 font-mono font-light">{t.landing.dnaTest}</span>
-                </button>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  <button 
-                    onClick={startDailyAwareness} 
-                    className="w-full py-7 bg-[#8C635B] text-white text-[16px] uppercase font-bold rounded-sm shadow-xl hover:bg-[#7D5A50] transition-all flex flex-col items-center justify-center leading-none"
+            <div className="relative z-10 flex flex-col items-center px-6 pb-72 pt-12 text-center sm:px-12 sm:pb-80 sm:pt-16 lg:mx-auto lg:max-w-5xl lg:px-14 lg:pb-[22rem] lg:pt-20 xl:px-20">
+              <p className="text-[10px] font-bold tracking-[0.28em] text-[#8C635B] sm:text-xs">FACE · TRADING SELF-AWARENESS</p>
+
+              <h1 className="mt-6 max-w-[22rem] serif text-[1.75rem] leading-[1.62] text-[#2D2D2D] sm:max-w-2xl sm:text-[2.65rem] sm:leading-[1.55] lg:mt-8 lg:max-w-3xl lg:text-[3.25rem] lg:leading-[1.48] xl:text-[3.55rem]">
+                {language === 'zh' ? (
+                  <>
+                    <span className="block">交易心態，像一面鏡子</span>
+                    <span className="mt-1 block sm:mt-2">決定你能走多遠</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="block">Your trading mindset is a mirror.</span>
+                    <span className="mt-2 block">It reflects the person behind every decision.</span>
+                  </>
+                )}
+              </h1>
+
+              <div className="my-7 flex items-center gap-3 text-[#B59E7B] sm:my-8" aria-hidden="true">
+                <span className="h-px w-10 bg-current sm:w-14" />
+                <span className="h-2 w-2 rotate-45 border border-current" />
+                <span className="h-px w-10 bg-current sm:w-14" />
+              </div>
+
+              <div className="max-w-[21rem] text-[15px] leading-[2] text-[#625A53] sm:max-w-xl sm:text-lg sm:leading-[2.05] lg:max-w-lg">
+                {language === 'zh' ? (
+                  <>
+                    <p>只要 <span className="font-medium text-[#9A6258]">5</span> 分鐘，</p>
+                    <p>真實<span className="font-medium text-[#9A6258]">面對</span>自己的交易決策，</p>
+                    <p>了解你的行為模式、情緒反應和決策習慣，</p>
+                    <p>找到真正<span className="font-medium text-[#9A6258]">適合你</span>的交易方式。</p>
+                  </>
+                ) : (
+                  <>
+                    <p>In just <strong className="font-bold text-[#2D2D2D]">5 minutes</strong>,</p>
+                    <p>understand your trading personality, emotional reactions, and decision patterns,</p>
+                    <p>then find the approach that truly fits you.</p>
+                  </>
+                )}
+              </div>
+
+              <div className="mt-8 w-full max-w-[21rem] sm:mt-10 sm:max-w-sm lg:max-w-md">
+                {!state.dna ? (
+                  <button
+                    type="button"
+                    onClick={() => navigateTo('dna-test')}
+                    className="group flex min-h-14 w-full items-center justify-center gap-5 border border-[#4A382D] bg-[#4A382D] px-7 py-4 text-base font-bold tracking-[0.12em] text-white shadow-[0_12px_30px_rgba(74,56,45,0.18)] transition hover:bg-[#34261F] focus-visible:outline-[#8C635B] sm:min-h-16 sm:text-lg"
                   >
-                    <span className="tracking-[0.6em] pl-[0.6em] serif">{t.landing.todayAwareness}</span>
-                    <span className="text-[11px] tracking-[1.2em] opacity-70 mt-4 pl-[1.2em] font-mono font-light">{t.landing.today}</span>
+                    <span>{t.landing.startTest}</span>
+                    <span className="text-2xl font-light transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
                   </button>
-                  <button 
-                    onClick={() => setView('dashboard')} 
-                    className="w-full py-5 bg-white border border-[#2D2D2D] text-[#2D2D2D] text-[12px] tracking-[0.6em] uppercase font-bold hover:bg-[#FBFBFA] transition-all pl-[0.6em]"
-                  >
-                    {t.landing.dashboard}
-                  </button>
+                ) : (
+                  <div className="grid gap-3">
+                    <button
+                      type="button"
+                      onClick={startDailyAwareness}
+                      className="min-h-14 w-full border border-[#8C635B] bg-[#8C635B] px-6 py-4 text-base font-bold tracking-[0.1em] text-white transition hover:bg-[#754F48]"
+                    >
+                      {t.landing.todayAwareness}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setView('dashboard')}
+                      className="min-h-12 w-full border border-[#4A382D] bg-white/70 px-6 py-3 text-sm font-bold tracking-[0.1em] text-[#2D2D2D] transition hover:bg-white"
+                    >
+                      {t.landing.dashboard}
+                    </button>
+                  </div>
+                )}
+
+                <div className="mt-4">
+                  <LastAssessmentCard
+                    user={state.user}
+                    localScores={state.dna}
+                    localCompletedAt={state.history.find((entry) => entry.isBaseline)?.date}
+                    onViewResult={(scores) => {
+                      setState((previous) => ({ ...previous, dna: scores, tempDaily: null }));
+                      navigateTo('dashboard');
+                    }}
+                  />
                 </div>
-              )}
-              <div className="mt-4">
-                <LastAssessmentCard
-                  user={state.user}
-                  localScores={state.dna}
-                  localCompletedAt={state.history.find((entry) => entry.isBaseline)?.date}
-                  onViewResult={(scores) => {
-                    setState((previous) => ({ ...previous, dna: scores, tempDaily: null }));
-                    navigateTo('dashboard');
-                  }}
-                />
               </div>
             </div>
-          </div>
+
+          </section>
         </div>
         <LandingInfo
           onStartTest={() => navigateTo('dna-test')}

@@ -40,6 +40,15 @@ a:focus-visible {
   outline-offset: 3px;
 }
 
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 ::selection {
   background: #E9DDD7;
   color: var(--face-ink);

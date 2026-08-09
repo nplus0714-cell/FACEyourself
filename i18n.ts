@@ -11,11 +11,11 @@ export const translations: Record<Language, any> = {
       watch: '內容中心'
     },
     landing: {
-      title: '投資沒有標準答案\n只有適合你的交易方式',
-      motto: '先看懂自己，再看懂市場',
-      supportingLine: '找到你的交易舒適圈',
-      startTest: '開始 40 題交易人格測驗',
-      dnaTest: 'trading style test',
+      title: '交易心態，像一面鏡子。\n映照出每一次買賣背後的你。',
+      motto: '只要 5 分鐘，',
+      supportingLine: '看懂自己的交易性格、情緒反應與決策模式，\n找到真正適合你的交易方式。',
+      startTest: '開始測驗',
+      dnaTest: '約 5 分鐘',
       todayAwareness: '今日交易回顧',
       today: 'DAILY CHECK-IN',
       dashboard: '查看我的結果',
@@ -56,11 +56,11 @@ export const translations: Record<Language, any> = {
       watch: 'Watch'
     },
     landing: {
-      title: 'Understand How You Trade,\nNot Just Your Returns',
-      motto: '40 questions. About 6 minutes. Find your FACE trading style.',
-      supportingLine: 'Find the trading approach that feels right for you.',
-      startTest: 'Start the 40-Question Test',
-      dnaTest: 'TRADING STYLE TEST',
+      title: 'Your trading mindset is a mirror.\nIt reflects the person behind every decision.',
+      motto: 'In just 5 minutes,',
+      supportingLine: 'Understand your trading personality, emotional reactions, and decision patterns—and find the approach that truly fits you.',
+      startTest: 'Start Test',
+      dnaTest: 'ABOUT 5 MINUTES',
       todayAwareness: 'Today’s Trade Review',
       today: 'DAILY CHECK-IN',
       dashboard: 'View My Results',

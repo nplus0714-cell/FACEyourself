@@ -30,6 +30,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   showNav,
   activeView,
   onViewChange,
+  isLanding,
   language,
   onToggleLanguage
 }) => {
@@ -59,7 +60,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
       <div className={`${(wide ? 'max-w-6xl' : 'max-w-4xl') + ' w-full'} transition-all duration-500`}>
         
         {/* Header - 質感深度優化 */}
-        <header className={`${isAssessmentView ? 'mb-5 md:mb-8' : 'mb-10 md:mb-16'} text-center relative`}>
+        <header className={`${isAssessmentView ? 'mb-5 md:mb-8' : isLanding ? 'mb-0' : 'mb-10 md:mb-16'} text-center relative`}>
           <div className="flex justify-between items-center gap-3 mb-7 md:mb-9">
             <div 
               className="flex items-center gap-3 cursor-pointer group"
@@ -132,28 +133,28 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
 
           {/* Nav */}
           {showNav && !isAssessmentView && onViewChange && (
-            <nav className="mb-8 md:mb-10 flex flex-wrap justify-center gap-x-5 gap-y-4 border-b border-[#D1D1C7]/60 pb-5 text-[15px] font-medium leading-6 tracking-[0.06em] sm:gap-x-8 md:gap-x-12 md:pb-8 md:text-base">
+            <nav className={`${isLanding ? 'mb-0' : 'mb-8 md:mb-10'} hide-scrollbar -mx-4 flex snap-x items-end gap-x-5 overflow-x-auto border-b border-[#D1D1C7]/60 px-4 text-sm font-medium leading-6 tracking-[0.04em] sm:mx-0 sm:justify-center sm:gap-x-9 sm:px-0 md:gap-x-12 md:text-base`}>
                 <button 
                   onClick={() => onViewChange('dna-test')} 
-                  className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'dna-test' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}
+                  className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${(activeView === 'dna-test' || activeView === 'landing') ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   開始測驗
                 </button>
                 <button 
                   onClick={() => onViewChange('role-gallery')} 
-                  className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'role-gallery' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}
+                  className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'role-gallery' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   {t.nav.gallery}
                 </button>
                 <button 
                   onClick={() => onViewChange('about-face')} 
-                  className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'about-face' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}
+                  className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'about-face' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   {t.nav.about}
                 </button>
                 <button 
                   onClick={() => onViewChange('content-hub')} 
-                  className={`whitespace-nowrap hover:text-[#2D2D2D] transition-all pb-1 ${activeView === 'content-hub' ? 'text-[#2D2D2D] font-black border-b-2 border-[#2D2D2D]' : 'text-[#8C7E6D]'}`}
+                  className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'content-hub' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   {t.nav.watch}
                 </button>
