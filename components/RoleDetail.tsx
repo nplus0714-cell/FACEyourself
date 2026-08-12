@@ -6,6 +6,8 @@ import { PERSONALITY_EDITORIAL_V2 } from '../data/personalityEditorialV2';
 import { MASTER_PORTRAIT_BY_CODE } from '../data/masterPortraits';
 import { FACE_MAP } from '../constants';
 import { RoleDetailV2 } from './RoleDetailV2';
+import { RoleDetailPrototype } from './RoleDetailPrototype';
+import { FACE_2_PROTOTYPES } from '../data/faceProfilePrototype';
 
 const NAME_TO_CODE: Record<string, string> = Object.values(FACE_MAP).reduce((map, role) => {
   map[role.name] = role.code;
@@ -57,6 +59,21 @@ const GentleLink: React.FC<{ eyebrow: string; description: string; link: string;
 );
 
 export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack, compact = false, onOpenCompatibility, onOpenRate, onOpenContent, onOpenRole }) => {
+  // 已完成 FACE 2.0 專用內容的類型使用新原型；未遷移的類型維持既有 V2 版型。
+  if (FACE_2_PROTOTYPES[role.code]) {
+    return (
+      <RoleDetailPrototype
+        role={role}
+        isUserType={isUserType}
+        onBack={onBack}
+        compact={compact}
+        onOpenCompatibility={onOpenCompatibility}
+        onOpenRate={onOpenRate}
+        onOpenContent={onOpenContent}
+      />
+    );
+  }
+
   // 已遷移到 V2 圖鑑內容的代碼改用 V2 版型；其餘沿用舊版。
   if (PERSONALITY_EDITORIAL_V2[role.code]) {
     return (

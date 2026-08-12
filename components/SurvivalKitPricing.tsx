@@ -1,22 +1,15 @@
 import React, { useState } from 'react';
 
-const benefits = [
-  {
-    label: '完整數位指南',
-    description: '從交易幻覺、風險承擔到復盤，建立一套能持續執行的交易規則。',
-  },
-  {
-    label: 'FACE 完整人格報告',
-    description: '看懂你的交易優勢、慣性盲點，以及更適合你的部位與週期。',
-  },
-  {
-    label: '4 個核心實作工具',
-    description: '交易情緒日記、期望值計算器、交易計畫卡與倉位計算器、復盤報告。',
-  },
-  {
-    label: '30 天練習計畫',
-    description: '把人格洞察轉成下一步能開始、能追蹤，也能回頭檢視的行動。',
-  },
+// 生存指南不是「更多人格介紹」，而是回答「我這種人到底該怎麼交易」的方向感。
+// 這 7 個問題來自商業漏斗規劃，是這份「個人交易使用說明書」的核心大綱。
+const questions = [
+  '我最適合什麼交易環境？',
+  '什麼行情最容易讓我失控？',
+  '我的優勢最常在什麼情況下變成盲點？',
+  '我在部位、停損、持有、加碼上最需要注意什麼？',
+  '連續虧損時，我最容易出現哪種心理反應？',
+  '大行情來時，我最容易錯過或做錯什麼？',
+  '我的交易生存守則是什麼？',
 ];
 
 export const SurvivalKitPricing: React.FC = () => {
@@ -65,23 +58,26 @@ export const SurvivalKitPricing: React.FC = () => {
       <div className="border-b border-[#D1D1C7] p-7 sm:p-10 lg:border-b-0 lg:border-r lg:p-14">
         <p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">PAID PLAN · EARLY BIRD</p>
         <h2 id="survival-kit-title" className="mt-5 serif text-4xl leading-[1.4] text-[#2D2D2D] md:text-5xl">
-          FACE 交易生存包
+          FACE 交易生存指南
         </h2>
         <p className="mt-6 max-w-2xl text-lg leading-[1.9] text-[#5F554E]">
-          不是告訴你買什麼，而是陪你找出：你是哪一種交易者，以及下一步可以怎麼做。
+          你已經知道自己是哪一種交易者了。這份指南只回答一件事——<span className="font-bold text-[#2D2D2D]">你這種人，到底該怎麼交易？</span>
+        </p>
+        <p className="mt-4 max-w-2xl text-base leading-[1.9] text-[#70665D]">
+          它像一份「個人交易使用說明書」，不是 16 型人格百科；買的不是更多介紹，而是屬於你的方向感。
         </p>
 
-        <div className="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2">
-          {benefits.map((benefit, index) => (
-            <article key={benefit.label} className="border-t border-[#D1D1C7] pt-5">
-              <p className="text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">
+        <p className="mt-10 text-sm font-bold tracking-[0.14em] text-[#8C635B]">這份指南會回答你這一型的 7 個關鍵問題</p>
+        <ol className="mt-5 grid gap-x-10 gap-y-5 sm:grid-cols-2">
+          {questions.map((question, index) => (
+            <li key={question} className="flex gap-3 border-t border-[#D1D1C7] pt-4">
+              <span className="shrink-0 text-sm font-bold tracking-[0.1em] text-[#8C635B]">
                 {String(index + 1).padStart(2, '0')}
-              </p>
-              <h3 className="mt-3 text-base font-bold text-[#2D2D2D]">{benefit.label}</h3>
-              <p className="mt-2 text-sm leading-[1.85] text-[#70665D]">{benefit.description}</p>
-            </article>
+              </span>
+              <span className="text-base leading-[1.7] text-[#2D2D2D]">{question}</span>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
 
       <div className="flex flex-col justify-between bg-[#2D2D2D] p-7 text-white sm:p-10 lg:p-14">
@@ -89,16 +85,16 @@ export const SurvivalKitPricing: React.FC = () => {
           <p className="text-xs font-bold tracking-[0.24em] text-white/50">一次付費 · 數位內容</p>
           <div className="mt-7 flex flex-wrap items-end gap-x-4 gap-y-2">
             <p className="serif text-5xl leading-none md:text-6xl">
-              <span className="mr-2 text-lg">NT$</span>699
+              <span className="mr-2 text-lg">NT$</span>590
             </p>
-            <p className="pb-1 text-sm text-white/45 line-through">NT$899</p>
+            <p className="pb-1 text-sm text-white/45 line-through">NT$790</p>
           </div>
-          <p className="mt-5 text-sm leading-[1.8] text-white/65">早鳥優惠期間，完整內容與工具一次解鎖。</p>
+          <p className="mt-5 text-sm leading-[1.8] text-white/65">早鳥優惠期間，你這一型的完整生存指南一次解鎖。</p>
 
           <ul className="mt-9 space-y-4 text-sm leading-7 text-white/85">
-            <li className="flex gap-3"><span aria-hidden="true" className="text-[#D9C7A9]">✓</span><span>完整指南與四套可反覆使用的工具</span></li>
-            <li className="flex gap-3"><span aria-hidden="true" className="text-[#D9C7A9]">✓</span><span>依 FACE 人格整理的盲點與練習方向</span></li>
-            <li className="flex gap-3"><span aria-hidden="true" className="text-[#D9C7A9]">✓</span><span>購買後引導，從第一篇交易日記開始</span></li>
+            <li className="flex gap-3"><span aria-hidden="true" className="text-[#D9C7A9]">✓</span><span>回答你這一型最關鍵的 7 個交易問題</span></li>
+            <li className="flex gap-3"><span aria-hidden="true" className="text-[#D9C7A9]">✓</span><span>依 FACE 人格整理的優勢、盲點與適合的部位與週期</span></li>
+            <li className="flex gap-3"><span aria-hidden="true" className="text-[#D9C7A9]">✓</span><span>附可反覆使用的實作工具與 30 天練習方向</span></li>
           </ul>
         </div>
 
@@ -109,7 +105,7 @@ export const SurvivalKitPricing: React.FC = () => {
             disabled={isStartingCheckout}
             className="flex w-full items-center justify-center bg-white px-6 py-4 text-center text-sm font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9] disabled:cursor-wait disabled:opacity-65"
           >
-            {isStartingCheckout ? '正在前往安全付款頁…' : '立即購買早鳥方案 →'}
+            {isStartingCheckout ? '正在前往安全付款頁…' : '立即解鎖我的生存指南 →'}
           </button>
           {checkoutError && <p role="alert" className="mt-3 text-sm leading-6 text-[#F2B8B5]">{checkoutError}</p>}
           <p className="mt-4 text-xs leading-6 text-white/45">

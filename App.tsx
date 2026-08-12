@@ -323,7 +323,7 @@ const App: React.FC = () => {
         {new URLSearchParams(window.location.search).get('payment') && (
           <div className={`mb-8 border px-5 py-4 text-sm leading-7 ${new URLSearchParams(window.location.search).get('payment') === 'success' ? 'border-[#78947A] bg-[#EEF4EE] text-[#314D35]' : 'border-[#B98A83] bg-[#F8EFED] text-[#75463F]'}`} role="status">
             {new URLSearchParams(window.location.search).get('payment') === 'success'
-              ? '付款已完成，我們正在準備你的 FACE 交易生存包。'
+              ? '付款已完成，我們正在準備你的 FACE 交易生存指南。'
               : new URLSearchParams(window.location.search).get('payment') === 'cancelled'
                 ? '你已返回 FACE，這筆付款尚未完成。'
                 : '付款未完成或驗證失敗，請重新操作；若已扣款請先聯絡我們確認。'}
@@ -346,17 +346,9 @@ const App: React.FC = () => {
               <p className="text-[10px] font-bold tracking-[0.28em] text-[#8C635B] sm:text-xs">FACE · TRADING SELF-AWARENESS</p>
 
               <h1 className="mt-6 max-w-[22rem] serif text-[1.75rem] leading-[1.62] text-[#2D2D2D] sm:max-w-2xl sm:text-[2.65rem] sm:leading-[1.55] lg:mt-8 lg:max-w-3xl lg:text-[3.25rem] lg:leading-[1.48] xl:text-[3.55rem]">
-                {language === 'zh' ? (
-                  <>
-                    <span className="block">交易心態，像一面鏡子</span>
-                    <span className="mt-1 block sm:mt-2">決定你能走多遠</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="block">Your trading mindset is a mirror.</span>
-                    <span className="mt-2 block">It reflects the person behind every decision.</span>
-                  </>
-                )}
+                {String(t.landing.title).split('\n').map((line: string, index: number) => (
+                  <span key={line} className={index === 0 ? 'block' : 'mt-1 block sm:mt-2'}>{line}</span>
+                ))}
               </h1>
 
               <div className="my-7 flex items-center gap-3 text-[#B59E7B] sm:my-8" aria-hidden="true">
@@ -366,20 +358,8 @@ const App: React.FC = () => {
               </div>
 
               <div className="max-w-[21rem] text-[15px] leading-[2] text-[#625A53] sm:max-w-xl sm:text-lg sm:leading-[2.05] lg:max-w-lg">
-                {language === 'zh' ? (
-                  <>
-                    <p>只要 <span className="font-medium text-[#9A6258]">5</span> 分鐘，</p>
-                    <p>真實<span className="font-medium text-[#9A6258]">面對</span>自己的交易決策，</p>
-                    <p>了解你的行為模式、情緒反應和決策習慣，</p>
-                    <p>找到真正<span className="font-medium text-[#9A6258]">適合你</span>的交易方式。</p>
-                  </>
-                ) : (
-                  <>
-                    <p>In just <strong className="font-bold text-[#2D2D2D]">5 minutes</strong>,</p>
-                    <p>understand your trading personality, emotional reactions, and decision patterns,</p>
-                    <p>then find the approach that truly fits you.</p>
-                  </>
-                )}
+                <p className="font-medium text-[#4B433D]">{t.landing.motto}</p>
+                {String(t.landing.supportingLine).split('\n').map((line: string) => <p key={line}>{line}</p>)}
               </div>
 
               <div className="mt-8 w-full max-w-[21rem] sm:mt-10 sm:max-w-sm lg:max-w-md">

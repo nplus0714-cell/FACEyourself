@@ -2,8 +2,8 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 
 export const ECPAY_PRODUCT = {
   code: 'face-survival-kit',
-  name: 'FACE 交易生存包',
-  amount: 699,
+  name: 'FACE 交易生存指南',
+  amount: 590,
 } as const;
 
 const STAGE_CONFIG = {

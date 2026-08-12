@@ -3,6 +3,7 @@ export type Language = 'zh' | 'en';
 
 export interface FaceScores {
   A: number; P: number; R: number; I: number; L: number; T: number; C: number; D: number;
+  assessmentMeta?: FaceAssessmentMeta;
 }
 
 export interface Question {
@@ -19,6 +20,8 @@ export type FaceDimension = 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
 
 export type FaceQuestionType = 'scenario' | 'image' | 'intuition' | 'agreement';
 
+export type FaceQuestionResponseMode = 'binary' | 'bipolar' | 'agreement';
+
 export interface FaceQuestionOption {
   id: 'a' | 'b';
   label: string;
@@ -27,6 +30,7 @@ export interface FaceQuestionOption {
 
 export interface FaceImagePlaceholder {
   assetKey: string;
+  src?: string;
   alt: string;
   prompt: string;
 }
@@ -57,11 +61,35 @@ export interface FaceQuestion {
   agreement?: FaceAgreementMapping;
   images?: [FaceImagePlaceholder, FaceImagePlaceholder];
   compositeImage?: FaceCompositeImage;
+  responseMode?: FaceQuestionResponseMode;
+  allowNotApplicable?: boolean;
+}
+
+export type AssessmentSelectedOption =
+  | 'A'
+  | 'B'
+  | 'very_agree'
+  | 'somewhat_agree'
+  | 'neutral'
+  | 'somewhat_disagree'
+  | 'very_disagree'
+  | 'very_a'
+  | 'somewhat_a'
+  | 'balanced'
+  | 'somewhat_b'
+  | 'very_b'
+  | 'not_applicable';
+
+export interface FaceAssessmentMeta {
+  assessmentVersion: string;
+  answeredCountByDimension: Record<FaceDimension, number>;
+  skippedQuestionIds: string[];
+  confidenceByDimension: Record<FaceDimension, 'high' | 'medium' | 'low'>;
 }
 
 export interface AssessmentAnswer {
   question_code: string;
-  selected_option: 'A' | 'B' | 'very_agree' | 'somewhat_agree' | 'neutral' | 'somewhat_disagree' | 'very_disagree';
+  selected_option: AssessmentSelectedOption;
   dimension: 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
   score_value: number;
   answered_at: string;

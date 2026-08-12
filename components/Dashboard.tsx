@@ -2,13 +2,14 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip,
 } from 'recharts';
-import { FaceScores, ReportContent, AuthUser, DiaryEntry, Language } from '../types';
+import { FaceScores, ReportContent, AuthUser, DiaryEntry, Language, FaceDimension, FaceTrait } from '../types';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { generateDynamicReport } from '../services/geminiService';
 import { ShareModal } from './ShareModal';
 import { RoleDetail } from './RoleDetail';
 import { BookOpen, RotateCcw, Share2 } from 'lucide-react';
 import { translations } from '../i18n';
+import { FACE_2_PROTOTYPES } from '../data/faceProfilePrototype';
 
 interface DashboardProps {
   dna: FaceScores;
@@ -36,6 +37,8 @@ const calcRatio = (v1: number, v2: number) => {
 export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenMemberHome, onOpenCompatibility, onRetest, isSharedView, language }) => {
   const code = getFaceCode(dna);
   const profile = FACE_MAP[code] || FACE_MAP['ARLC'];
+  const face2Profile = FACE_2_PROTOTYPES[code];
+  const heroMotto = face2Profile?.coreDescription.split('。')[0] ?? profile.motto;
   const [report, setReport] = useState<ReportContent | null>(staticReport || null);
   const [loading, setLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -65,18 +68,31 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
 
   const faceData = useMemo(() => {
     const scores = daily || dna;
-    const getPairData = (label: string, l1Name: string, l1Key: keyof FaceScores, l2Name: string, l2Key: keyof FaceScores) => {
+    const getPairData = (dimension: FaceDimension, label: string, l1Name: string, l1Key: FaceTrait, l2Name: string, l2Key: FaceTrait) => {
       const v1 = calcRatio(scores[l1Key], scores[l2Key]);
       const v2 = 100 - v1;
-      return { label, l1Name, l2Name, v1, v2 };
+      return {
+        dimension,
+        label,
+        l1Name,
+        l2Name,
+        v1,
+        v2,
+        isBalanced: v1 >= 45 && v1 <= 55,
+        confidence: daily ? null : dna.assessmentMeta?.confidenceByDimension[dimension] ?? null,
+      };
     };
     return [
-      getPairData('獲利動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
-      getPairData('決策邏輯', '理性數據 (R)', 'R', '感應直覺 (I)', 'I'),
-      getPairData('交易週期', '長期投資 (L)', 'L', '短期投機 (T)', 'T'),
-      getPairData('資金管理', '集中 (C)', 'C', '分散 (D)', 'D'),
+      getPairData('FOCUS', '獲利動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
+      getPairData('ANALYSIS', '決策邏輯', '理性數據 (R)', 'R', '感應直覺 (I)', 'I'),
+      getPairData('CYCLE', '交易週期', '長期投資 (L)', 'L', '短期投機 (T)', 'T'),
+      getPairData('EXPOSURE', '資金管理', '集中 (C)', 'C', '分散 (D)', 'D'),
     ];
   }, [dna, daily]);
+
+  const baselineAnswerCount = dna.assessmentMeta
+    ? Object.values(dna.assessmentMeta.answeredCountByDimension).reduce((total, count) => total + count, 0)
+    : null;
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -162,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             <h1 className="mt-5 serif text-3xl leading-[1.45] text-[#2D2D2D] md:text-5xl">{profile.name}</h1>
             <p className="mt-4 text-sm tracking-[0.12em] text-[#8C7E6D]">{code}　{profile.attributes}</p>
             <div className="my-7 h-px w-16 bg-[#CDBCB1]"></div>
-            <p className="serif text-xl leading-[1.9] text-[#8C635B] md:text-2xl">「{profile.motto}」</p>
+            <p className="serif text-xl leading-[1.9] text-[#8C635B] md:text-2xl">「{heroMotto}。」</p>
             <p className="mt-7 text-base leading-8 text-[#5F574F]">這份報告會整理你的四個交易傾向，幫你理解什麼樣的策略，才是你能長期執行的方式。</p>
           </div>
         </div>
@@ -178,6 +194,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
               <div>
                 <h2 className="serif text-2xl leading-[1.55] text-[#2D2D2D] md:text-3xl">你的 FACE 分數</h2>
                 <p className="mt-3 text-base leading-[2] text-[#5F574F]">這四組分數不是好或壞，而是你在市場中比較自然的選擇方式。</p>
+                <p className="mt-2 text-xs leading-6 text-[#8C7E6D]">結果描述的是決策偏好，不是能力高低或績效保證；請用自己的交易紀錄核對。</p>
+                {baselineAnswerCount !== null && dna.assessmentMeta && (
+                  <p className="mt-3 text-xs leading-6 text-[#8C7E6D]">
+                    作答完整度 {baselineAnswerCount}／40
+                    {dna.assessmentMeta.skippedQuestionIds.length > 0 && `；${dna.assessmentMeta.skippedQuestionIds.length} 題不適用，已按其餘作答重新換算。`}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -204,8 +227,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
                 const lightColor = '#D1D1C7';
                 return (
                   <div key={idx} className="border-t border-[#D1D1C7] pt-3 first:border-t-0 first:pt-0 md:flex md:min-h-0 md:flex-col md:justify-center md:py-0">
-                    <div className="mb-3 md:mb-3">
+                    <div className="mb-3 flex items-center justify-between gap-2 md:mb-3">
                       <span className="serif text-[0.9rem] leading-none text-[#2D2D2D]">{item.label}</span>
+                      <span className="flex items-center gap-1">
+                        {item.isBalanced && <span className="bg-[#F0ECE6] px-2 py-1 text-[9px] font-bold tracking-[0.08em] text-[#70665D]">接近平衡</span>}
+                        {item.confidence === 'medium' && <span className="bg-[#EEF2F3] px-2 py-1 text-[9px] font-bold tracking-[0.08em] text-[#56616A]">1 題不適用</span>}
+                        {item.confidence === 'low' && <span className="bg-[#F5E9E6] px-2 py-1 text-[9px] font-bold tracking-[0.08em] text-[#8C635B]">結果信心較低</span>}
+                      </span>
                     </div>
                     <div className="relative">
                       <div className="mb-1 flex items-end justify-between px-1 md:mb-0.5">

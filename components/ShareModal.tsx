@@ -24,7 +24,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
   }, []);
 
   const shareUrl = useMemo(() => {
-    const scores = Object.entries(dna).map(([key, value]) => `${key}${value}`).join('_');
+    const traits = ['A', 'P', 'R', 'I', 'L', 'T', 'C', 'D'] as const;
+    const scores = traits.map((key) => `${key}${dna[key]}`).join('_');
     return `https://faceyourself.vercel.app?dna_share=${scores}`;
   }, [dna]);
 

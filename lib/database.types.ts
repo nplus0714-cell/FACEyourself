@@ -56,7 +56,7 @@ export type Database = {
           id: number;
           assessment_run_id: string;
           question_code: string;
-          selected_option: 'A' | 'B' | 'very_agree' | 'somewhat_agree' | 'neutral' | 'somewhat_disagree' | 'very_disagree';
+          selected_option: 'A' | 'B' | 'very_agree' | 'somewhat_agree' | 'neutral' | 'somewhat_disagree' | 'very_disagree' | 'very_a' | 'somewhat_a' | 'balanced' | 'somewhat_b' | 'very_b' | 'not_applicable';
           dimension: 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
           score_value: number;
           answered_at: string;
@@ -65,7 +65,7 @@ export type Database = {
           id?: number;
           assessment_run_id: string;
           question_code: string;
-          selected_option: 'A' | 'B' | 'very_agree' | 'somewhat_agree' | 'neutral' | 'somewhat_disagree' | 'very_disagree';
+          selected_option: 'A' | 'B' | 'very_agree' | 'somewhat_agree' | 'neutral' | 'somewhat_disagree' | 'very_disagree' | 'very_a' | 'somewhat_a' | 'balanced' | 'somewhat_b' | 'very_b' | 'not_applicable';
           dimension: 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
           score_value: number;
           answered_at?: string;
