@@ -173,6 +173,19 @@ const calculateScores = (answers: Record<string, FaceResponse>): { scores: FaceS
     scoreValues[question.id] = 10;
   });
 
+  const scenarioConsistencyBonuses: NonNullable<FaceAssessmentMeta['scenarioConsistencyBonuses']> = [];
+  const scenarioGroups = [...new Set(FACE_BASELINE_V2_QUESTIONS.flatMap((question) => question.scenarioGroup ? [question.scenarioGroup] : []))];
+  scenarioGroups.forEach((group) => {
+    const groupQuestions = FACE_BASELINE_V2_QUESTIONS.filter((question) => question.scenarioGroup === group);
+    const responses = groupQuestions.map((question) => answers[question.id]);
+    const usable = responses.every((response) => response && response !== 'balanced' && response !== 'not_applicable');
+    const sides = responses.map((response) => response === 'very_a' || response === 'somewhat_a' ? 'a' : 'b');
+    if (!usable || !sides.every((side) => side === sides[0])) return;
+    const trait = sides[0] === 'a' ? groupQuestions[0].options![0].trait : groupQuestions[0].options![1].trait;
+    addScore(scores, trait, 2);
+    scenarioConsistencyBonuses.push({ group, title: groupQuestions[0].scenarioGroupTitle ?? group, trait, points: 2 });
+  });
+
   Object.values(DIMENSION_TRAITS).forEach(([firstTrait, secondTrait]) => {
     const rawTotal = scores[firstTrait] + scores[secondTrait];
     const firstScore = rawTotal === 0 ? 50 : Math.round((scores[firstTrait] / rawTotal) * 100);
@@ -186,11 +199,17 @@ const calculateScores = (answers: Record<string, FaceResponse>): { scores: FaceS
       count === 10 ? 'high' : count >= 9 ? 'medium' : 'low',
     ]),
   ) as FaceAssessmentMeta['confidenceByDimension'];
+  const scenarioQuestionCount = FACE_BASELINE_V2_QUESTIONS.filter((question) => question.allowNotApplicable).length;
+  const notApplicableRate = scenarioQuestionCount === 0 ? 0 : skippedQuestionIds.length / scenarioQuestionCount;
 
   scores.assessmentMeta = {
     assessmentVersion: FACE_BASELINE_V2_VERSION,
     answeredCountByDimension,
     skippedQuestionIds,
+    scenarioQuestionCount,
+    notApplicableRate,
+    hasInsufficientData: notApplicableRate > 0.5,
+    scenarioConsistencyBonuses,
     confidenceByDimension,
   };
 
@@ -202,7 +221,6 @@ interface FaceAssessmentProps {
 }
 
 export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) => {
-  const [hasStarted, setHasStarted] = useState(false);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, FaceResponse>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -309,32 +327,8 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
     );
   };
 
-  if (!hasStarted) {
-    return (
-      <div className="mx-auto flex min-h-[72vh] max-w-2xl flex-col justify-center px-4 py-10 text-center fade-in md:px-8">
-        <p className="font-mono text-[11px] font-bold tracking-[0.22em] text-[#8C635B]">FACE 2.0 · 40 QUESTIONS</p>
-        <h1 className="serif mt-5 text-3xl leading-[1.5] text-[#2D2D2D] md:text-5xl">看見你在市場中<br />比較自然的選擇方式</h1>
-        <p className="mx-auto mt-7 max-w-xl text-base leading-8 text-[#5F574F]">
-          接下來有 40 個選擇，沒有標準答案。請選擇「更像你平常會怎麼做」的一邊，而不是你認為投資人應該怎麼做。
-        </p>
-        <div className="mx-auto mt-8 grid max-w-xl gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] text-left sm:grid-cols-2">
-          <div className="bg-white p-5"><p className="text-xs font-bold tracking-[0.12em] text-[#8C635B]">直覺與圖片</p><p className="mt-2 text-sm leading-7 text-[#70665D]">不需要完全符合，選多數情況下比較接近你的反應。</p></div>
-          <div className="bg-white p-5"><p className="text-xs font-bold tracking-[0.12em] text-[#56616A]">情境與同意程度</p><p className="mt-2 text-sm leading-7 text-[#70665D]">可以表達偏向或選擇「看情況」，不必強迫自己站到最極端。</p></div>
-        </div>
-        <p className="mx-auto mt-6 max-w-lg text-xs leading-6 text-[#8C7E6D]">若某個情境完全沒有相關經驗，可選「這個情境不適用於我」；系統不會把它誤算成中立。</p>
-        <button
-          type="button"
-          onClick={() => setHasStarted(true)}
-          className="mx-auto mt-8 min-h-14 w-full max-w-sm border border-[#4A382D] bg-[#4A382D] px-8 py-4 text-sm font-bold tracking-[0.18em] text-white transition hover:bg-[#34261F]"
-        >
-          開始測驗
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto flex min-h-[72vh] max-w-2xl flex-col justify-center px-0 sm:px-4 py-2 md:px-8 md:py-4 fade-in">
+    <div className="mx-auto flex min-h-[72vh] max-w-5xl flex-col justify-center px-0 sm:px-4 py-2 md:px-8 md:py-4 fade-in">
       <div className="mb-6 md:mb-8 space-y-5 md:space-y-6 text-center">
         <div className="grid grid-cols-4 overflow-hidden border border-[#D1D1C7]/60 bg-white/40 shadow-sm">
           {Object.entries(DIMENSION_LABELS).map(([dimension, label]) => (
@@ -370,6 +364,12 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
           {question.type === 'image' && <p className="text-sm text-[#8C7E6D]">不要想太久，選第一眼比較像你的畫面。</p>}
           {question.type === 'intuition' && <p className="text-sm text-[#8C7E6D]">先選第一個直覺反應。</p>}
           {question.responseMode === 'bipolar' && <p className="text-sm text-[#8C7E6D]">先看兩端的做法，再選擇你通常落在哪個位置。</p>}
+          {question.scenarioGroup && (
+            <div className="mx-auto max-w-lg border-b border-[#D1D1C7] pb-3">
+              <div className="flex items-center justify-between text-[11px] font-bold tracking-[0.12em] text-[#8C635B]"><span>{question.scenarioGroup} · {question.scenarioGroupTitle}</span><span>情境進展 {question.scenarioStage} / 2</span></div>
+              <div className="mt-2 grid grid-cols-2 gap-2">{[1, 2].map((stage) => <span key={stage} className={`h-1 ${stage <= (question.scenarioStage ?? 0) ? 'bg-[#8C635B]' : 'bg-[#DED7CE]'}`} />)}</div>
+            </div>
+          )}
           <p className="serif px-2 text-xl leading-[1.7] text-[#2D2D2D] md:text-2xl">{question.prompt}</p>
         </div>
 
@@ -399,22 +399,39 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
                 className="group overflow-hidden border border-[#D1D1C7]/70 bg-white text-left shadow-sm transition-all duration-300 hover:border-[#2D2D2D] hover:shadow-lg disabled:cursor-wait disabled:opacity-60"
               >
                 {item.src ? (
-                  <img src={item.src} alt={item.alt} className="block h-auto w-full" />
+                  <span className="flex aspect-[2/3] w-full items-center justify-center overflow-hidden bg-[#F7F4EF]"><img src={item.src} alt={item.alt} className="h-full w-full object-contain" /></span>
                 ) : (
                   <div className="flex aspect-[4/3] items-center justify-center bg-[radial-gradient(circle_at_top_left,_#d9d1c7,_#f8f7f4_45%,_#d5c0b9)] p-6 text-center">
                     <p className="serif text-base leading-relaxed text-[#2D2D2D]">{item.alt}</p>
                   </div>
                 )}
-                <div className="p-5">
-                  <span className="font-mono text-[10px] tracking-[0.2em] text-[#8C7E6D]">OPTION {index === 0 ? 'A' : 'B'}</span>
-                  <p className="serif mt-2 text-base leading-relaxed text-[#2D2D2D]">{question.options![index].label}</p>
-                </div>
               </button>
             ))}
           </div>
         )}
 
-        {question.type !== 'image' && question.type !== 'agreement' && question.responseMode !== 'bipolar' && (
+        {question.type === 'intuition' && question.images && question.options && (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {question.images.map((item, index) => (
+              <button
+                key={item.assetKey}
+                type="button"
+                onClick={() => choose(index === 0 ? 'A' : 'B')}
+                disabled={isSaving}
+                className="group overflow-hidden border border-[#D1D1C7]/70 bg-white text-left shadow-sm transition-all duration-300 hover:border-[#2D2D2D] hover:shadow-lg disabled:cursor-wait disabled:opacity-60"
+              >
+                <div className="flex min-h-20 items-center gap-4 border-b border-[#E2DCD4] px-5 py-4">
+                  <strong className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base text-white ${index === 0 ? 'bg-[#9A6B61]' : 'bg-[#65747A]'}`}>{index === 0 ? 'A' : 'B'}</strong>
+                  <span className="text-lg font-bold leading-7 text-[#302C29]">{item.shortLabel}</span>
+                </div>
+                <span className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-[#F7F4EF] p-2"><img src={item.src} alt={item.alt} className="h-full w-full object-contain" /></span>
+                <div className="min-h-24 border-t border-[#E2DCD4] p-5 text-sm font-medium leading-7 text-[#5D554F]">{question.options![index].label}</div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {question.type !== 'image' && question.type !== 'intuition' && question.type !== 'agreement' && question.responseMode !== 'bipolar' && (
           <div className="grid gap-4">{question.options!.map(renderChoice)}</div>
         )}
 

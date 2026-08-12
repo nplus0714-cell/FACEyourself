@@ -29,10 +29,11 @@ export interface FaceQuestionOption {
 }
 
 export interface FaceImagePlaceholder {
-  assetKey: string;
-  src?: string;
-  alt: string;
-  prompt: string;
+    assetKey: string;
+    src?: string;
+    alt: string;
+    prompt: string;
+    shortLabel?: string;
 }
 
 export interface FaceCompositeImage {
@@ -62,7 +63,10 @@ export interface FaceQuestion {
   images?: [FaceImagePlaceholder, FaceImagePlaceholder];
   compositeImage?: FaceCompositeImage;
   responseMode?: FaceQuestionResponseMode;
-  allowNotApplicable?: boolean;
+    allowNotApplicable?: boolean;
+    scenarioGroup?: string;
+    scenarioGroupTitle?: string;
+    scenarioStage?: 1 | 2;
 }
 
 export type AssessmentSelectedOption =
@@ -84,6 +88,15 @@ export interface FaceAssessmentMeta {
   assessmentVersion: string;
   answeredCountByDimension: Record<FaceDimension, number>;
   skippedQuestionIds: string[];
+  scenarioQuestionCount?: number;
+  notApplicableRate?: number;
+    hasInsufficientData?: boolean;
+    scenarioConsistencyBonuses?: Array<{
+      group: string;
+      title: string;
+      trait: FaceTrait;
+      points: number;
+    }>;
   confidenceByDimension: Record<FaceDimension, 'high' | 'medium' | 'low'>;
 }
 

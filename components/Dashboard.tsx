@@ -93,6 +93,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
   const baselineAnswerCount = dna.assessmentMeta
     ? Object.values(dna.assessmentMeta.answeredCountByDimension).reduce((total, count) => total + count, 0)
     : null;
+  const skippedScenarioCount = dna.assessmentMeta?.skippedQuestionIds.length ?? 0;
+  const scenarioQuestionCount = dna.assessmentMeta?.scenarioQuestionCount ?? 16;
+  const hasInsufficientScenarioData = dna.assessmentMeta?.hasInsufficientData
+    ?? skippedScenarioCount / scenarioQuestionCount > 0.5;
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -159,6 +163,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
 
       {/* ✅ 合併後的「完整靈魂報告卷軸」 */}
       <div className="bg-[#F7F4EF] border border-[#D1D1C7] overflow-hidden flex flex-col items-center">
+        {hasInsufficientScenarioData && (
+          <div className="w-full border-b border-[#C99562] bg-[#FFF5E8] px-6 py-5 text-left text-[#6A4529]" role="alert">
+            <p className="text-sm font-bold tracking-[0.08em]">問卷回答缺少足夠資料，產出的結果可能失真</p>
+            <p className="mt-2 text-sm leading-7">你有 {skippedScenarioCount}／{scenarioQuestionCount} 題交易情境選擇「不適用於我」。本頁仍依其餘回答換算，但建議只作初步參考，並在累積更多交易經驗後重新測驗。</p>
+          </div>
+        )}
         
         {/* 1. 照片區塊 */}
         <div className="grid w-full border-b border-[#D1D1C7] md:grid-cols-[0.95fr_1.05fr]">
@@ -199,6 +209,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
                   <p className="mt-3 text-xs leading-6 text-[#8C7E6D]">
                     作答完整度 {baselineAnswerCount}／40
                     {dna.assessmentMeta.skippedQuestionIds.length > 0 && `；${dna.assessmentMeta.skippedQuestionIds.length} 題不適用，已按其餘作答重新換算。`}
+                  </p>
+                )}
+                {!!dna.assessmentMeta?.scenarioConsistencyBonuses?.length && (
+                  <p className="mt-2 text-xs leading-6 text-[#8C7E6D]">
+                    連續情境中有 {dna.assessmentMeta.scenarioConsistencyBonuses.length} 組在壓力增加時維持同一方向，已納入結果加權。
                   </p>
                 )}
               </div>

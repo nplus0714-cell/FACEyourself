@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ZenLayout } from './components/ZenLayout';
 import { Assessment } from './components/Assessment';
 import { FaceAssessment } from './components/FaceAssessment';
+import { FaceSequentialMockup } from './components/FaceSequentialMockup';
 import { Dashboard } from './components/Dashboard';
 import { RoleGallery } from './components/RoleGallery';
 import { RoleDetail } from './components/RoleDetail';
@@ -28,7 +29,7 @@ import { claimPendingGuestAssessment } from './services/guestResultClaim';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 
-type AppView = 'landing' | 'dna-test' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'mirror-trade' | 'result-preview' | 'member-home';
+type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'mirror-trade' | 'result-preview' | 'member-home';
 
 const viewFromPath = (path: string): AppView => {
   if (path === '/preview-results') return 'result-preview';
@@ -40,6 +41,7 @@ const viewFromPath = (path: string): AppView => {
   if (path.startsWith('/watch/')) return 'content-detail';
   if (path === '/watch') return 'content-hub';
   if (path === '/test') return 'dna-test';
+  if (path === '/test-mockup') return 'sequential-test-mockup';
   if (path === '/about') return 'about-face';
   if (path === '/coach') return 'coach-profile';
   return 'landing';
@@ -48,6 +50,7 @@ const viewFromPath = (path: string): AppView => {
 const pathForView = (view: AppView) => ({
   landing: '/',
   'dna-test': '/test',
+  'sequential-test-mockup': '/test-mockup',
   'about-face': '/about',
   'coach-profile': '/coach',
   'role-gallery': '/types',
@@ -416,6 +419,7 @@ const App: React.FC = () => {
       </>}
 
       {view === 'dna-test' && <FaceAssessment onComplete={handleDnaComplete} />}
+      {view === 'sequential-test-mockup' && <FaceSequentialMockup onExit={() => navigateTo('landing')} />}
       
       {view === 'daily-test' && (
         isFetchingQuestions ? (
