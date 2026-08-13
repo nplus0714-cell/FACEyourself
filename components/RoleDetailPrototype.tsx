@@ -10,6 +10,7 @@ interface RoleDetailPrototypeProps {
   onOpenCompatibility?: () => void;
   onOpenRate?: () => void;
   onOpenContent?: () => void;
+  onOpenDeepDive?: (code: string) => void;
 }
 
 const toneFor = (code: string) => (code.startsWith('A') ? '#9A655C' : '#667784');
@@ -31,6 +32,7 @@ export const RoleDetailPrototype: React.FC<RoleDetailPrototypeProps> = ({
   onOpenCompatibility,
   onOpenRate,
   onOpenContent,
+  onOpenDeepDive,
 }) => {
   const profile = FACE_2_PROTOTYPES[role.code]!;
   const tone = toneFor(role.code);
@@ -230,12 +232,18 @@ export const RoleDetailPrototype: React.FC<RoleDetailPrototypeProps> = ({
         </section>
 
         <section className="border border-[#CFC6B8] bg-[#F1EAE2] px-7 py-12 text-center md:px-14 md:py-16">
-          <p className="text-xs font-bold tracking-[0.18em]" style={{ color: tone }}>10 · FACE DEEP DIVE</p>
-          <h2 className="mx-auto mt-5 max-w-3xl serif text-3xl leading-[1.65] text-[#2D2D2D] md:text-4xl">{profile.closing.headline}</h2>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-[2] text-[#5F574F]">{profile.closing.body}</p>
-          <button type="button" disabled className="mt-9 cursor-not-allowed bg-[#2D2D2D] px-8 py-4 text-sm font-bold tracking-[0.1em] text-white opacity-55" aria-label="FACE Deep Dive 將在下一階段開放">
-            FACE Deep Dive｜下一階段開放
-          </button>
+          <p className="text-xs font-bold tracking-[0.18em]" style={{ color: tone }}>10 · 今日自我覺察</p>
+          <h2 className="mx-auto mt-5 max-w-3xl serif text-3xl leading-[1.65] text-[#2D2D2D] md:text-4xl">人格是長期習慣，今天的狀態需要每天看見。</h2>
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-[2] text-[#5F574F]">用 8 題整理今天面對盤勢時的情緒、注意力與行動傾向。完成後，結果會直接存入你的自我覺察日記。</p>
+          {onOpenDeepDive ? (
+            <button type="button" onClick={() => onOpenDeepDive(role.code)} className="mt-9 bg-[#2D2D2D] px-8 py-4 text-sm font-bold tracking-[0.1em] text-white transition hover:bg-black">
+              開始今日的 8 題自我覺察 →
+            </button>
+          ) : (
+            <button type="button" disabled className="mt-9 cursor-not-allowed bg-[#2D2D2D] px-8 py-4 text-sm font-bold tracking-[0.1em] text-white opacity-55" aria-label="登入後開啟今日自我覺察">
+              登入後開啟今日自我覺察
+            </button>
+          )}
           <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-bold text-[#5F574F]">
             {onOpenContent && <button type="button" onClick={onOpenContent} className="border-b border-current pb-1 hover:text-[#8C635B]">先去交易解憂 Bar →</button>}
             {onOpenCompatibility && <button type="button" onClick={onOpenCompatibility} className="border-b border-current pb-1 hover:text-[#8C635B]">查看交易互補輪盤 →</button>}

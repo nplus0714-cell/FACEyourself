@@ -27,6 +27,7 @@ dist-ssr
 *.sw?
 .vercel
 .env*
+supabase/.temp/
 
 # Local agent tooling and generated working files
 .claude/

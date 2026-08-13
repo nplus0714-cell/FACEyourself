@@ -9,9 +9,12 @@ interface ResultPreviewProps {
   onSelectCode: (code: string) => void;
   onBackToList: () => void;
   language: Language;
+  onOpenDeepDive: (code: string) => void;
+  onStartAwareness: () => void;
+  onRetest: () => void;
 }
 
-export const ResultPreview: React.FC<ResultPreviewProps> = ({ selectedCode, onSelectCode, onBackToList, language }) => {
+export const ResultPreview: React.FC<ResultPreviewProps> = ({ selectedCode, onSelectCode, onBackToList, language, onOpenDeepDive, onStartAwareness, onRetest }) => {
   if (selectedCode && FACE_MAP[selectedCode]) {
     return (
       <div className="fade-in">
@@ -19,7 +22,7 @@ export const ResultPreview: React.FC<ResultPreviewProps> = ({ selectedCode, onSe
           <p className="text-xs font-bold tracking-[0.16em] text-[#8C635B]">RESULT PAGE PREVIEW · {selectedCode}</p>
           <button type="button" onClick={onBackToList} className="border border-[#D1D1C7] bg-white px-4 py-2 text-xs font-bold text-[#5F574F] transition hover:border-[#2D2D2D] hover:text-[#2D2D2D]">返回 16 型清單</button>
         </div>
-        <Dashboard dna={createPreviewScores(selectedCode)} user={null} onLoginRequest={() => undefined} isSharedView language={language} />
+        <Dashboard dna={createPreviewScores(selectedCode)} user={null} onLoginRequest={() => undefined} language={language} onOpenDeepDive={onOpenDeepDive} onGoToGallery={onBackToList} onRetest={onRetest} onStartAwareness={onStartAwareness} />
         <p className="mt-8 text-center text-xs leading-6 text-[#8C7E6D]">這是版型測試用的模擬分數，不會寫入你的測驗紀錄。</p>
       </div>
     );

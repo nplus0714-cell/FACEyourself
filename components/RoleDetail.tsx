@@ -22,6 +22,7 @@ interface RoleDetailProps {
   onOpenCompatibility?: () => void;
   onOpenRate?: () => void;
   onOpenContent?: () => void;
+  onOpenDeepDive?: (code: string) => void;
   onOpenRole?: (code: string) => void;
 }
 
@@ -58,7 +59,7 @@ const GentleLink: React.FC<{ eyebrow: string; description: string; link: string;
   </aside>
 );
 
-export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack, compact = false, onOpenCompatibility, onOpenRate, onOpenContent, onOpenRole }) => {
+export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack, compact = false, onOpenCompatibility, onOpenRate, onOpenContent, onOpenDeepDive, onOpenRole }) => {
   // 已完成 FACE 2.0 專用內容的類型使用新原型；未遷移的類型維持既有 V2 版型。
   if (FACE_2_PROTOTYPES[role.code]) {
     return (
@@ -70,6 +71,7 @@ export const RoleDetail: React.FC<RoleDetailProps> = ({ role, isUserType, onBack
         onOpenCompatibility={onOpenCompatibility}
         onOpenRate={onOpenRate}
         onOpenContent={onOpenContent}
+        onOpenDeepDive={onOpenDeepDive}
       />
     );
   }

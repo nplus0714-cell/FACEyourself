@@ -7,7 +7,7 @@ import { FACE_MAP, getFaceCode } from '../constants';
 import { generateDynamicReport } from '../services/geminiService';
 import { ShareModal } from './ShareModal';
 import { RoleDetail } from './RoleDetail';
-import { BookOpen, RotateCcw, Share2 } from 'lucide-react';
+import { BookOpen, RotateCcw, Share2, NotebookPen } from 'lucide-react';
 import { translations } from '../i18n';
 import { FACE_2_PROTOTYPES } from '../data/faceProfilePrototype';
 
@@ -24,6 +24,8 @@ interface DashboardProps {
   onOpenContent?: () => void;
   onOpenMemberHome?: () => void;
   onOpenCompatibility?: () => void;
+  onOpenDeepDive?: (code: string) => void;
+  onStartAwareness?: () => void;
   onRetest?: () => void;
   isSharedView?: boolean;
   language: Language;
@@ -34,7 +36,7 @@ const calcRatio = (v1: number, v2: number) => {
   return total === 0 ? 50 : Math.round((v1 / total) * 100);
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenMemberHome, onOpenCompatibility, onRetest, isSharedView, language }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenMemberHome, onOpenCompatibility, onOpenDeepDive, onStartAwareness, onRetest, isSharedView, language }) => {
   const code = getFaceCode(dna);
   const profile = FACE_MAP[code] || FACE_MAP['ARLC'];
   const face2Profile = FACE_2_PROTOTYPES[code];
@@ -284,6 +286,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             onOpenCompatibility={onOpenCompatibility}
             onOpenRate={onGoToMirrorTrade}
             onOpenContent={onOpenContent}
+            onOpenDeepDive={onOpenDeepDive}
           />
 
           {!isSharedView && (
@@ -309,6 +312,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
                 >
                   <BookOpen size={16} strokeWidth={1.7} aria-hidden="true" />
                   查看圖鑑
+                </button>
+              )}
+              {onStartAwareness && (
+                <button
+                  onClick={onStartAwareness}
+                  className="inline-flex items-center gap-2 bg-[#8C635B] px-6 py-3 text-sm font-bold tracking-[0.08em] text-white transition-colors hover:bg-[#754F48]"
+                >
+                  <NotebookPen size={16} strokeWidth={1.7} aria-hidden="true" />
+                  開始自我覺察
                 </button>
               )}
             </div>

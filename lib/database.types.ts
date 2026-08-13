@@ -73,6 +73,54 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      member_profiles: {
+        Row: {
+          user_id: string;
+          nickname: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          nickname: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          nickname?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      awareness_diary_entries: {
+        Row: {
+          id: string;
+          user_id: string;
+          entry_date: string;
+          content: string;
+          state_code: 'steady' | 'watching' | 'chasing' | 'attached' | 'guarded' | 'resetting' | null;
+          answers: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          entry_date: string;
+          content?: string;
+          state_code?: 'steady' | 'watching' | 'chasing' | 'attached' | 'guarded' | 'resetting' | null;
+          answers?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          content?: string;
+          state_code?: 'steady' | 'watching' | 'chasing' | 'attached' | 'guarded' | 'resetting' | null;
+          answers?: Json | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

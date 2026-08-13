@@ -158,6 +158,14 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                 >
                   {t.nav.watch}
                 </button>
+                <button
+                  onClick={() => user ? onViewChange('member-home') : onLogin?.()}
+                  className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'member-home' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
+                  aria-label={user ? '進入 FACE 自我覺察日記' : '登入後使用 FACE 自我覺察日記'}
+                >
+                  覺察日記
+                  {!user && <span className="ml-1.5 text-[10px] font-bold text-[#8C635B]" aria-hidden="true">登入</span>}
+                </button>
             </nav>
           )}
 
