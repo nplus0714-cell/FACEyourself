@@ -1,6 +1,16 @@
 const WEBHOOK_URL = 'https://uudmqsvdtiizamsbevih.supabase.co/functions/v1/research-form-webhook';
 const AGREEMENT = ['非常同意', '有些同意', '中立／不一定', '有些不同意', '非常不同意'];
 const BIPOLAR = ['非常接近 A', '比較接近 A', '兩者都有可能', '比較接近 B', '非常接近 B', '這個情境不適用於我'];
+const CALIBRATION = {
+  focus: { title: '[校準01] 你認為自己的交易風格比較接近哪一側？', choices: ['非常偏積極', '比較偏積極', '介於兩者之間', '比較偏保守', '非常偏保守'] },
+  analysis: { title: '[校準02] 做交易決策時，你通常比較依賴哪一側？', choices: ['非常依賴數據與規則', '比較依賴數據與規則', '兩種方式並用', '比較依賴盤面感受', '非常依賴盤面感受'] },
+  cycle: { title: '[校準03] 你通常比較偏好哪一種持有方式？', choices: ['非常偏向長期持有', '比較偏向長期持有', '兩種方式並用', '比較偏向掌握波段', '非常偏向掌握波段'] },
+  exposure: { title: '[校準04] 你通常比較偏好哪一種資金配置？', choices: ['非常偏向集中配置', '比較偏向集中配置', '介於兩者之間', '比較偏向分散配置', '非常偏向分散配置'] },
+  difficult: '[回饋01] 這份問卷中，有哪些題目讓你特別難以選擇？為什麼？',
+  repetitive: '[回饋02] 你覺得哪些題目的內容或情境較為重複？',
+  neither: '[回饋03] 是否有題目的兩個選項都不像你？請寫下題號或簡單描述。',
+  realism: { title: '[回饋04] 整體而言，這份問卷呈現的交易情境是否貼近你的實際經驗？', choices: ['非常貼近', '大致貼近', '一半貼近', '不太貼近', '完全不貼近'] },
+};
 
 const QUESTIONS = [
   [1,'intuition','一個潛在報酬很高、但資訊還不完整的機會出現時，你第一個想確認的是：','上行空間可能有多大？','最壞情況可能損失多少？'],
@@ -82,6 +92,7 @@ function setupResearchForm() {
     if (kind === 'scenario') item.setHelpText(`A｜${optionA}\n\nB｜${optionB}\n\n請依你當下比較可能採取的做法選擇；若兩者都可能，請選「兩者都有可能」。`);
     item.setChoiceValues(kind === 'agreement' ? AGREEMENT : kind === 'scenario' ? BIPOLAR : [`A｜${optionA}`, `B｜${optionB}`]);
   });
+  addCalibrationSection(form);
 
   const sheet = SpreadsheetApp.create('交易決策與行為模式前期研究｜原始回覆');
   form.setDestination(FormApp.DestinationType.SPREADSHEET, sheet.getId());
@@ -94,6 +105,29 @@ function setupResearchForm() {
   ScriptApp.newTrigger('onResearchFormSubmit').forForm(form).onFormSubmit().create();
   properties.setProperties({ FORM_ID: form.getId(), SHEET_ID: sheet.getId() });
   console.log(JSON.stringify({ formId: form.getId(), editUrl: form.getEditUrl(), publishedUrl: form.getPublishedUrl(), sheetUrl: sheet.getUrl() }));
+}
+
+function addCalibrationSection(form) {
+  form.addPageBreakItem().setTitle('第五部分｜自我評估與問卷回饋').setHelpText('以下題目僅用於檢驗問卷是否準確、清楚，不會影響你的交易行為分類結果。');
+  ['focus', 'analysis', 'cycle', 'exposure'].forEach((key) => {
+    const question = CALIBRATION[key];
+    form.addMultipleChoiceItem().setTitle(question.title).setChoiceValues(question.choices).setRequired(true);
+  });
+  form.addParagraphTextItem().setTitle(CALIBRATION.difficult).setHelpText('選填；可填題號與原因。').setRequired(false);
+  form.addParagraphTextItem().setTitle(CALIBRATION.repetitive).setHelpText('選填；可填題號或相似情境。').setRequired(false);
+  form.addParagraphTextItem().setTitle(CALIBRATION.neither).setHelpText('選填；可填題號與比較接近你的做法。').setRequired(false);
+  form.addMultipleChoiceItem().setTitle(CALIBRATION.realism.title).setChoiceValues(CALIBRATION.realism.choices).setRequired(true);
+}
+
+function addCalibrationSectionToCurrentForm() {
+  const properties = PropertiesService.getScriptProperties();
+  const form = FormApp.openById(properties.getProperty('FORM_ID'));
+  const exists = form.getItems(FormApp.ItemType.PAGE_BREAK)
+    .some((item) => item.asPageBreakItem().getTitle() === '第五部分｜自我評估與問卷回饋');
+  if (!exists) addCalibrationSection(form);
+  form.setDescription(form.getDescription().replace('共40題，約需8～12分鐘', '共40題及8題作答回饋，約需10～15分鐘'));
+  form.setAcceptingResponses(true);
+  console.log(JSON.stringify({ added: !exists, publishedUrl: form.getPublishedUrl(), totalItems: form.getItems().length }));
 }
 
 function convertCurrentFormToTextOnly() {
@@ -157,6 +191,15 @@ function onResearchFormSubmit(event) {
     responseId: event.response.getId(), formId: event.source.getId(), submittedAt: event.response.getTimestamp().toISOString(),
     consentResearch: Array.isArray(responses['研究參與同意']) ? responses['研究參與同意'].indexOf('我同意') >= 0 : String(responses['研究參與同意']).includes('我同意'),
     email: responses['Email'], consentResultEmail: resultConsent, consentMarketing: marketingConsent, answers,
+    calibration: {
+      focus: responses[CALIBRATION.focus.title], analysis: responses[CALIBRATION.analysis.title],
+      cycle: responses[CALIBRATION.cycle.title], exposure: responses[CALIBRATION.exposure.title],
+      realism: responses[CALIBRATION.realism.title],
+    },
+    feedback: {
+      difficult: responses[CALIBRATION.difficult] || '', repetitive: responses[CALIBRATION.repetitive] || '',
+      neither: responses[CALIBRATION.neither] || '',
+    },
   };
   const response = UrlFetchApp.fetch(WEBHOOK_URL, {
     method: 'post', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true,

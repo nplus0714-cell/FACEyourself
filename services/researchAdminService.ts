@@ -19,6 +19,9 @@ export type ResearchSubmission = {
   canSendResult: boolean;
   canMarket: boolean;
   issues: string[];
+  calibration: Record<string, string>;
+  feedback: Record<string, string>;
+  calibrationComplete: boolean;
 };
 
 export type ResearchAdminData = {

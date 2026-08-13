@@ -51,7 +51,7 @@ Deno.serve(async (request) => {
   const admin = createClient(url, serviceKey);
   const { data: submissions, error: submissionError } = await admin
     .from('research_submissions')
-    .select('id, participant_id, assessment_version, face_code, scores, not_applicable_count, insufficient_data, submitted_at, received_at')
+    .select('id, participant_id, assessment_version, face_code, scores, not_applicable_count, insufficient_data, submitted_at, received_at, metadata')
     .order('submitted_at', { ascending: false })
     .limit(500);
   if (submissionError) return Response.json({ error: submissionError.message }, { status: 500, headers: corsHeaders });
@@ -83,6 +83,10 @@ Deno.serve(async (request) => {
     const scoresValid = scoresAreValid(submission.scores);
     const faceCodeValid = /^[AP][RI][LT][CD]$/.test(submission.face_code || '');
     const emailUsable = isEmailUsable(participant?.email || null);
+    const metadata = submission.metadata && typeof submission.metadata === 'object' ? submission.metadata as Record<string, unknown> : {};
+    const calibration = metadata.calibration && typeof metadata.calibration === 'object' ? metadata.calibration as Record<string, unknown> : {};
+    const feedback = metadata.feedback && typeof metadata.feedback === 'object' ? metadata.feedback as Record<string, unknown> : {};
+    const calibrationComplete = ['focus', 'analysis', 'cycle', 'exposure', 'realism'].every((key) => typeof calibration[key] === 'string' && calibration[key]);
     const researchReady = Boolean(participant?.consent_research)
       && answerCount === 40 && uniqueCodes.size === 40 && missingQuestions.length === 0
       && scoresValid && faceCodeValid && !submission.insufficient_data;
@@ -116,6 +120,9 @@ Deno.serve(async (request) => {
       canSendResult: researchReady && emailUsable && Boolean(participant?.consent_result_email) && !participant?.unsubscribed_at,
       canMarket: researchReady && emailUsable && Boolean(participant?.consent_marketing) && !participant?.unsubscribed_at,
       issues,
+      calibration,
+      feedback,
+      calibrationComplete,
     };
   });
 

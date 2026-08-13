@@ -6,6 +6,10 @@ not mention FACE, the animal result, or the scoring hypothesis. Scenario items
 show the complete A/B actions before the response scale so each answer remains
 understandable without an image.
 
+After the 40 scored items, the form includes eight unscored calibration and
+feedback items. Their answers are stored in submission metadata and must never
+change the FACE score or animal result.
+
 ## Data flow
 
 1. Google Form stores the original response in its linked Google Sheet.

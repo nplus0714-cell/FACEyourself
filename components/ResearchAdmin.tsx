@@ -45,7 +45,7 @@ export const ResearchAdmin: React.FC = () => {
         <tbody>{data.submissions.map((row) => <tr key={row.id} className="border-t border-[#E2DBD1] align-top">
           <td className="whitespace-nowrap px-4 py-5 text-xs text-[#6F655D]">{new Date(row.submittedAt).toLocaleString('zh-TW')}</td>
           <td className="px-4 py-5"><div>{row.emailMasked || '未提供'}</div><div className={`mt-1 text-xs ${row.emailUsable ? 'text-[#527257]' : 'text-[#A35D55]'}`}>{row.emailUsable ? '格式可用' : '不可寄送'}</div></td>
-          <td className="px-4 py-5"><b>{row.answerCount}/40</b><div className="mt-1 text-xs text-[#756B62]">不適用 {row.notApplicableCount} 題</div></td>
+          <td className="px-4 py-5"><b>{row.answerCount}/40</b><div className="mt-1 text-xs text-[#756B62]">不適用 {row.notApplicableCount} 題</div><div className={`mt-1 text-xs ${row.calibrationComplete ? 'text-[#527257]' : 'text-[#8B7664]'}`}>校準題：{row.calibrationComplete ? '完整' : '舊版／未填'}</div></td>
           <td className="px-4 py-5"><span className="font-bold tracking-widest">{row.faceCode}</span></td>
           <td className="px-4 py-5 text-xs leading-6 text-[#5F5650]">A {row.scores.A} / P {row.scores.P}<br />R {row.scores.R} / I {row.scores.I}<br />L {row.scores.L} / T {row.scores.T}<br />C {row.scores.C} / D {row.scores.D}</td>
           <td className="px-4 py-5">{row.researchReady ? <span className="inline-flex bg-[#EAF2EA] px-3 py-1 text-xs font-bold text-[#426248]">可研究</span> : <span className="inline-flex bg-[#F6E8E5] px-3 py-1 text-xs font-bold text-[#934F47]">需排除</span>}<div className="mt-2 max-w-[220px] text-xs leading-5 text-[#8A5B54]">{row.issues.join('、')}</div></td>

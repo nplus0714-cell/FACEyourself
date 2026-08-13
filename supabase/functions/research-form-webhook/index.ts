@@ -134,7 +134,11 @@ Deno.serve(async (request) => {
       not_applicable_count: calculated.skipped,
       insufficient_data: calculated.insufficientData,
       submitted_at: new Date(payload.submittedAt).toISOString(),
-      metadata: { formId: payload.formId || null },
+      metadata: {
+        formId: payload.formId || null,
+        calibration: payload.calibration && typeof payload.calibration === 'object' ? payload.calibration : {},
+        feedback: payload.feedback && typeof payload.feedback === 'object' ? payload.feedback : {},
+      },
     }, { onConflict: 'external_response_id' }).select('id').single();
     if (submissionError) throw submissionError;
     const answerRows = calculated.rows.map((row) => ({ ...row, submission_id: submission.id }));
