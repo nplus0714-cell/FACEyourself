@@ -21,6 +21,7 @@ import { LastAssessmentCard } from './components/LastAssessmentCard';
 import { ResearchAdmin } from './components/ResearchAdmin';
 import { DailyAwarenessCheckIn } from './components/DailyAwarenessCheckIn';
 import { DailyAwarenessResultPreview } from './components/DailyAwarenessResultPreview';
+import { ReadingLayerPrototype } from './components/ReadingLayerPrototype';
 import { scoreDailyAwareness, type DailyAwarenessAnswers } from './data/dailyAwarenessQuestions';
 import type { DailyAwarenessResult } from './data/dailyAwarenessPreview';
 import { saveDailyAwarenessResult } from './services/memberAwarenessJournal';
@@ -34,12 +35,13 @@ import { claimPendingGuestAssessment } from './services/guestResultClaim';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 
-type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'daily-result' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'mirror-trade' | 'result-preview' | 'member-home' | 'research-admin';
+type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'daily-result' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin';
 
 const viewFromPath = (path: string): AppView => {
   if (path === '/my-result') return 'dashboard';
   if (path === '/journal/history') return 'history';
   if (path === '/preview-results') return 'result-preview';
+  if (path === '/reading-prototype') return 'reading-prototype';
   if (path === '/daily-awareness-result') return 'daily-result';
   if (path === '/deep-dive') return 'daily-test';
   if (path === '/research-admin') return 'research-admin';
@@ -71,6 +73,7 @@ const pathForView = (view: AppView) => ({
   'content-hub': '/watch',
   'mirror-trade': '/mirror-trade',
   'result-preview': '/preview-results',
+  'reading-prototype': '/reading-prototype',
   'research-admin': '/research-admin',
   'member-home': '/me',
   dashboard: '/my-result',
@@ -356,7 +359,7 @@ const App: React.FC = () => {
         }
         navigateTo(v as AppView);
       }}
-      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'mirror-trade', 'result-preview', 'member-home', 'research-admin'].includes(view)}
+      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'mirror-trade', 'result-preview', 'reading-prototype', 'member-home', 'research-admin'].includes(view)}
       isLanding={view === 'landing'}
       language={language}
       onToggleLanguage={toggleLanguage}
@@ -551,6 +554,7 @@ const App: React.FC = () => {
       {view === 'member-home' && state.user && <MemberHome user={state.user} dna={state.dna} onViewResult={(code) => openResultPreview(code)} onStartTest={() => navigateTo('dna-test')} onStartAwareness={openDailyAwareness} onOpenContent={() => navigateTo('content-hub')} onNicknameChange={(nickname) => setState((previous) => previous.user ? { ...previous, user: { ...previous.user, name: nickname } } : previous)} />}
       {view === 'member-home' && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">登入後可以保存測驗結果、回看變化，並使用 RATE 鏡相診股。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">登入並保存結果</button></div>}
       {view === 'result-preview' && <ResultPreview selectedCode={previewResultCode} onSelectCode={openResultPreview} onBackToList={backToResultPreviewList} language={language} onOpenDeepDive={() => openDailyAwareness()} onStartAwareness={openDailyAwareness} onRetest={() => navigateTo('dna-test')} />}
+      {view === 'reading-prototype' && <ReadingLayerPrototype />}
       {view === 'research-admin' && state.user && <ResearchAdmin />}
       {view === 'research-admin' && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">研究後台僅開放管理者帳號。請先登入。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">管理者登入</button></div>}
       {view === 'content-hub' && (
