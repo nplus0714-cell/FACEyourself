@@ -1,7 +1,6 @@
 const WEBHOOK_URL = 'https://uudmqsvdtiizamsbevih.supabase.co/functions/v1/research-form-webhook';
-const ASSET_BASE = 'https://faceyourself.vercel.app/images/questions/v2';
 const AGREEMENT = ['非常同意', '有些同意', '中立／不一定', '有些不同意', '非常不同意'];
-const BIPOLAR = ['非常接近 A', '比較接近 A', '看情況／介於兩者', '比較接近 B', '非常接近 B', '這個情境不適用於我'];
+const BIPOLAR = ['非常接近 A', '比較接近 A', '兩者都有可能', '比較接近 B', '非常接近 B', '這個情境不適用於我'];
 
 const QUESTIONS = [
   [1,'intuition','一個潛在報酬很高、但資訊還不完整的機會出現時，你第一個想確認的是：','上行空間可能有多大？','最壞情況可能損失多少？'],
@@ -12,14 +11,14 @@ const QUESTIONS = [
   [6,'intuition','面對沒有標準答案的市場時，你通常更信任：','可以在事前寫下、事後檢驗的方法','長期觀察後形成、能讀懂情境變化的市場感'],
   [7,'intuition','哪一種狀況更容易打亂你的交易節奏？','為了找短線機會頻繁進出','資金長時間停在沒有進展的部位'],
   [8,'intuition','配置資金時，哪一個方向對你更自然？','讓資金明顯集中在最有把握的少數機會','讓多個不同機會共同影響整體結果'],
-  [9,'image','看到兩種上漲走勢，你第一眼比較有感的是？','短期拉升','平穩上行'],
-  [10,'image','如果都有獲利機會，你比較能接受哪種持有過程？','波動較大','波動較小'],
-  [11,'image','準備做一筆交易時，哪種方式比較像你？','先規劃','邊看邊決定'],
-  [12,'image','你平常比較像哪一種選股方式？','條件篩選','市場熱點'],
-  [13,'image','你的持股創下新高時，你通常會怎麼做？','續抱長期','賣出掌握節奏'],
-  [14,'image','投入資金時，哪種節奏比較像你？','每月固定買','看變化再決定'],
-  [15,'image','你通常會怎麼安排持股數量？','集中少數標的','分散在多個標的'],
-  [16,'image','哪一種資產配置方式比較像你？','單一主軸','多元組合'],
+  [9,'preference','如果兩種走勢都有獲利機會，你比較偏好哪一種持有體驗？','短期快速拉升，過程波動可能較明顯','較平穩地逐步上行，等待時間可能較長'],
+  [10,'preference','如果長期期望報酬相近，你比較能接受哪一種價格路徑？','價格波動較大，但可能較早出現明顯漲幅','價格波動較小，以較穩定的節奏逐步累積'],
+  [11,'preference','準備做一筆交易時，哪種方式比較像你？','交易前先寫好條件與計畫','先觀察盤面，再依變化決定'],
+  [12,'preference','你平常比較像哪一種選股方式？','依數據與條件篩選標的','從市場熱門題材與強勢股尋找機會'],
+  [13,'preference','你的持股創下新高時，你通常比較想怎麼做？','只要長期理由仍在，就繼續持有','依短期行情節奏分批賣出'],
+  [14,'preference','投入資金時，哪種節奏比較像你？','固定時間投入，不特別判斷進場時點','觀察行情變化後，再決定何時投入'],
+  [15,'preference','你通常會怎麼安排持股數量？','集中持有少數較有把握的標的','分散持有多個不同標的'],
+  [16,'preference','哪一種資產配置方式比較像你？','以一項主要資產或策略為核心','配置多種資產與不同策略'],
   [17,'agreement','面對上行空間與回撤風險都較大的機會，我通常願意承受較大的短期波動來換取上行。','',''],
   [18,'agreement','我比較信任能在事前寫成條件、事後回頭檢驗的買進理由。','',''],
   [19,'agreement','資金長時間沒有進展，對我來說本身就是一種成本。','',''],
@@ -75,11 +74,12 @@ function setupResearchForm() {
   QUESTIONS.forEach((question, index) => {
     const [number, kind, prompt, optionA, optionB] = question;
     if (number === 1 || number === 9 || number === 17 || number === 25) {
-      const section = number === 1 ? '第一部分｜直覺選擇' : number === 9 ? '第二部分｜圖片選擇' : number === 17 ? '第三部分｜同意程度' : '第四部分｜市場情境';
+      const section = number === 1 ? '第一部分｜直覺選擇' : number === 9 ? '第二部分｜交易偏好選擇' : number === 17 ? '第三部分｜同意程度' : '第四部分｜市場情境';
       form.addPageBreakItem().setTitle(section);
     }
-    if (number <= 16) addQuestionImages(form, number, kind, optionA, optionB);
     const item = form.addMultipleChoiceItem().setTitle(`[Q${String(number).padStart(2,'0')}] ${prompt}`).setRequired(true);
+    if (kind === 'agreement') item.setHelpText('請選擇你對這句描述的同意程度。');
+    if (kind === 'scenario') item.setHelpText(`A｜${optionA}\n\nB｜${optionB}\n\n請依你當下比較可能採取的做法選擇；若兩者都可能，請選「兩者都有可能」。`);
     item.setChoiceValues(kind === 'agreement' ? AGREEMENT : kind === 'scenario' ? BIPOLAR : [`A｜${optionA}`, `B｜${optionB}`]);
   });
 
@@ -96,19 +96,44 @@ function setupResearchForm() {
   console.log(JSON.stringify({ formId: form.getId(), editUrl: form.getEditUrl(), publishedUrl: form.getPublishedUrl(), sheetUrl: sheet.getUrl() }));
 }
 
-function addQuestionImages(form, number, kind, optionA, optionB) {
-  const source = number <= 8 ? number : number - 8;
-  const folder = kind === 'intuition' ? 'intuition' : 'original-split';
-  const prefix = kind === 'intuition' ? 'face-intuition' : 'face-original';
-  ['a','b'].forEach((side, index) => {
-    const url = `${ASSET_BASE}/${folder}/${prefix}-${String(source).padStart(2,'0')}-${side}.png`;
-    try {
-      const pngBlob = UrlFetchApp.fetch(url).getBlob().setName(`Q${String(number).padStart(2,'0')}-${side}.png`);
-      form.addImageItem().setTitle(`${side.toUpperCase()}｜${index === 0 ? optionA : optionB}`).setImage(pngBlob);
-    } catch (error) {
-      console.warn(`圖片載入失敗 Q${number}-${side}: ${error}`);
+function convertCurrentFormToTextOnly() {
+  const properties = PropertiesService.getScriptProperties();
+  const form = FormApp.openById(properties.getProperty('FORM_ID'));
+  let removedImages = 0;
+
+  for (let index = form.getItems().length - 1; index >= 0; index -= 1) {
+    if (form.getItems()[index].getType() === FormApp.ItemType.IMAGE) {
+      form.deleteItem(index);
+      removedImages += 1;
     }
+  }
+
+  form.getItems().forEach((formItem) => {
+    if (formItem.getType() === FormApp.ItemType.PAGE_BREAK) {
+      const page = formItem.asPageBreakItem();
+      if (page.getTitle() === '第二部分｜圖片選擇') page.setTitle('第二部分｜交易偏好選擇');
+      return;
+    }
+    if (formItem.getType() !== FormApp.ItemType.MULTIPLE_CHOICE) return;
+
+    const item = formItem.asMultipleChoiceItem();
+    const match = item.getTitle().match(/^\[Q(\d{2})\]/);
+    if (!match) return;
+    const question = QUESTIONS.find((entry) => entry[0] === Number(match[1]));
+    if (!question) return;
+
+    const [number, kind, prompt, optionA, optionB] = question;
+    item.setTitle(`[Q${String(number).padStart(2,'0')}] ${prompt}`);
+    item.setHelpText(kind === 'agreement'
+      ? '請選擇你對這句描述的同意程度。'
+      : kind === 'scenario'
+        ? `A｜${optionA}\n\nB｜${optionB}\n\n請依你當下比較可能採取的做法選擇；若兩者都可能，請選「兩者都有可能」。`
+        : '');
+    item.setChoiceValues(kind === 'agreement' ? AGREEMENT : kind === 'scenario' ? BIPOLAR : [`A｜${optionA}`, `B｜${optionB}`]);
   });
+
+  form.setAcceptingResponses(true);
+  console.log(JSON.stringify({ removedImages, editUrl: form.getEditUrl(), publishedUrl: form.getPublishedUrl() }));
 }
 
 function onResearchFormSubmit(event) {
@@ -124,7 +149,7 @@ function onResearchFormSubmit(event) {
     const value = responses[title];
     if (number <= 16) answers[code] = String(value).startsWith('A｜') ? 'A' : 'B';
     else if (number <= 24) answers[code] = ({'非常同意':'very_agree','有些同意':'somewhat_agree','中立／不一定':'neutral','有些不同意':'somewhat_disagree','非常不同意':'very_disagree'})[value];
-    else answers[code] = ({'非常接近 A':'very_a','比較接近 A':'somewhat_a','看情況／介於兩者':'balanced','比較接近 B':'somewhat_b','非常接近 B':'very_b','這個情境不適用於我':'not_applicable'})[value];
+    else answers[code] = ({'非常接近 A':'very_a','比較接近 A':'somewhat_a','兩者都有可能':'balanced','比較接近 B':'somewhat_b','非常接近 B':'very_b','這個情境不適用於我':'not_applicable'})[value];
   });
   const resultConsent = responses['是否同意日後收到本次研究的個人分析結果？'] === '同意';
   const marketingConsent = responses['是否願意收到相關網站上線、活動及內容通知？'] === '願意';

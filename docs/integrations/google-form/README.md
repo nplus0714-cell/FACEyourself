@@ -1,8 +1,10 @@
 # Google Form → Supabase research pilot
 
 `Code.gs` creates the private pilot form, its response spreadsheet, and the
-installable form-submit trigger. The form deliberately does not mention FACE,
-the animal result, or the scoring hypothesis.
+installable form-submit trigger. The form is text-only and deliberately does
+not mention FACE, the animal result, or the scoring hypothesis. Scenario items
+show the complete A/B actions before the response scale so each answer remains
+understandable without an image.
 
 ## Data flow
 
