@@ -30,6 +30,52 @@ const coverByCode: Record<ProfileCode, string> = {
   PITD: '/images/personalities-v2-text/v2-16-koala-companion-text.png',
 };
 
+type EditorialImageSet = {
+  face: string;
+  mirrors: string;
+  talent: string;
+  triggers: readonly [string, string, string];
+};
+
+const generatedEditorialImages = (slug: string): EditorialImageSet => ({
+  face: `/images/reading-prototype/${slug}/chapter-01.jpg`,
+  mirrors: `/images/reading-prototype/${slug}/chapter-02.jpg`,
+  talent: `/images/reading-prototype/${slug}/chapter-03.jpg`,
+  triggers: [
+    `/images/reading-prototype/${slug}/scene-01.jpg`,
+    `/images/reading-prototype/${slug}/scene-02.jpg`,
+    `/images/reading-prototype/${slug}/scene-03.jpg`,
+  ],
+});
+
+const editorialImagesByCode: Record<ProfileCode, EditorialImageSet> = {
+  ARLC: generatedEditorialImages('arlc'),
+  ARLD: generatedEditorialImages('arld'),
+  ARTC: {
+    face: '/images/reading-prototype/cheetah/chapter-01-face.jpg',
+    mirrors: '/images/reading-prototype/cheetah/chapter-02-mirrors.jpg',
+    talent: '/images/reading-prototype/cheetah/chapter-03-talent.jpg',
+    triggers: [
+      '/images/reading-prototype/cheetah/scene-01-missed-entry.jpg',
+      '/images/reading-prototype/cheetah/scene-02-stopped-out.jpg',
+      '/images/reading-prototype/cheetah/scene-03-overconfidence.jpg',
+    ],
+  },
+  ARTD: generatedEditorialImages('artd'),
+  AILC: generatedEditorialImages('ailc'),
+  AILD: generatedEditorialImages('aild'),
+  AITC: generatedEditorialImages('aitc'),
+  AITD: generatedEditorialImages('aitd'),
+  PRLC: generatedEditorialImages('prlc'),
+  PRLD: generatedEditorialImages('prld'),
+  PRTC: generatedEditorialImages('prtc'),
+  PRTD: generatedEditorialImages('prtd'),
+  PILC: generatedEditorialImages('pilc'),
+  PILD: generatedEditorialImages('pild'),
+  PITC: generatedEditorialImages('pitc'),
+  PITD: generatedEditorialImages('pitd'),
+};
+
 const isProfileCode = (value: string | null): value is ProfileCode => Boolean(value && PROFILE_CODES.includes(value as ProfileCode));
 
 const getInitialProfileCode = (): ProfileCode => {
@@ -187,11 +233,52 @@ const PsychologyNote: React.FC<{ title: string; children: React.ReactNode }> = (
   </aside>
 );
 
+const EditorialFigure: React.FC<{
+  src: string;
+  alt: string;
+  className?: string;
+  imageClassName?: string;
+}> = ({ src, alt, className = '', imageClassName = '' }) => (
+  <figure className={`overflow-hidden border border-[#D8CDBD] bg-[#F3E8D5] ${className}`}>
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      className={`block w-full ${imageClassName || 'h-auto'}`}
+    />
+  </figure>
+);
+
+type ImageSide = 'left' | 'right';
+
+const getEditorialGridClass = (copy: string, imageSide: ImageSide = 'left') => {
+  const copyLength = copy.replace(/\s/g, '').length;
+
+  if (copyLength >= 260) {
+    return imageSide === 'left'
+      ? 'md:grid-cols-[0.82fr_1.18fr]'
+      : 'md:grid-cols-[1.18fr_0.82fr]';
+  }
+
+  if (copyLength <= 150) {
+    return imageSide === 'left'
+      ? 'md:grid-cols-[1.12fr_0.88fr]'
+      : 'md:grid-cols-[0.88fr_1.12fr]';
+  }
+
+  return 'md:grid-cols-2';
+};
+
 export const ReadingLayerPrototype: React.FC = () => {
   const [selectedCode, setSelectedCode] = React.useState<ProfileCode>(getInitialProfileCode);
   const profile = getProfile(selectedCode);
+  const editorialImages = editorialImagesByCode[selectedCode];
   const coreCopy = sentenceParts(profile.coreDescription);
   const comfortItems = profile.comfortZone.items.filter((item) => ['市場節奏', '決策頻率', '部位管理', '交易週期'].includes(item.label));
+  const faceEditorialCopy = `${profile.traits.join('')}${dimensionCopy[profile.code[0]]}${dimensionCopy[profile.code[1]]}${dimensionCopy[profile.code[2]]}${dimensionCopy[profile.code[3]]}`;
+  const mirrorEditorialCopy = `${profile.outsideView}${profile.insideVoice}`;
+  const talentEditorialCopy = `${profile.talent.headline}${profile.talent.body.join('')}`;
 
   const handleProfileChange = (code: ProfileCode) => {
     setSelectedCode(code);
@@ -246,17 +333,28 @@ export const ReadingLayerPrototype: React.FC = () => {
 
       <main className="mt-4">
         <SectionShell chapter={chapterMeta[0]}>
-          <BodyText>
-            <p>{dimensionCopy[profile.code[0]]} {dimensionCopy[profile.code[1]]}</p>
-            <p>{dimensionCopy[profile.code[2]]} <Highlight>{dimensionCopy[profile.code[3]]}</Highlight></p>
-          </BodyText>
-          <div className="mt-8 grid grid-cols-2 gap-px border border-[#D9CFC2] bg-[#D9CFC2] sm:grid-cols-4">
-            {profile.traits.map((trait, index) => (
-              <div key={trait} className="bg-[#FBF8F4] px-4 py-5 text-center">
-                <span className="font-mono text-[13px] text-[#A36F63]">{profile.code[index]}</span>
-                <p className="serif mt-2 text-[1.05rem] font-normal text-[#413934]">{trait}</p>
+          <div className={`grid overflow-hidden border border-[#D8CDBD] bg-white md:items-stretch ${getEditorialGridClass(faceEditorialCopy)}`}>
+            <EditorialFigure
+              src={editorialImages.face}
+              alt={`${profile.name}觀察市場，將訊號、風險與行動連成自己的決策路徑。`}
+              className="border-0 border-b border-[#D8CDBD] md:border-b-0 md:border-r"
+              imageClassName="h-auto md:h-full md:object-cover"
+            />
+            <div className="flex flex-col justify-center px-5 py-7 md:px-8 md:py-9">
+              <MinorLabel>畫面裡的決策視角</MinorLabel>
+              <div className="mt-5 grid grid-cols-2 gap-px border border-[#D9CFC2] bg-[#D9CFC2]">
+                {profile.traits.map((trait, index) => (
+                  <div key={trait} className="flex items-center gap-3 bg-[#FBF8F4] px-3 py-3.5">
+                    <span className="font-mono text-[12px] text-[#A36F63]">{profile.code[index]}</span>
+                    <p className="serif text-[0.98rem] font-normal text-[#413934]">{trait}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+              <BodyText className="mt-6">
+                <p>{dimensionCopy[profile.code[0]]} {dimensionCopy[profile.code[1]]}</p>
+                <p>{dimensionCopy[profile.code[2]]} <Highlight>{dimensionCopy[profile.code[3]]}</Highlight></p>
+              </BodyText>
+            </div>
           </div>
           <Takeaway action={getDecisionAction(profile)}>
             你的決策路徑通常是：先用<Highlight>{profile.traits[1]}</Highlight>形成判斷，以<Highlight>{profile.traits[2]}</Highlight>掌握節奏，再用<Highlight>{profile.traits[3]}</Highlight>配置風險。
@@ -264,15 +362,23 @@ export const ReadingLayerPrototype: React.FC = () => {
         </SectionShell>
 
         <SectionShell chapter={chapterMeta[1]} tinted>
-          <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
-            <article className="border border-[#D8CDBD] bg-white p-6 md:p-8">
-              <div className="flex items-center gap-3"><Eye size={18} strokeWidth={1.4} className="text-[#9A655C]" /><MinorLabel>別人眼中的你</MinorLabel></div>
-              <BodyText className="mt-5"><p>{profile.outsideView}</p></BodyText>
-            </article>
-            <article className="border border-[#C6B4A7] bg-[#4A3A33] p-6 text-white md:p-8">
-              <p className="text-[13px] tracking-[0.1em] text-white/65 md:text-sm">你眼中的自己</p>
-              <p className="serif mt-5 text-[1.18rem] font-normal leading-[2] text-white/90">「{profile.insideVoice}」</p>
-            </article>
+          <div className={`grid overflow-hidden border border-[#D8CDBD] bg-white md:items-stretch ${getEditorialGridClass(mirrorEditorialCopy)}`}>
+            <EditorialFigure
+              src={editorialImages.mirrors}
+              alt={`${profile.name}在鏡前，看見外在表現與內在判斷的兩種樣子。`}
+              className="border-0 border-b border-[#D8CDBD] md:border-b-0 md:border-r"
+              imageClassName="h-auto md:h-full md:object-cover"
+            />
+            <div className="divide-y divide-[#D8CDBD]">
+              <article className="bg-white p-6 md:p-8">
+                <div className="flex items-center gap-3"><Eye size={18} strokeWidth={1.4} className="text-[#9A655C]" /><MinorLabel>鏡子外｜別人眼中的你</MinorLabel></div>
+                <BodyText className="mt-4"><p>{profile.outsideView}</p></BodyText>
+              </article>
+              <article className="bg-[#4A3A33] p-6 text-white md:p-8">
+                <p className="text-[13px] tracking-[0.1em] text-white/65 md:text-sm">鏡子裡｜只有你知道的聲音</p>
+                <p className="serif mt-4 text-[1.18rem] font-normal leading-[2] text-white/90">「{profile.insideVoice}」</p>
+              </article>
+            </div>
           </div>
           <Takeaway>
             外在表現與內在動機不是矛盾。你真正想守住的是：<Highlight>{firstSentence(profile.insideVoice)}</Highlight>
@@ -280,12 +386,23 @@ export const ReadingLayerPrototype: React.FC = () => {
         </SectionShell>
 
         <SectionShell chapter={chapterMeta[2]}>
-          <p className="serif text-[1.35rem] font-normal leading-[1.85] text-[#A05F54] md:text-[1.55rem]">{profile.talent.headline}</p>
-          <BodyText className="mt-7">
-            {profile.talent.body.map((paragraph, index) => (
-              <p key={paragraph}>{index === profile.talent.body.length - 1 ? <Highlight>{paragraph}</Highlight> : paragraph}</p>
-            ))}
-          </BodyText>
+          <div className={`grid overflow-hidden border border-[#D8CDBD] bg-white md:items-stretch ${getEditorialGridClass(talentEditorialCopy, 'right')}`}>
+            <EditorialFigure
+              src={editorialImages.talent}
+              alt={`${profile.name}整理市場資料，將雜訊收斂成訊號、風險與行動。`}
+              className="border-0 border-b border-[#D8CDBD] md:order-2 md:border-b-0 md:border-l"
+              imageClassName="h-auto md:h-full md:object-cover"
+            />
+            <div className="flex flex-col justify-center px-5 py-7 md:px-8 md:py-9">
+              <MinorLabel>畫面裡正在發生的能力</MinorLabel>
+              <p className="serif mt-4 text-[1.35rem] font-normal leading-[1.85] text-[#A05F54] md:text-[1.55rem]">{profile.talent.headline}</p>
+              <BodyText className="mt-5">
+                {profile.talent.body.map((paragraph, index) => (
+                  <p key={paragraph}>{index === profile.talent.body.length - 1 ? <Highlight>{paragraph}</Highlight> : paragraph}</p>
+                ))}
+              </BodyText>
+            </div>
+          </div>
           <PsychologyNote title="資訊處理與風險感受">
             {getTalentPsychology(profile)}
           </PsychologyNote>
@@ -320,22 +437,32 @@ export const ReadingLayerPrototype: React.FC = () => {
           <div className="space-y-7">
             {profile.triggers.map((trigger, index) => (
               <article key={trigger.title} className="overflow-hidden border border-[#D8CDBD] bg-white">
-                <header className="bg-[#4A3A33] px-5 py-6 text-white md:px-8">
-                  <p className="font-mono text-[13px] tracking-[0.12em] text-white/60">SCENE 0{index + 1}</p>
-                  <h3 className="serif mt-3 text-[1.35rem] font-normal leading-[1.65]">{trigger.title}</h3>
-                </header>
-                <div className="serif divide-y divide-[#E5DDD2] text-[1rem] font-normal leading-8 text-[#554C45]">
-                  <p className="px-5 py-5 md:px-8"><span className="mr-3 text-[#A05F54]">情境</span>{trigger.event}</p>
-                  <p className="px-5 py-5 md:px-8"><span className="mr-3 text-[#A05F54]">心理機制</span>{getPsychologyMechanism(`${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}`).title}：{getPsychologyMechanism(`${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}`).description}</p>
-                  <p className="px-5 py-5 md:px-8"><span className="mr-3 text-[#A05F54]">行為偏移</span>{trigger.behavior} {trigger.consequence}</p>
+                <div className={`grid md:items-stretch ${getEditorialGridClass(`${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}${trigger.consequence}${trigger.watchFor}`)}`}>
+                  <EditorialFigure
+                    src={editorialImages.triggers[index]}
+                    alt={`${profile.name}失控情境 ${index + 1}：${trigger.title}`}
+                    className="border-0 border-b border-[#D8CDBD] md:border-b-0 md:border-r"
+                    imageClassName="h-auto md:h-full md:object-cover"
+                  />
+                  <div className="bg-white">
+                    <header className="border-b border-[#D8CDBD] bg-[#F7F2EC] px-5 py-6 md:px-7">
+                      <p className="font-mono text-[12px] tracking-[0.14em] text-[#9A655C]">SCENE 0{index + 1}</p>
+                      <h3 className="serif mt-2 text-[1.45rem] font-normal leading-[1.55] text-[#3C332E] md:text-[1.6rem]">{trigger.title}</h3>
+                    </header>
+                    <div className="serif divide-y divide-[#E5DDD2] text-[1rem] font-normal leading-8 text-[#554C45]">
+                      <p className="bg-[#F7F2EC] px-5 py-5 md:px-7"><span className="mb-2 block text-[13px] tracking-[0.09em] text-[#A05F54]">畫面裡的你</span>{trigger.event}</p>
+                      <p className="px-5 py-5 md:px-7"><span className="mb-2 block text-[13px] tracking-[0.09em] text-[#A05F54]">這股反應從哪裡來</span>{getPsychologyMechanism(`${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}`).title}：{getPsychologyMechanism(`${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}`).description}</p>
+                      <p className="px-5 py-5 md:px-7"><span className="mb-2 block text-[13px] tracking-[0.09em] text-[#A05F54]">接著可能發生</span>{trigger.behavior} {trigger.consequence}</p>
+                    </div>
+                    <p className="serif border-t border-[#D8CDBD] bg-[#F4EBE4] px-5 py-5 text-[1.02rem] font-normal leading-8 text-[#443A35] md:px-7"><span className="mb-2 block text-[13px] tracking-[0.09em] text-[#A05F54]">現在可以怎麼停下來</span>{getInterruptAction(profile, `${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}`)} {trigger.watchFor}</p>
+                  </div>
                 </div>
-                <p className="serif border-t border-[#D8CDBD] bg-[#F4EBE4] px-5 py-5 text-[1.02rem] font-normal leading-8 text-[#443A35] md:px-8"><span className="mr-2 text-[#A05F54]">中斷動作：</span>{getInterruptAction(profile, `${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}`)} {trigger.watchFor}</p>
               </article>
             ))}
           </div>
           <div className="mt-9 border border-[#79584D] bg-[#79584D] px-6 py-9 text-white md:px-9">
             <p className="text-[13px] tracking-[0.1em] text-white/65 md:text-sm">你最容易相信的理由</p>
-            <blockquote className="serif mt-5 text-[1.8rem] font-normal leading-[1.65] md:text-[2.25rem]">{profile.selfDeception.quote}</blockquote>
+            <blockquote className="serif mt-5 break-words text-[1.8rem] font-normal leading-[1.65] [overflow-wrap:anywhere] md:text-[2.25rem]">{profile.selfDeception.quote}</blockquote>
             <p className="serif mt-5 text-[1rem] font-normal leading-8 text-white/75">{profile.selfDeception.context}</p>
             <p className="serif mt-6 border-t border-white/25 pt-5 text-[1rem] font-normal leading-8 text-white/90"><span className="mr-2 text-white/55">換一面鏡子：</span>{profile.selfDeception.reframe}</p>
           </div>
