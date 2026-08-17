@@ -196,7 +196,7 @@ export const AGGRESSIVE_FACE_2_PROTOTYPES: Record<string, FaceProfilePrototype> 
   },
 
   AITC: {
-    code: 'AITC', name: '劍齒虎賭徒', animal: '劍齒虎', traits: ['積極', '感性', '短期', '集中'],
+    code: 'AITC', name: '劍齒虎賭俠', animal: '劍齒虎', traits: ['積極', '感性', '短期', '集中'],
     coreDescription: '你擅長在市場轉折的瞬間快速感受機會，敢在大多數人還猶豫時集中行動。真正的考驗，不是消除直覺，而是確保每一次勇敢都有清楚的損失邊界。',
     outsideView: '別人可能覺得你膽子大、反應快，盤面一有味道就能立刻做決定。你不喜歡用很小的部位假裝參與，更相信看見窗口就要真正把握。',
     insideVoice: '我不是愛賭，我只是不想在機會出現時還站在旁邊計算。盤感是長期累積出來的，真正關鍵是出手後知道哪裡不對。',

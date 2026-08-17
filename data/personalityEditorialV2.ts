@@ -337,7 +337,7 @@ export const PERSONALITY_EDITORIAL_V2: Partial<Record<string, PersonalityEditori
           "feeling": "數據都看完了，卻因為怕錯遲遲扣不下扳機",
           "shift": "從「等到完美」→「小口先試」",
           "saviorCode": "AITC",
-          "saviorName": "劍齒虎賭徒",
+          "saviorName": "劍齒虎賭俠",
           "advice": "先用可承受的小部位進場，錯了就按規則退出。"
         },
         {
@@ -554,7 +554,7 @@ export const PERSONALITY_EDITORIAL_V2: Partial<Record<string, PersonalityEditori
           "feeling": "等待太漫長，開始懷疑自己的長期判斷",
           "shift": "從「只等終點」→「加一點節奏」",
           "saviorCode": "AITC",
-          "saviorName": "劍齒虎賭徒",
+          "saviorName": "劍齒虎賭俠",
           "advice": "用小額部位做一段波段，讓判斷接受市場驗證。"
         },
         {
@@ -876,7 +876,7 @@ export const PERSONALITY_EDITORIAL_V2: Partial<Record<string, PersonalityEditori
           "feeling": "同時追太多浪，每個部位都小到無法產生效果",
           "shift": "從「分心」→「聚焦」",
           "saviorCode": "AITC",
-          "saviorName": "劍齒虎賭徒",
+          "saviorName": "劍齒虎賭俠",
           "advice": "只保留最有把握的一兩道浪，其他先放進觀察清單。"
         }
       ]
@@ -1590,7 +1590,7 @@ export const PERSONALITY_EDITORIAL_V2: Partial<Record<string, PersonalityEditori
           "feeling": "太怕受傷，明明有訊號卻總想再等一下",
           "shift": "從「過度防守」→「小風險先試」",
           "saviorCode": "AITC",
-          "saviorName": "劍齒虎賭徒",
+          "saviorName": "劍齒虎賭俠",
           "advice": "只用事先設定的小風險進場，不再等到完全確定。"
         },
         {

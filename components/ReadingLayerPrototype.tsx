@@ -35,31 +35,51 @@ type EditorialImageSet = {
   mirrors: string;
   talent: string;
   triggers: readonly [string, string, string];
+  layouts?: {
+    face: EditorialPlacement;
+    mirrors: EditorialPlacement;
+    talent: EditorialPlacement;
+    triggers: readonly [EditorialPlacement, EditorialPlacement, EditorialPlacement];
+  };
 };
 
+type EditorialPlacement = 'adaptive-left' | 'adaptive-right' | 'banner';
+
 const generatedEditorialImages = (slug: string): EditorialImageSet => ({
-  face: `/images/reading-prototype/${slug}/chapter-01.jpg`,
-  mirrors: `/images/reading-prototype/${slug}/chapter-02.jpg`,
-  talent: `/images/reading-prototype/${slug}/chapter-03.jpg`,
+  face: `/images/reading-prototype/${slug}/chapter-01-v2.webp`,
+  mirrors: `/images/reading-prototype/${slug}/chapter-02-v2.webp`,
+  talent: `/images/reading-prototype/${slug}/chapter-03-v2.webp`,
   triggers: [
-    `/images/reading-prototype/${slug}/scene-01.jpg`,
-    `/images/reading-prototype/${slug}/scene-02.jpg`,
-    `/images/reading-prototype/${slug}/scene-03.jpg`,
+    `/images/reading-prototype/${slug}/scene-01-v2.webp`,
+    `/images/reading-prototype/${slug}/scene-02-v2.webp`,
+    `/images/reading-prototype/${slug}/scene-03-v2.webp`,
   ],
+  layouts: {
+    face: 'banner',
+    mirrors: 'adaptive-left',
+    talent: 'adaptive-right',
+    triggers: ['banner', 'adaptive-left', 'adaptive-right'],
+  },
 });
 
 const editorialImagesByCode: Record<ProfileCode, EditorialImageSet> = {
   ARLC: generatedEditorialImages('arlc'),
   ARLD: generatedEditorialImages('arld'),
   ARTC: {
-    face: '/images/reading-prototype/cheetah/chapter-01-face.jpg',
-    mirrors: '/images/reading-prototype/cheetah/chapter-02-mirrors.jpg',
-    talent: '/images/reading-prototype/cheetah/chapter-03-talent.jpg',
+    face: '/images/reading-prototype/cheetah/chapter-01-face-v2.webp',
+    mirrors: '/images/reading-prototype/cheetah/chapter-02-mirrors-v2.webp',
+    talent: '/images/reading-prototype/cheetah/chapter-03-talent-v2.webp',
     triggers: [
-      '/images/reading-prototype/cheetah/scene-01-missed-entry.jpg',
-      '/images/reading-prototype/cheetah/scene-02-stopped-out.jpg',
-      '/images/reading-prototype/cheetah/scene-03-overconfidence.jpg',
+      '/images/reading-prototype/cheetah/scene-01-missed-entry-v2.webp',
+      '/images/reading-prototype/cheetah/scene-02-stopped-out-v2.webp',
+      '/images/reading-prototype/cheetah/scene-03-overconfidence-v2.webp',
     ],
+    layouts: {
+      face: 'banner',
+      mirrors: 'adaptive-left',
+      talent: 'adaptive-right',
+      triggers: ['banner', 'adaptive-left', 'adaptive-right'],
+    },
   },
   ARTD: generatedEditorialImages('artd'),
   AILC: generatedEditorialImages('ailc'),
@@ -270,6 +290,24 @@ const getEditorialGridClass = (copy: string, imageSide: ImageSide = 'left') => {
   return 'md:grid-cols-2';
 };
 
+const getEditorialLayout = (
+  copy: string,
+  placement: EditorialPlacement = 'adaptive-left',
+) => {
+  const isBanner = placement === 'banner';
+  const imageSide: ImageSide = placement === 'adaptive-right' ? 'right' : 'left';
+
+  return {
+    grid: isBanner ? 'grid' : `grid md:items-stretch ${getEditorialGridClass(copy, imageSide)}`,
+    figure: isBanner
+      ? 'border-0 border-b border-[#D8CDBD]'
+      : imageSide === 'left'
+        ? 'border-0 border-b border-[#D8CDBD] md:border-b-0 md:border-r'
+        : 'border-0 border-b border-[#D8CDBD] md:order-2 md:border-b-0 md:border-l',
+    image: isBanner ? 'h-auto' : 'h-auto md:h-full md:object-cover',
+  };
+};
+
 export const ReadingLayerPrototype: React.FC = () => {
   const [selectedCode, setSelectedCode] = React.useState<ProfileCode>(getInitialProfileCode);
   const profile = getProfile(selectedCode);
@@ -279,6 +317,9 @@ export const ReadingLayerPrototype: React.FC = () => {
   const faceEditorialCopy = `${profile.traits.join('')}${dimensionCopy[profile.code[0]]}${dimensionCopy[profile.code[1]]}${dimensionCopy[profile.code[2]]}${dimensionCopy[profile.code[3]]}`;
   const mirrorEditorialCopy = `${profile.outsideView}${profile.insideVoice}`;
   const talentEditorialCopy = `${profile.talent.headline}${profile.talent.body.join('')}`;
+  const faceLayout = getEditorialLayout(faceEditorialCopy, editorialImages.layouts?.face);
+  const mirrorLayout = getEditorialLayout(mirrorEditorialCopy, editorialImages.layouts?.mirrors);
+  const talentLayout = getEditorialLayout(talentEditorialCopy, editorialImages.layouts?.talent ?? 'adaptive-right');
 
   const handleProfileChange = (code: ProfileCode) => {
     setSelectedCode(code);
@@ -333,12 +374,12 @@ export const ReadingLayerPrototype: React.FC = () => {
 
       <main className="mt-4">
         <SectionShell chapter={chapterMeta[0]}>
-          <div className={`grid overflow-hidden border border-[#D8CDBD] bg-white md:items-stretch ${getEditorialGridClass(faceEditorialCopy)}`}>
+          <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${faceLayout.grid}`}>
             <EditorialFigure
               src={editorialImages.face}
               alt={`${profile.name}觀察市場，將訊號、風險與行動連成自己的決策路徑。`}
-              className="border-0 border-b border-[#D8CDBD] md:border-b-0 md:border-r"
-              imageClassName="h-auto md:h-full md:object-cover"
+              className={faceLayout.figure}
+              imageClassName={faceLayout.image}
             />
             <div className="flex flex-col justify-center px-5 py-7 md:px-8 md:py-9">
               <MinorLabel>畫面裡的決策視角</MinorLabel>
@@ -362,12 +403,12 @@ export const ReadingLayerPrototype: React.FC = () => {
         </SectionShell>
 
         <SectionShell chapter={chapterMeta[1]} tinted>
-          <div className={`grid overflow-hidden border border-[#D8CDBD] bg-white md:items-stretch ${getEditorialGridClass(mirrorEditorialCopy)}`}>
+          <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${mirrorLayout.grid}`}>
             <EditorialFigure
               src={editorialImages.mirrors}
               alt={`${profile.name}在鏡前，看見外在表現與內在判斷的兩種樣子。`}
-              className="border-0 border-b border-[#D8CDBD] md:border-b-0 md:border-r"
-              imageClassName="h-auto md:h-full md:object-cover"
+              className={mirrorLayout.figure}
+              imageClassName={mirrorLayout.image}
             />
             <div className="divide-y divide-[#D8CDBD]">
               <article className="bg-white p-6 md:p-8">
@@ -386,12 +427,12 @@ export const ReadingLayerPrototype: React.FC = () => {
         </SectionShell>
 
         <SectionShell chapter={chapterMeta[2]}>
-          <div className={`grid overflow-hidden border border-[#D8CDBD] bg-white md:items-stretch ${getEditorialGridClass(talentEditorialCopy, 'right')}`}>
+          <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${talentLayout.grid}`}>
             <EditorialFigure
               src={editorialImages.talent}
               alt={`${profile.name}整理市場資料，將雜訊收斂成訊號、風險與行動。`}
-              className="border-0 border-b border-[#D8CDBD] md:order-2 md:border-b-0 md:border-l"
-              imageClassName="h-auto md:h-full md:object-cover"
+              className={talentLayout.figure}
+              imageClassName={talentLayout.image}
             />
             <div className="flex flex-col justify-center px-5 py-7 md:px-8 md:py-9">
               <MinorLabel>畫面裡正在發生的能力</MinorLabel>
@@ -437,12 +478,16 @@ export const ReadingLayerPrototype: React.FC = () => {
           <div className="space-y-7">
             {profile.triggers.map((trigger, index) => (
               <article key={trigger.title} className="overflow-hidden border border-[#D8CDBD] bg-white">
-                <div className={`grid md:items-stretch ${getEditorialGridClass(`${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}${trigger.consequence}${trigger.watchFor}`)}`}>
+                {(() => {
+                  const triggerCopy = `${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}${trigger.consequence}${trigger.watchFor}`;
+                  const triggerLayout = getEditorialLayout(triggerCopy, editorialImages.layouts?.triggers[index]);
+
+                  return <div className={triggerLayout.grid}>
                   <EditorialFigure
                     src={editorialImages.triggers[index]}
                     alt={`${profile.name}失控情境 ${index + 1}：${trigger.title}`}
-                    className="border-0 border-b border-[#D8CDBD] md:border-b-0 md:border-r"
-                    imageClassName="h-auto md:h-full md:object-cover"
+                    className={triggerLayout.figure}
+                    imageClassName={triggerLayout.image}
                   />
                   <div className="bg-white">
                     <header className="border-b border-[#D8CDBD] bg-[#F7F2EC] px-5 py-6 md:px-7">
@@ -456,7 +501,8 @@ export const ReadingLayerPrototype: React.FC = () => {
                     </div>
                     <p className="serif border-t border-[#D8CDBD] bg-[#F4EBE4] px-5 py-5 text-[1.02rem] font-normal leading-8 text-[#443A35] md:px-7"><span className="mb-2 block text-[13px] tracking-[0.09em] text-[#A05F54]">現在可以怎麼停下來</span>{getInterruptAction(profile, `${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}`)} {trigger.watchFor}</p>
                   </div>
-                </div>
+                  </div>;
+                })()}
               </article>
             ))}
           </div>

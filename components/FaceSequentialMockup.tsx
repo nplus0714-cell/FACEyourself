@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { ArrowLeft, Check, RotateCcw } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Check, Maximize2, RotateCcw, X } from 'lucide-react';
 import {
   FACE_SEQUENTIAL_MOCKUP_QUESTIONS,
   MOCK_DIMENSIONS,
@@ -32,13 +32,36 @@ export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, MockAnswer>>({});
   const [finished, setFinished] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches);
+  const [preview, setPreview] = useState<{ side: 'A' | 'B'; label: string; description: string; src: string } | null>(null);
   const question = FACE_SEQUENTIAL_MOCKUP_QUESTIONS[index];
   const result = useMemo(() => scoreSequentialMockup(answers), [answers]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   const choose = (answer: MockAnswer) => {
     setAnswers((previous) => ({ ...previous, [question.id]: answer }));
     if (index === FACE_SEQUENTIAL_MOCKUP_QUESTIONS.length - 1) setFinished(true);
     else setIndex((value) => value + 1);
+  };
+
+  const chooseVisual = (answer: MockAnswer) => {
+    if (question.kind === 'image' && isMobile) {
+      setAnswers((previous) => ({ ...previous, [question.id]: answer }));
+      return;
+    }
+    choose(answer);
+  };
+
+  const confirmMobileVisual = () => {
+    const answer = answers[question.id];
+    if (answer) choose(answer);
   };
 
   const restart = () => { setAnswers({}); setIndex(0); setFinished(false); window.scrollTo({ top: 0 }); };
@@ -112,7 +135,7 @@ export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
       <div className="h-1 overflow-hidden bg-[#E1DAD1]"><div className="h-full bg-[#8C635B] transition-all" style={{ width: `${((index + 1) / 40) * 100}%` }} /></div>
       <div className="mt-4 flex items-center justify-between text-xs text-[#80766E]"><span>{sectionLabel(question.id)}</span><span>{question.id} / 40</span></div>
 
-      <main className="mt-6 border border-[#D4CCC1] bg-[#FBF9F5] p-5 shadow-[0_18px_55px_rgba(70,55,43,0.07)] sm:p-8 lg:p-11">
+      <main className={`mt-6 border border-[#D4CCC1] bg-[#FBF9F5] shadow-[0_18px_55px_rgba(70,55,43,0.07)] sm:p-8 lg:p-11 ${question.kind === 'image' ? 'p-3' : 'p-5'}`}>
         {question.group && (
           <div className="mb-6 border-b border-[#D8D0C5] pb-5">
             <div className="flex items-center justify-between gap-4"><p className="text-[11px] font-bold tracking-[0.2em] text-[#9A6B61]">{question.group} · {question.groupTitle}</p><p className="text-xs font-bold text-[#6E645D]">情境進展 {question.stage} / 2</p></div>
@@ -123,23 +146,40 @@ export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
         <h1 className="mt-4 serif text-2xl leading-[1.55] text-[#2D2D2D] sm:text-3xl lg:text-[2.15rem]">{question.prompt}</h1>
 
         {imageMode ? (
-          <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <div className={`grid md:grid-cols-2 ${question.kind === 'image' ? 'mt-5 grid-cols-2 gap-2 sm:mt-8 sm:gap-5' : 'mt-8 gap-5'}`}>
             {([['very_a', 'A', question.shortA, question.optionA, question.imageA], ['very_b', 'B', question.shortB, question.optionB, question.imageB]] as const).map(([answer, side, shortLabel, description, src]) => (
-              <button key={side} type="button" onClick={() => choose(answer)} className={`group flex h-full flex-col overflow-hidden border bg-white text-left transition hover:-translate-y-0.5 hover:border-[#8C635B] hover:shadow-lg ${answers[question.id] === answer ? 'border-[#8C635B] ring-2 ring-[#8C635B]/20' : 'border-[#D6CEC4]'}`}>
-                {question.kind === 'intuition' && (
-                  <span className="flex min-h-20 items-center gap-4 border-b border-[#E2DCD4] px-5 py-4 sm:px-6">
-                    <strong className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base text-white ${side === 'A' ? 'bg-[#9A6B61]' : 'bg-[#65747A]'}`}>{side}</strong>
-                    <span className="text-lg font-bold leading-7 text-[#302C29] sm:text-xl">{shortLabel}</span>
+              <div key={side} className="relative min-w-0">
+                <button type="button" onClick={() => chooseVisual(answer)} aria-pressed={answers[question.id] === answer} className={`group flex h-full w-full flex-col overflow-hidden border bg-white text-left transition hover:-translate-y-0.5 hover:border-[#8C635B] hover:shadow-lg ${answers[question.id] === answer ? 'border-[#8C635B] ring-2 ring-[#8C635B]/20' : 'border-[#D6CEC4]'}`}>
+                  {question.kind === 'intuition' && (
+                    <span className="flex min-h-20 items-center gap-4 border-b border-[#E2DCD4] px-5 py-4 sm:px-6">
+                      <strong className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base text-white ${side === 'A' ? 'bg-[#9A6B61]' : 'bg-[#65747A]'}`}>{side}</strong>
+                      <span className="text-lg font-bold leading-7 text-[#302C29] sm:text-xl">{shortLabel}</span>
+                    </span>
+                  )}
+                  <span className={`relative flex w-full items-center justify-center overflow-hidden bg-[#F7F4EF] ${question.kind === 'image' ? 'aspect-[2/3]' : 'aspect-[4/3] p-2 sm:p-3'}`}>
+                    <img src={src} alt={`${side}：${description}`} className="h-full w-full object-contain" />
+                    {question.kind === 'image' && answers[question.id] === answer && (
+                      <span className={`absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-white shadow-sm md:hidden ${side === 'A' ? 'bg-[#9A6B61]' : 'bg-[#65747A]'}`} aria-hidden="true"><Check size={15} /></span>
+                    )}
                   </span>
+                  {question.kind === 'intuition' && (
+                    <span className="flex min-h-24 flex-1 items-center border-t border-[#E2DCD4] px-5 py-4 text-sm font-medium leading-7 text-[#5D554F] sm:px-6 sm:text-[15px]">{description}</span>
+                  )}
+                </button>
+                {question.kind === 'image' && (
+                  <button type="button" onClick={() => setPreview({ side, label: shortLabel, description, src })} className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-[#2D2D2D]/75 text-white shadow-sm backdrop-blur-sm transition hover:bg-[#2D2D2D]" aria-label={`放大查看選項 ${side}：${shortLabel}`}>
+                    <Maximize2 size={15} />
+                  </button>
                 )}
-                <span className={`flex w-full items-center justify-center overflow-hidden bg-[#F7F4EF] ${question.kind === 'image' ? 'aspect-[2/3]' : 'aspect-[4/3] p-2 sm:p-3'}`}>
-                  <img src={src} alt={`${side}：${description}`} className="h-full w-full object-contain" />
-                </span>
-                {question.kind === 'intuition' && (
-                  <span className="flex min-h-24 flex-1 items-center border-t border-[#E2DCD4] px-5 py-4 text-sm font-medium leading-7 text-[#5D554F] sm:px-6 sm:text-[15px]">{description}</span>
-                )}
-              </button>
+              </div>
             ))}
+            {question.kind === 'image' && (
+              <div className="sticky bottom-3 z-20 col-span-2 mt-1 rounded-sm bg-[#FBF9F5]/95 pt-2 backdrop-blur md:hidden">
+                <button type="button" onClick={confirmMobileVisual} disabled={!answers[question.id]} className="min-h-12 w-full border border-[#4A382D] bg-[#4A382D] px-5 py-3 text-sm tracking-[0.08em] text-white transition disabled:cursor-not-allowed disabled:border-[#CFC6BA] disabled:bg-[#E3DDD5] disabled:text-[#8A817A]">
+                  {answers[question.id] ? `已選擇 ${answers[question.id] === 'very_a' ? 'A' : 'B'}，確認並繼續` : '請先選擇 A 或 B'}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <>
@@ -157,6 +197,19 @@ export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
         )}
       </main>
       <p className="mt-5 text-center text-xs leading-6 text-[#8A817A]">沒有標準答案，請選擇更接近你平常實際反應的一側。</p>
+      {preview && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#201C19]/80 p-3 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={`選項 ${preview.side} 放大圖`} onClick={() => setPreview(null)}>
+          <div className="relative flex max-h-[94vh] w-full max-w-2xl flex-col overflow-hidden bg-[#FBF9F5] shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-[#D8D0C5] px-4 py-3">
+              <p className="serif text-lg text-[#302C29]">選項 {preview.side} · {preview.label}</p>
+              <button type="button" onClick={() => setPreview(null)} className="flex h-10 w-10 items-center justify-center rounded-full text-[#625A53] hover:bg-[#EDE7DE]" aria-label="關閉放大圖"><X size={20} /></button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-auto bg-[#F7F4EF] p-2 sm:p-4">
+              <img src={preview.src} alt={`選項 ${preview.side}：${preview.description}`} className="mx-auto max-h-[82vh] w-full object-contain" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -178,7 +178,7 @@ export const FACE_MAP: Record<string, PersonalityProfile> = {
   'AITC': {
     "id": "07",
     "code": "AITC",
-    "name": "劍齒虎賭徒",
+    "name": "劍齒虎賭俠",
     "attributes": "A 積極 / I 感性 / T 交易 / C 集中",
     "imageUrl": "/images/personalities-v2-landscape/v2-07-sabertooth-gambler-landscape.png",
     "sketchImageUrl": "/images/personalities-v2-square-line/v2-07-sabertooth-gambler-square-line.png",

@@ -13,7 +13,7 @@ const MAP = [
   { code: 'ARTD', n: 4, slug: 'hound-astrologer', v1: '灰狼調度員', v2: '獵犬占星師' },
   { code: 'AILC', n: 5, slug: 'black-panther-evangelist', v1: '黑豹傳教士', v2: '黑豹傳教士' },
   { code: 'AILD', n: 6, slug: 'squirrel-collector', v1: '松鼠策劃家', v2: '松鼠收藏家' },
-  { code: 'AITC', n: 7, slug: 'sabertooth-gambler', v1: '劍齒虎猛獸', v2: '劍齒虎賭徒' },
+  { code: 'AITC', n: 7, slug: 'sabertooth-gambler', v1: '劍齒虎猛獸', v2: '劍齒虎賭俠' },
   { code: 'AITD', n: 8, slug: 'macaque-host', v1: '蜂鳥衝浪者', v2: '獼猴派對主' },
   { code: 'PRLC', n: 9, slug: 'white-deer-appraiser', v1: '高山岩羊隱士', v2: '白鹿鑑古師' },
   { code: 'PRLD', n: 10, slug: 'mole-guide', v1: '信天翁導航員', v2: '鼴鼠導引者' },

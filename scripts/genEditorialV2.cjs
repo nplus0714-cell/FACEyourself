@@ -15,7 +15,7 @@ const TYPES = [
   { n: 4, code: 'ARTD', slug: 'hound-astrologer', name: '獵犬占星師' },
   { n: 5, code: 'AILC', slug: 'black-panther-evangelist', name: '黑豹傳教士' },
   { n: 6, code: 'AILD', slug: 'squirrel-collector', name: '松鼠收藏家' },
-  { n: 7, code: 'AITC', slug: 'sabertooth-gambler', name: '劍齒虎賭徒' },
+  { n: 7, code: 'AITC', slug: 'sabertooth-gambler', name: '劍齒虎賭俠' },
   { n: 8, code: 'AITD', slug: 'macaque-host', name: '獼猴派對主' },
   { n: 9, code: 'PRLC', slug: 'white-deer-appraiser', name: '白鹿鑑古師' },
   { n: 10, code: 'PRLD', slug: 'mole-guide', name: '鼴鼠導引者' },
