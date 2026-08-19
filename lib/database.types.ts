@@ -100,6 +100,10 @@ export type Database = {
           content: string;
           state_code: 'steady' | 'watching' | 'chasing' | 'attached' | 'guarded' | 'resetting' | null;
           answers: Json | null;
+          face_code: string | null;
+          assessment_version: string | null;
+          result: Json | null;
+          completed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -110,6 +114,10 @@ export type Database = {
           content?: string;
           state_code?: 'steady' | 'watching' | 'chasing' | 'attached' | 'guarded' | 'resetting' | null;
           answers?: Json | null;
+          face_code?: string | null;
+          assessment_version?: string | null;
+          result?: Json | null;
+          completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -117,8 +125,82 @@ export type Database = {
           content?: string;
           state_code?: 'steady' | 'watching' | 'chasing' | 'attached' | 'guarded' | 'resetting' | null;
           answers?: Json | null;
+          face_code?: string | null;
+          assessment_version?: string | null;
+          result?: Json | null;
+          completed_at?: string | null;
           updated_at?: string;
         };
+        Relationships: [];
+      };
+      member_entitlements: {
+        Row: {
+          id: string;
+          user_id: string;
+          product_code: string;
+          status: 'active' | 'revoked' | 'expired';
+          payment_order_id: string | null;
+          starts_at: string;
+          expires_at: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          product_code: string;
+          status?: 'active' | 'revoked' | 'expired';
+          payment_order_id?: string | null;
+          starts_at?: string;
+          expires_at?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          status?: 'active' | 'revoked' | 'expired';
+          expires_at?: string | null;
+          metadata?: Json;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      member_activity_events: {
+        Row: {
+          id: number;
+          user_id: string;
+          event_type: 'signed_in' | 'signed_out' | 'session_restored';
+          occurred_at: string;
+          metadata: Json;
+        };
+        Insert: {
+          id?: number;
+          user_id: string;
+          event_type: 'signed_in' | 'signed_out' | 'session_restored';
+          occurred_at?: string;
+          metadata?: Json;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      content_reading_progress: {
+        Row: {
+          id: string;
+          content_id: string;
+          content_slug: string;
+          access_mode: 'public' | 'login_required' | 'paid';
+          user_id: string | null;
+          anonymous_visitor_id: string | null;
+          view_count: number;
+          max_progress: number;
+          first_viewed_at: string;
+          last_viewed_at: string;
+          completed_at: string | null;
+          metadata: Json;
+        };
+        Insert: never;
+        Update: never;
         Relationships: [];
       };
     };

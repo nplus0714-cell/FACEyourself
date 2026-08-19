@@ -33,3 +33,5 @@ supabase/.temp/
 .claude/
 compound-engineering-plugin/
 tmp/
+_exports/
+scripts/__pycache__/

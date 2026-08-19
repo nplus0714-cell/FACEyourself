@@ -56,7 +56,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   const isAssessmentView = activeView === 'dna-test' || activeView === 'daily-test';
 
   return (
-    <div className={`min-h-screen relative flex flex-col items-center transition-colors duration-1000 bg-zen-paper px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-12`}>
+    <div className={`face-site min-h-screen relative flex flex-col items-center transition-colors duration-1000 bg-zen-paper px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-12`}>
       <div className={`${(wide ? 'max-w-6xl' : 'max-w-4xl') + ' w-full'} transition-all duration-500`}>
         
         {/* Header - 質感深度優化 */}
@@ -154,7 +154,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                 </button>
                 <button 
                   onClick={() => onViewChange('content-hub')} 
-                  className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'content-hub' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
+                  className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${['content-hub', 'content-detail', 'survival-kit'].includes(activeView ?? '') ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   {t.nav.watch}
                 </button>
@@ -164,7 +164,6 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                   aria-label={user ? '進入 FACE 自我覺察日記' : '登入後使用 FACE 自我覺察日記'}
                 >
                   覺察日記
-                  {!user && <span className="ml-1.5 text-[10px] font-bold text-[#8C635B]" aria-hidden="true">登入</span>}
                 </button>
             </nav>
           )}

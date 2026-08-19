@@ -36,6 +36,7 @@ export interface DailyAwarenessResult {
   dailyDeviation: number;
   primaryPullCode: string;
   inferredMindset: string;
+  reflectionText?: string;
   summary: string;
   insight: string;
   reflectionQuestion: string;

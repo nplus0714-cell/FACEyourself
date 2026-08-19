@@ -1,5 +1,5 @@
 import { formDataToRecord, getEcpayConfig, verifyCheckMacValue } from '../../_lib/ecpay';
-import { getPaymentOrder, updatePaymentOrderFromCallback } from '../../_lib/paymentOrders';
+import { grantEntitlementForOrder, getPaymentOrder, updatePaymentOrderFromCallback } from '../../_lib/paymentOrders';
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -29,6 +29,9 @@ export async function POST(request: Request): Promise<Response> {
       paymentDate: parameters.PaymentDate,
       callback: parameters,
     });
+    if (paid) {
+      await grantEntitlementForOrder(order);
+    }
     return new Response('1|OK', { status: 200 });
   } catch (error) {
     console.error('ECPay notification failed', error instanceof Error ? error.message : error);

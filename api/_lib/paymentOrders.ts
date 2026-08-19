@@ -1,25 +1,23 @@
-import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from './supabaseAdmin';
 
-type PaymentOrder = {
+export type PaymentOrder = {
   id: string;
   merchant_trade_no: string;
   amount: number;
-  status: 'pending' | 'paid' | 'failed';
-};
-
-const getAdminClient = () => {
-  const url = (process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL)?.trim();
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (!url || !serviceRoleKey) throw new Error('Supabase payment storage is not configured');
-  return createClient(url, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
+  product_code: string;
+  user_id: string | null;
+  customer_email: string | null;
+  face_code: string | null;
 };
 
 export const createPaymentOrder = async (input: {
   merchantTradeNo: string;
   amount: number;
   environment: 'stage' | 'production';
+  userId: string;
+  customerEmail: string | null;
+  faceCode: string | null;
 }): Promise<void> => {
   const { error } = await getAdminClient().from('payment_orders').insert({
     merchant_trade_no: input.merchantTradeNo,
@@ -29,6 +27,9 @@ export const createPaymentOrder = async (input: {
     status: 'pending',
     payment_provider: 'ecpay',
     payment_environment: input.environment,
+    user_id: input.userId,
+    customer_email: input.customerEmail,
+    face_code: input.faceCode,
   });
   if (error) throw new Error(`Unable to create payment order: ${error.message}`);
 };
@@ -36,11 +37,25 @@ export const createPaymentOrder = async (input: {
 export const getPaymentOrder = async (merchantTradeNo: string): Promise<PaymentOrder | null> => {
   const { data, error } = await getAdminClient()
     .from('payment_orders')
-    .select('id, merchant_trade_no, amount, status')
+    .select('id, merchant_trade_no, amount, status, product_code, user_id, customer_email, face_code')
     .eq('merchant_trade_no', merchantTradeNo)
     .maybeSingle();
   if (error) throw new Error(`Unable to read payment order: ${error.message}`);
   return data as PaymentOrder | null;
+};
+
+export const getLatestFaceCodeForUser = async (userId: string): Promise<string | null> => {
+  const { data, error } = await getAdminClient()
+    .from('assessment_runs')
+    .select('face_code')
+    .eq('user_id', userId)
+    .not('completed_at', 'is', null)
+    .not('face_code', 'is', null)
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`Unable to read member FACE result: ${error.message}`);
+  return typeof data?.face_code === 'string' ? data.face_code : null;
 };
 
 export const updatePaymentOrderFromCallback = async (input: {
@@ -64,4 +79,28 @@ export const updatePaymentOrderFromCallback = async (input: {
     })
     .eq('id', input.orderId);
   if (error) throw new Error(`Unable to update payment order: ${error.message}`);
+};
+
+export const grantEntitlementForOrder = async (order: PaymentOrder): Promise<void> => {
+  if (!order.user_id) {
+    throw new Error(`Payment order ${order.merchant_trade_no} is not linked to a member`);
+  }
+
+  const now = new Date().toISOString();
+  const { error } = await getAdminClient().from('member_entitlements').upsert({
+    user_id: order.user_id,
+    product_code: order.product_code,
+    status: 'active',
+    payment_order_id: order.id,
+    starts_at: now,
+    expires_at: null,
+    metadata: {
+      merchant_trade_no: order.merchant_trade_no,
+      face_code_at_purchase: order.face_code,
+      app_version: '2.5.0',
+    },
+    updated_at: now,
+  }, { onConflict: 'user_id,product_code' });
+
+  if (error) throw new Error(`Unable to grant member entitlement: ${error.message}`);
 };

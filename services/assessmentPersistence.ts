@@ -15,7 +15,7 @@ export class AssessmentPersistenceError extends Error {
   }
 }
 
-const getAnonymousVisitorId = (): string => {
+export const getAnonymousVisitorId = (): string => {
   const existing = localStorage.getItem(VISITOR_ID_KEY);
   if (existing) return existing;
 

@@ -1,15 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip,
-} from 'recharts';
 import { FaceScores, ReportContent, AuthUser, DiaryEntry, Language, FaceDimension, FaceTrait } from '../types';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { generateDynamicReport } from '../services/geminiService';
 import { ShareModal } from './ShareModal';
-import { RoleDetail } from './RoleDetail';
-import { BookOpen, RotateCcw, Share2, NotebookPen } from 'lucide-react';
+import { ReadingLayerPrototype } from './ReadingLayerPrototype';
+import { BookOpen, RotateCcw, Share2 } from 'lucide-react';
 import { translations } from '../i18n';
-import { FACE_2_PROTOTYPES } from '../data/faceProfilePrototype';
 
 interface DashboardProps {
   dna: FaceScores;
@@ -36,11 +32,9 @@ const calcRatio = (v1: number, v2: number) => {
   return total === 0 ? 50 : Math.round((v1 / total) * 100);
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenMemberHome, onOpenCompatibility, onOpenDeepDive, onStartAwareness, onRetest, isSharedView, language }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenMemberHome, onOpenCompatibility, onOpenDeepDive, onRetest, isSharedView, language }) => {
   const code = getFaceCode(dna);
   const profile = FACE_MAP[code] || FACE_MAP['ARLC'];
-  const face2Profile = FACE_2_PROTOTYPES[code];
-  const heroMotto = face2Profile?.coreDescription.split('。')[0] ?? profile.motto;
   const [report, setReport] = useState<ReportContent | null>(staticReport || null);
   const [loading, setLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -92,26 +86,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
     ];
   }, [dna, daily]);
 
-  const baselineAnswerCount = dna.assessmentMeta
-    ? Object.values(dna.assessmentMeta.answeredCountByDimension).reduce((total, count) => total + count, 0)
-    : null;
   const skippedScenarioCount = dna.assessmentMeta?.skippedQuestionIds.length ?? 0;
   const scenarioQuestionCount = dna.assessmentMeta?.scenarioQuestionCount ?? 16;
   const hasInsufficientScenarioData = dna.assessmentMeta?.hasInsufficientData
     ?? skippedScenarioCount / scenarioQuestionCount > 0.5;
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#2D2D2D] text-white px-6 py-3 text-xs shadow-2xl border border-white/10 rounded-sm">
-          <p className="font-bold border-b border-white/20 mb-2 pb-1 uppercase tracking-widest">{payload[0].payload.subject}</p>
-          <p className="opacity-80">{t.dashboard.baseEnergy}: {payload[0].value}%</p>
-          {daily && <p className="text-[#D9B5AF] font-bold">{t.dashboard.todayStatus}: {payload[1].value}%</p>}
-        </div>
-      );
-    }
-    return null;
-  };
 
   if (loading) {
     return (
@@ -163,130 +141,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
         </div>
       )}
 
-      {/* ✅ 合併後的「完整靈魂報告卷軸」 */}
-      <div className="bg-[#F7F4EF] border border-[#D1D1C7] overflow-hidden flex flex-col items-center">
-        {hasInsufficientScenarioData && (
-          <div className="w-full border-b border-[#C99562] bg-[#FFF5E8] px-6 py-5 text-left text-[#6A4529]" role="alert">
-            <p className="text-sm font-bold tracking-[0.08em]">問卷回答缺少足夠資料，產出的結果可能失真</p>
-            <p className="mt-2 text-sm leading-7">你有 {skippedScenarioCount}／{scenarioQuestionCount} 題交易情境選擇「不適用於我」。本頁仍依其餘回答換算，但建議只作初步參考，並在累積更多交易經驗後重新測驗。</p>
-          </div>
-        )}
-        
-        {/* 1. 照片區塊 */}
-        <div className="grid w-full border-b border-[#D1D1C7] md:grid-cols-[0.95fr_1.05fr]">
-          <div className="relative min-h-[280px] bg-white md:min-h-[420px]">
-            <img 
-              src={profile.imageUrl} 
-              className="h-full w-full object-contain p-5 grayscale-[0.15] md:p-8" 
-              alt={profile.name} 
-              loading="lazy" 
-            />
-            <div className="absolute left-4 top-4 md:left-6 md:top-6">
-              <span className="inline-block bg-[#2D2D2D] px-4 py-2 text-xs font-bold tracking-[0.2em] text-white">{code}</span>
-            </div>
-          </div>
-          <div className="flex flex-col justify-center px-7 py-10 text-left md:px-12 md:py-14">
-            <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FACE RESULT REPORT</p>
-            <h1 className="mt-5 serif text-3xl leading-[1.45] text-[#2D2D2D] md:text-5xl">{profile.name}</h1>
-            <p className="mt-4 text-sm tracking-[0.12em] text-[#8C7E6D]">{code}　{profile.attributes}</p>
-            <div className="my-7 h-px w-16 bg-[#CDBCB1]"></div>
-            <p className="serif text-xl leading-[1.9] text-[#8C635B] md:text-2xl">「{heroMotto}。」</p>
-            <p className="mt-7 text-base leading-8 text-[#5F574F]">這份報告會整理你的四個交易傾向，幫你理解什麼樣的策略，才是你能長期執行的方式。</p>
-          </div>
+      {hasInsufficientScenarioData && (
+        <div className="mx-auto max-w-4xl border border-[#C99562] bg-[#FFF5E8] px-6 py-5 text-left text-[#6A4529]" role="alert">
+          <p className="text-sm font-bold tracking-[0.08em]">問卷回答缺少足夠資料，產出的結果可能失真</p>
+          <p className="mt-2 text-sm leading-7">你有 {skippedScenarioCount}／{scenarioQuestionCount} 題交易情境選擇「不適用於我」。本頁仍依其餘回答換算，但建議只作初步參考，並在累積更多交易經驗後重新測驗。</p>
         </div>
+      )}
 
-        {/* 內容區塊 Wrapper */}
-        <div className="w-full space-y-10 p-6 text-center md:space-y-14 md:p-10">
-          
-          {/* FACE 分數 */}
-          {/* 修正 1：將卡片外層的手機版上下間距縮小，space-y-12 降為 space-y-6 */}
-          <div className="mx-auto grid max-w-4xl gap-6 border-y border-[#D1D1C7] py-9 text-left md:grid-cols-2 md:gap-x-8 md:gap-y-6 md:py-10">
-            <div className="grid gap-4 md:col-span-2 md:grid-cols-[9rem_1fr] md:gap-6">
-              <p className="text-sm font-bold leading-[1.7] tracking-[0.12em] text-[#8C635B]">FACE SCORE<br />四個交易面向</p>
-              <div>
-                <h2 className="serif text-2xl leading-[1.55] text-[#2D2D2D] md:text-3xl">你的 FACE 分數</h2>
-                <p className="mt-3 text-base leading-[2] text-[#5F574F]">這四組分數不是好或壞，而是你在市場中比較自然的選擇方式。</p>
-                <p className="mt-2 text-xs leading-6 text-[#8C7E6D]">結果描述的是決策偏好，不是能力高低或績效保證；請用自己的交易紀錄核對。</p>
-                {baselineAnswerCount !== null && dna.assessmentMeta && (
-                  <p className="mt-3 text-xs leading-6 text-[#8C7E6D]">
-                    作答完整度 {baselineAnswerCount}／40
-                    {dna.assessmentMeta.skippedQuestionIds.length > 0 && `；${dna.assessmentMeta.skippedQuestionIds.length} 題不適用，已按其餘作答重新換算。`}
-                  </p>
-                )}
-                {!!dna.assessmentMeta?.scenarioConsistencyBonuses?.length && (
-                  <p className="mt-2 text-xs leading-6 text-[#8C7E6D]">
-                    連續情境中有 {dna.assessmentMeta.scenarioConsistencyBonuses.length} 組在壓力增加時維持同一方向，已納入結果加權。
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* 修正 2：雷達圖高度在手機版降為 260px，並縮減 mb-12 為 mb-4 */}
-            <div className="h-[260px] w-full md:h-[360px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarData} outerRadius={window.innerWidth < 768 ? "65%" : "76%"} margin={{ top: 10, right: 24, bottom: 10, left: 24 }}>
-                  <PolarGrid stroke="#D1D1C7" strokeDasharray="4 4" />
-                  <PolarAngleAxis 
-                    dataKey="subject" 
-                    tick={{ fontSize: window.innerWidth < 768 ? 10 : 13, fontWeight: 700, fill: '#2D2D2D', fontFamily: 'Noto Serif TC' }}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Radar dataKey="base" stroke="#2D2D2D" strokeWidth={1} fill="#2D2D2D" fillOpacity={0.03} />
-                  {daily && <Radar dataKey="current" stroke="#8C635B" strokeWidth={2} fill="#8C635B" fillOpacity={0.15} dot={{ r: 4, fill: '#8C635B' }} />}
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-            
-            {/* 修正 3：下方條狀圖的頂部間距 pt-12 改為 pt-6 */}
-            <div className="mx-auto max-w-2xl space-y-3 border-t border-[#D1D1C7] pt-4 md:mx-0 md:grid md:h-[360px] md:max-w-none md:grid-rows-[repeat(4,minmax(0,1fr))] md:gap-0 md:space-y-0 md:border-l md:border-t-0 md:pl-8 md:pt-0">
-              {faceData.map((item, idx) => {
-                const deepColor = daily ? '#8C635B' : '#2D2D2D';
-                const lightColor = '#D1D1C7';
-                return (
-                  <div key={idx} className="border-t border-[#D1D1C7] pt-3 first:border-t-0 first:pt-0 md:flex md:min-h-0 md:flex-col md:justify-center md:py-0">
-                    <div className="mb-3 flex items-center justify-between gap-2 md:mb-3">
-                      <span className="serif text-[0.9rem] leading-none text-[#2D2D2D]">{item.label}</span>
-                      <span className="flex items-center gap-1">
-                        {item.isBalanced && <span className="bg-[#F0ECE6] px-2 py-1 text-[9px] font-bold tracking-[0.08em] text-[#70665D]">接近平衡</span>}
-                        {item.confidence === 'medium' && <span className="bg-[#EEF2F3] px-2 py-1 text-[9px] font-bold tracking-[0.08em] text-[#56616A]">1 題不適用</span>}
-                        {item.confidence === 'low' && <span className="bg-[#F5E9E6] px-2 py-1 text-[9px] font-bold tracking-[0.08em] text-[#8C635B]">結果信心較低</span>}
-                      </span>
-                    </div>
-                    <div className="relative">
-                      <div className="mb-1 flex items-end justify-between px-1 md:mb-0.5">
-                        <div className="text-left w-1/2">
-                          <p className={`serif text-[0.68rem] ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l1Name}</p>
-                          <p className={`serif mt-0.5 text-[1.35rem] leading-none ${item.v1 >= item.v2 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v1}%</p>
-                        </div>
-                        <div className="text-right w-1/2">
-                          <p className={`serif text-[0.68rem] ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]'}`}>{item.l2Name}</p>
-                          <p className={`serif mt-0.5 text-[1.35rem] leading-none ${item.v2 > item.v1 ? 'text-[#2D2D2D]' : 'text-[#8C7E6D]/50'}`}>{item.v2}%</p>
-                        </div>
-                      </div>
-                      <div className="flex h-2 w-full overflow-hidden bg-[#E6E6E1]">
-                        <div className="h-full transition-all duration-1000" style={{ width: `${item.v1}%`, backgroundColor: item.v1 >= item.v2 ? deepColor : lightColor }}></div>
-                        <div className="h-full transition-all duration-1000" style={{ width: `${item.v2}%`, backgroundColor: item.v2 > item.v1 ? deepColor : lightColor }}></div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-          {/* Use the same editorial content and layout as the personality catalogue. */}
-          <RoleDetail
-            role={profile}
-            isUserType={false}
-            onBack={() => undefined}
-            compact
-            onOpenCompatibility={onOpenCompatibility}
-            onOpenRate={onGoToMirrorTrade}
-            onOpenContent={onOpenContent}
-            onOpenDeepDive={onOpenDeepDive}
+          {/* Use the latest editorial content and layout from the personality atlas. */}
+          <ReadingLayerPrototype
+            profileCode={code}
+            showPrototypeControls={false}
+            isUserType={!isSharedView}
+            onShareResult={() => setIsShareModalOpen(true)}
+            onViewGallery={onGoToGallery}
+            resultVisualization={{
+              pairs: faceData,
+              radarData,
+              showCurrent: Boolean(daily),
+            }}
           />
 
           {!isSharedView && (
@@ -312,15 +185,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
                 >
                   <BookOpen size={16} strokeWidth={1.7} aria-hidden="true" />
                   查看圖鑑
-                </button>
-              )}
-              {onStartAwareness && (
-                <button
-                  onClick={onStartAwareness}
-                  className="inline-flex items-center gap-2 bg-[#8C635B] px-6 py-3 text-sm font-bold tracking-[0.08em] text-white transition-colors hover:bg-[#754F48]"
-                >
-                  <NotebookPen size={16} strokeWidth={1.7} aria-hidden="true" />
-                  開始自我覺察
                 </button>
               )}
             </div>

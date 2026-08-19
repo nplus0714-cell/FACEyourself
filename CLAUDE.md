@@ -4,7 +4,7 @@
 
 ## 專案目標
 
-- 以 40 題測驗辨識使用者的 FACE 四維交易人格。
+- 以 24 題測驗辨識使用者的 FACE 四維交易人格。
 - 提供 16 型動物人格圖鑑、完整人格說明、互補輪盤與結果頁。
 - 維持「現代東方繪本」的視覺語言：奶油白、米灰、暖棕、霧藍灰、低飽和森林綠，搭配水彩與鉛筆線稿。
 - 桌機與手機皆需可用，並保留足夠留白與成熟編輯感。
@@ -29,7 +29,7 @@ npm run typecheck
 | 路徑 | 畫面 | 主要元件 |
 |---|---|---|
 | `/` | 首頁 | `components/LandingInfo.tsx` |
-| `/test` | 40 題人格測驗 | `components/FaceAssessment.tsx` |
+| `/test` | 24 題人格測驗 | `components/FaceAssessment.tsx` |
 | `/types` | 16 型人格圖鑑 | `components/RoleGallery.tsx` |
 | `/types/:code` | 單一人格詳情 | `components/RoleDetail.tsx` |
 | `/types/compatibility` | 交易互補輪盤 | `components/CompatibilityWheel.tsx` |

@@ -62,11 +62,12 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
         </div>
       </header>
 
+      <div className="flex flex-col">
       {/* FACE 四維 + 快速篩選 + 正式測驗 */}
-      <section className="mt-8 border border-[#D1D1C7] bg-[#F7F4EF] p-6 md:p-9" aria-labelledby="dimension-title">
+      <section className="order-2 mt-10 border border-[#D1D1C7] bg-[#F7F4EF] p-6 md:p-9" aria-labelledby="dimension-title">
         <p className="text-xs font-bold tracking-[0.28em] text-[#8C635B]">FIND YOUR TYPE</p>
         <h2 id="dimension-title" className="mt-3 max-w-4xl serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-5xl">四個維度，描繪交易人格輪廓</h2>
-        <p className="mt-4 text-base leading-[1.9] text-[#70665D]">在每個維度選擇較接近你的一側，快速查看對應的人格；若想獲得完整判讀，可以進行 40 題正式測驗。</p>
+        <p className="mt-4 text-base leading-[1.9] text-[#70665D]">在每個維度選擇較接近你的一側，快速查看對應的人格；若想獲得完整判讀，可以進行 24 題正式測驗。</p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="FACE 四個維度">
           {AXES.map((ax, i) => (
@@ -97,7 +98,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
           ))}
         </div>
 
-        <div className="mt-6 grid gap-5 border-t border-[#D1D1C7] pt-6 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="mt-6 border-t border-[#D1D1C7] pt-6">
           <div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#70665D]">
               <span>
@@ -111,12 +112,11 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
             </div>
             {userRole && <p className="mt-2 text-sm text-[#70665D]">你的正式測驗結果：<button type="button" onClick={onOpenMyFace} className="font-bold text-[#2D2D2D] underline decoration-[#8C635B]/50 underline-offset-4">{userRole.name} {userRole.code}</button></p>}
           </div>
-          <button type="button" onClick={onStartTest} className="w-full border border-[#2D2D2D] bg-white px-6 py-4 text-sm font-bold text-[#2D2D2D] transition hover:bg-[#2D2D2D] hover:text-white md:w-auto">{userRole ? '重新測驗' : '開始 40 題測驗'} →</button>
         </div>
       </section>
 
       {/* 十六型畫廊 */}
-      <section className="mt-10" aria-labelledby="sixteen-types-title">
+      <section className="order-1 mt-8" aria-labelledby="sixteen-types-title">
         <div className="border-b border-[#D1D1C7] pb-5">
           <p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">THE SIXTEEN</p>
           <h2 id="sixteen-types-title" className="mt-2 serif text-3xl text-[#2D2D2D] md:text-4xl">十六型人物誌</h2>
@@ -152,11 +152,14 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
         })}
         </div>
       </section>
+      </div>
 
-      <section className="mt-14 overflow-hidden rounded-[0.7rem] bg-[#344A38] px-7 py-14 text-center text-[#F5F0E5] md:px-14 md:py-20">
+      <section className="mt-14 overflow-hidden rounded-[0.7rem] bg-[#344A38] px-7 pb-7 pt-14 text-center text-[#F5F0E5] md:px-14 md:pb-10 md:pt-20">
         <p className="text-xs font-bold tracking-[0.34em] text-[#E7DFCE]/75">FACE · TRADING PERSONA</p>
         <h2 className="mt-7 serif text-4xl leading-[1.4] md:text-5xl">認識自己，是交易的第一課</h2>
-        <p className="mx-auto mt-6 max-w-3xl text-base leading-[2] text-[#E7DFCE]/85 md:text-lg">每一型都有天賦，也都有盲點。看懂你的獸，也看懂牠的鄰居——當你卡關時，答案往往就藏在隔壁那一型身上。</p>
+        <div className="mt-10 flex justify-stretch md:mt-12 md:justify-end">
+          <button type="button" onClick={onStartTest} className="w-full border border-[#F5F0E5]/65 bg-transparent px-7 py-4 text-sm font-medium tracking-[0.04em] text-[#F5F0E5] transition hover:border-[#F5F0E5] hover:bg-[#F5F0E5] hover:text-[#344A38] md:w-auto">開始 FACE 測驗 →</button>
+        </div>
       </section>
     </div>
   );

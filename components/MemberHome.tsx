@@ -4,7 +4,7 @@ import { FACE_MAP, getFaceCode } from '../constants';
 import { getMemberAssessmentHistory, type MemberAssessmentRecord } from '../services/memberAssessmentHistory';
 import { getMemberAwarenessJournal, saveMemberDiaryEntry, saveMemberNickname } from '../services/memberAwarenessJournal';
 import { getDailyAwarenessState, type DailyAwarenessStateCode } from '../data/dailyAwarenessPreview';
-import type { DailyAwarenessPatternCode, DailyAwarenessResult, DailyAwarenessStatusCode } from '../data/dailyAwarenessPreview';
+import type { DailyAwarenessResult, DailyAwarenessStatusCode } from '../data/dailyAwarenessPreview';
 import type { DailyAwarenessAnswers } from '../data/dailyAwarenessQuestions';
 import type { AuthUser, FaceScores } from '../types';
 
@@ -16,6 +16,7 @@ interface MemberHomeProps {
   onStartAwareness: () => void;
   onOpenContent: () => void;
   onNicknameChange: (nickname: string) => void;
+  hasSurvivalKitAccess: boolean;
 }
 
 type CalendarMode = 'week' | 'month';
@@ -39,24 +40,6 @@ const RESULT_STATUS_ICON: Record<DailyAwarenessStatusCode, { icon: LucideIcon; l
   pause_needed: { icon: PauseCircle, label: '需要暫停', tone: '#8C4E4B', soft: '#F2DFDE' },
   not_observed: { icon: Shield, label: '尚未觀察', tone: '#70665D', soft: '#ECE9E4' },
 };
-
-const PATTERN_HEADLINE: Record<DailyAwarenessPatternCode, string> = {
-  steady: '今天仍在自己的交易節奏裡',
-  watching: '今天正在等待條件更清楚',
-  chasing: '今天有點急著追回結果',
-  attached: '今天還沒完全放下上一個結果',
-  guarded: '今天更想先保護自己',
-  resetting: '今天正在暫停重整',
-  mixed: '今天在幾股拉力之間來回',
-};
-
-const resultShortPriceInfluence = (code?: string) => ({
-  same: '仍照條件',
-  mostly_same: '部分影響',
-  unsure: '邊看邊決定',
-  probably_not: '明顯影響',
-  would_not: '由價格帶動',
-}[code ?? ''] ?? '未記錄');
 
 const AwarenessIcon: React.FC<{ code: DailyAwarenessStateCode; active?: boolean; size?: number }> = ({ code, active = false, size = 16 }) => {
   const config = AWARENESS_ICON[code];
@@ -99,7 +82,7 @@ const formatRecordDate = (value: string) => new Intl.DateTimeFormat('zh-TW', {
   year: 'numeric', month: 'long', day: 'numeric',
 }).format(new Date(value));
 
-export const MemberHome: React.FC<MemberHomeProps> = ({ user, dna, onViewResult, onStartTest, onStartAwareness, onOpenContent, onNicknameChange }) => {
+export const MemberHome: React.FC<MemberHomeProps> = ({ user, dna, onViewResult, onStartTest, onStartAwareness, onOpenContent, onNicknameChange, hasSurvivalKitAccess }) => {
   const diaryStorageKey = `face-awareness-diary-v1:${user.id}`;
   const nicknameStorageKey = `face-member-nickname-v1:${user.id}`;
   const [records, setRecords] = useState<MemberAssessmentRecord[]>([]);
@@ -164,12 +147,15 @@ export const MemberHome: React.FC<MemberHomeProps> = ({ user, dna, onViewResult,
     setSavedNotice(false);
   }, [selectedDate, diary]);
 
-  const currentCode = records[0]?.code ?? (dna ? getFaceCode(dna) : null);
-  const currentRole = currentCode ? FACE_MAP[currentCode] : null;
   const todayKey = dateKey(new Date());
   const todayAwareness = awareness[todayKey];
   const todayState = todayAwareness ? getDailyAwarenessState(todayAwareness.stateCode) : null;
   const todayResult = todayAwareness?.result ?? null;
+  // The journal belongs to the signed-in member. Prefer their latest saved
+  // baseline, then the animal stored with today's awareness result.
+  const currentCode = records[0]?.code ?? todayResult?.faceCode ?? (dna ? getFaceCode(dna) : null);
+  const currentRole = currentCode ? FACE_MAP[currentCode] : null;
+  const todayReflection = todayResult?.reflectionText ?? todayResult?.inferredMindset ?? todayResult?.summary;
   const selectedAwareness = awareness[dateKey(selectedDate)];
   const selectedState = selectedAwareness ? getDailyAwarenessState(selectedAwareness.stateCode) : null;
   const selectedResult = selectedAwareness?.result ?? null;
@@ -236,13 +222,13 @@ export const MemberHome: React.FC<MemberHomeProps> = ({ user, dna, onViewResult,
   return <section className="mx-auto max-w-6xl pb-28 pt-2 fade-in md:pt-8">
     <div className="flex gap-px overflow-x-auto border border-[#D1D1C7] bg-[#D1D1C7] hide-scrollbar" aria-label="我的 FACE 功能">
       <button type="button" className="shrink-0 bg-[#4A382D] px-5 py-4 text-sm font-bold text-white md:flex-1">FACE 自我覺察日記</button>
-      {['交易計畫卡', '風險報酬計算器', '事件交易日曆'].map((tool) => <button key={tool} type="button" disabled className="shrink-0 cursor-not-allowed bg-[#F3EFE9] px-5 py-4 text-sm font-bold text-[#8C7E6D] md:flex-1" aria-label={`${tool}，付費方案解鎖`}>{tool}<span className="ml-2 text-[10px]">付費解鎖</span></button>)}
+      {['交易計畫卡', '風險報酬計算器', '事件交易日曆'].map((tool) => <button key={tool} type="button" disabled className="shrink-0 cursor-not-allowed bg-[#F3EFE9] px-5 py-4 text-sm font-bold text-[#8C7E6D] md:flex-1" aria-label={`${tool}，${hasSurvivalKitAccess ? '已解鎖、功能建置中' : '付費方案解鎖'}`}>{tool}<span className="ml-2 text-[10px]">{hasSurvivalKitAccess ? '已解鎖 · 建置中' : '付費解鎖'}</span></button>)}
     </div>
 
     <div className="mt-8 overflow-hidden border border-[#CFC6B8] bg-[#F7F2EB]">
       <div className="grid md:grid-cols-[0.8fr_1.2fr]">
         <div className="relative min-h-[20rem] overflow-hidden bg-white md:min-h-[30rem]">
-          {currentRole ? <img src={currentRole.landscapeImageUrl} alt={currentRole.name} className="absolute inset-0 h-full w-full object-cover mix-blend-multiply" /> : <div className="grid h-full place-items-center text-sm text-[#8C7E6D]">完成 40 題後顯示你的動物</div>}
+          {currentRole ? <img src={currentRole.landscapeImageUrl} alt={currentRole.name} className="absolute inset-0 h-full w-full object-cover mix-blend-multiply" /> : <div className="grid h-full place-items-center text-sm text-[#8C7E6D]">完成 24 題後顯示你的動物</div>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#2D2D2D]/55 via-transparent to-transparent" />
           {currentRole && <div className="absolute inset-x-0 bottom-0 p-6 text-white"><p className="text-xs font-bold tracking-[0.16em] text-white/65">固定交易人格 · {currentCode}</p><h2 className="mt-2 serif text-3xl">{currentRole.name}</h2></div>}
         </div>
@@ -253,15 +239,16 @@ export const MemberHome: React.FC<MemberHomeProps> = ({ user, dna, onViewResult,
           </div>
           <h1 className="mt-5 serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-5xl">{nickname} 的自我覺察日記</h1>
           {todayState ? <>
-            <h2 className="mt-5 serif text-3xl leading-[1.5] text-[#2D2D2D] md:text-4xl">{todayResult ? `${currentRole?.name ?? '你的交易人格'}${PATTERN_HEADLINE[todayResult.patternCode]}` : awarenessHeadline(todayState.headline)}</h2>
-            <p className="mt-5 max-w-xl text-base leading-8 text-[#5F574F]">{todayResult?.summary ?? todayState.summary}</p>
-            {todayResult ? <div className="mt-6 grid gap-px border border-[#D1D1C7] bg-[#D1D1C7] sm:grid-cols-5"><p className="bg-white px-4 py-3 text-sm font-bold text-[#2D2D2D]">商品：{todayResult.marketLabel}</p><p className="bg-white px-4 py-3 text-sm font-bold text-[#2D2D2D]">情緒：{todayResult.emotionLevel}</p><p className="bg-white px-4 py-3 text-sm font-bold text-[#2D2D2D]">看盤：{todayResult.checkFrequencyLabel ?? '未記錄'}</p><p className="bg-white px-4 py-3 text-sm font-bold text-[#2D2D2D]">行情影響：{resultShortPriceInfluence(todayResult.priceInfluenceCode)}</p><p className="bg-white px-4 py-3 text-sm font-bold text-[#2D2D2D]">行為：{todayResult.actionLevel}</p></div> : <div className="mt-6 grid gap-px border border-[#D1D1C7] bg-[#D1D1C7] sm:grid-cols-2">{todayState.signals.map((signal) => <p key={signal} className="bg-white px-4 py-3 text-sm font-bold leading-6 text-[#2D2D2D]">{signal}</p>)}</div>}
+            <div className="mt-6 max-w-2xl border-y border-[#D8CDBD] py-6">
+              <p className="text-[13px] font-normal leading-[1.7] tracking-[0.16em] text-[#8C635B]">當日覺察結果{currentRole ? ` · ${currentRole.name}` : ''}</p>
+              <p className="mt-4 serif text-[1.45rem] font-normal leading-[1.9] text-[#352E2A] md:text-[1.7rem]">{todayReflection ?? todayState.summary}</p>
+            </div>
             <div className="mt-6 border-l-2 border-[#8C635B] pl-5"><p className="text-xs font-bold tracking-[0.12em] text-[#8C635B]">今日一問</p><p className="mt-2 text-base font-bold leading-7 text-[#2D2D2D]">{todayResult?.reflectionQuestion ?? todayState.reminder}</p></div>
           </> : <>
             <h2 className="mt-5 serif text-3xl leading-[1.5] text-[#2D2D2D] md:text-4xl">你還沒開啟今日覺察</h2>
             <p className="mt-6 max-w-xl text-base leading-8 text-[#5F574F]">開始今日的自我覺察，並留下你對盤勢的看法吧。</p>
           </>}
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row"><button type="button" onClick={onStartAwareness} className="bg-[#8C635B] px-7 py-4 text-sm font-bold text-white transition hover:bg-[#754F48]">{todayState ? '更新今日的自我覺察' : '開始今日的自我覺察'}</button><button type="button" onClick={currentCode ? () => onViewResult(currentCode) : onStartTest} className="border border-[#4A382D] bg-white px-7 py-4 text-sm font-bold text-[#2D2D2D]">{currentCode ? '查看我的動物圖鑑' : '先完成 40 題測驗'}</button></div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row"><button type="button" onClick={onStartAwareness} className="bg-[#8C635B] px-7 py-4 text-sm font-bold text-white transition hover:bg-[#754F48]">{todayState ? '更新今日的自我覺察' : '開始今日的自我覺察'}</button><button type="button" onClick={currentCode ? () => onViewResult(currentCode) : onStartTest} className="border border-[#4A382D] bg-white px-7 py-4 text-sm font-bold text-[#2D2D2D]">{currentCode ? '查看我的動物圖鑑' : '先完成 24 題測驗'}</button></div>
         </div>
       </div>
     </div>

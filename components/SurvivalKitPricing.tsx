@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getSupabaseClient } from '../lib/supabase';
 
 // 生存指南不是「更多人格介紹」，而是回答「我這種人到底該怎麼交易」的方向感。
 // 這 7 個問題來自商業漏斗規劃，是這份「個人交易使用說明書」的核心大綱。
@@ -12,17 +13,47 @@ const questions = [
   '我的交易生存守則是什麼？',
 ];
 
-export const SurvivalKitPricing: React.FC = () => {
+interface SurvivalKitPricingProps {
+  isLoggedIn?: boolean;
+  hasAccess?: boolean;
+  onRequireLogin?: () => void;
+  onOpenMemberAccess?: () => void;
+}
+
+export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
+  isLoggedIn = false,
+  hasAccess = false,
+  onRequireLogin,
+  onOpenMemberAccess,
+}) => {
   const [isStartingCheckout, setIsStartingCheckout] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const startCheckout = async () => {
+    if (hasAccess) {
+      onOpenMemberAccess?.();
+      return;
+    }
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
     setIsStartingCheckout(true);
     setCheckoutError(null);
     try {
+      const { data } = await getSupabaseClient().auth.getSession();
+      const accessToken = data.session?.access_token;
+      if (!accessToken) {
+        setIsStartingCheckout(false);
+        onRequireLogin?.();
+        return;
+      }
       const response = await fetch('/api/payments/ecpay/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({ productCode: 'face-survival-kit' }),
       });
       const payload = await response.json() as {
@@ -105,7 +136,13 @@ export const SurvivalKitPricing: React.FC = () => {
             disabled={isStartingCheckout}
             className="flex w-full items-center justify-center bg-white px-6 py-4 text-center text-sm font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9] disabled:cursor-wait disabled:opacity-65"
           >
-            {isStartingCheckout ? '正在前往安全付款頁…' : '立即解鎖我的生存指南 →'}
+            {hasAccess
+              ? '已解鎖，進入我的 FACE →'
+              : isStartingCheckout
+                ? '正在前往安全付款頁…'
+                : isLoggedIn
+                  ? '立即解鎖我的生存指南 →'
+                  : '登入後解鎖生存指南 →'}
           </button>
           {checkoutError && <p role="alert" className="mt-3 text-sm leading-6 text-[#F2B8B5]">{checkoutError}</p>}
           <p className="mt-4 text-xs leading-6 text-white/45">

@@ -3,6 +3,7 @@
 The browser calls these same-origin Vercel Functions:
 
 - `POST /api/gemini/bar`
+- `POST /api/gemini/daily-awareness`
 - `POST /api/gemini/market-questions`
 - `POST /api/gemini/report`
 
@@ -32,6 +33,13 @@ ECPay's published stage merchant automatically. Apply the payment migration,
 then configure `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` so orders and
 verified callbacks can be stored.
 
+V2.5 requires the member to be signed in before checkout. The create endpoint
+validates the Supabase bearer token and binds the order to that member. A paid
+entitlement is issued only after the server callback passes CheckMacValue,
+merchant, amount, return-code, and non-simulated-payment checks. Repeated
+callbacks are safe because entitlement issuance upserts the same
+`user_id + product_code` record.
+
 When testing through a public tunnel or preview domain, set
 `ECPAY_PUBLIC_ORIGIN` to that HTTPS origin so ECPay can reach the callback URLs.
 
@@ -39,6 +47,18 @@ For production, set `ECPAY_ENV=production` and configure `ECPAY_MERCHANT_ID`,
 `ECPAY_HASH_KEY`, and `ECPAY_HASH_IV` with the values from the ECPay merchant
 console. These values must remain server-only and must never use a `VITE_`
 prefix.
+
+Production checkout is not ready until all of these server-side Vercel values
+exist: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ECPAY_ENV=production`,
+`ECPAY_PUBLIC_ORIGIN`, `ECPAY_MERCHANT_ID`, `ECPAY_HASH_KEY`, and
+`ECPAY_HASH_IV`.
+
+## Content reading analytics
+
+`POST /api/analytics/content-reading` records public anonymous reading and
+authenticated member reading. Public readers are identified by a local random
+UUID; login-required and paid modes are verified on the server. The table is
+not writable through the public Data API.
 
 ## Local development
 

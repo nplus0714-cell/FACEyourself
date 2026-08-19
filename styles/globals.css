@@ -4,6 +4,8 @@
   --face-accent: #8C635B;
   --face-line: #D1D1C7;
   --face-paper: #FBFAF7;
+  --face-sans: "Noto Sans TC", "Noto Sans", "PingFang TC", "Microsoft JhengHei", "Helvetica Neue", Arial, sans-serif;
+  --face-serif: "Noto Serif TC", "Noto Serif", "Source Han Serif TC", "Songti TC", Georgia, serif;
 }
 
 html {
@@ -16,17 +18,309 @@ body {
   margin: 0;
   background: var(--face-paper);
   color: var(--face-ink);
-  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-family: var(--face-sans);
   font-size: 16px;
   line-height: 1.8;
+  font-kerning: normal;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-break: strict;
+  text-autospace: normal;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 .serif {
-  font-family: "Noto Serif TC", "PingFang TC", serif;
+  font-family: var(--face-serif);
   font-weight: 400;
   letter-spacing: 0.025em;
+}
+
+/* FACE site-wide editorial typography.
+ * Headings use the restrained Song-style serif; controls and navigation stay sans-serif. */
+.face-site :where(h1, h2, h3, h4, h5, h6, blockquote) {
+  font-family: var(--face-serif);
+  font-weight: 400;
+  letter-spacing: 0.018em;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.face-site :where(p, li, dd, dt, figcaption) {
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.face-site :where(button, input, textarea, select, option, label, nav) {
+  font-family: var(--face-sans);
+}
+
+.face-site :where(p, li, blockquote) {
+  hanging-punctuation: first allow-end;
+}
+
+/* FACE long-form editorial system.
+ * Approved on PILD and shared by all 16 personality pages. */
+.reading-editorial--pilot {
+  --editorial-ink: #352e2a;
+  --editorial-body: #564c45;
+  --editorial-muted: #76685f;
+  --editorial-accent: #955f55;
+  --editorial-line: #d8cdbf;
+  --editorial-paper: #fffdf9;
+  --editorial-tint: #f7f1ea;
+  color: var(--editorial-ink);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-kerning: normal;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-break: strict;
+  text-autospace: normal;
+}
+
+.reading-editorial--pilot :where(h1, h2, h3, p, blockquote, a, span) {
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.reading-editorial--pilot .serif {
+  letter-spacing: 0.012em;
+}
+
+.reading-editorial--pilot .editorial-section {
+  padding-block: clamp(3.5rem, 8vw, 5.5rem);
+}
+
+.reading-editorial--pilot .editorial-chapter-header {
+  margin-bottom: clamp(2.25rem, 5vw, 3.25rem);
+}
+
+.reading-editorial--pilot .editorial-kicker {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.14em;
+  color: var(--editorial-accent);
+}
+
+.reading-editorial--pilot .editorial-kicker--inverse {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.reading-editorial--pilot .editorial-chapter-title {
+  max-width: 18em;
+  margin-top: 0.75rem;
+  color: var(--editorial-ink);
+  font-size: clamp(1.9rem, 5vw, 2.5rem);
+  line-height: 1.48;
+  letter-spacing: 0.018em;
+  text-wrap: balance;
+}
+
+.reading-editorial--pilot .editorial-chapter-deck {
+  max-width: 34rem;
+  margin-top: 0.65rem;
+  color: #875a52;
+  font-size: clamp(1.08rem, 2.7vw, 1.3rem);
+  line-height: 1.85;
+}
+
+.reading-editorial--pilot .editorial-body {
+  max-width: 40rem;
+  color: var(--editorial-body);
+  font-size: clamp(1.03rem, 2.1vw, 1.1rem);
+  line-height: 2;
+  letter-spacing: 0.01em;
+}
+
+.reading-editorial--pilot .editorial-body-l {
+  color: #564c45;
+  font-family: var(--face-sans);
+  font-size: clamp(1.0625rem, 1.6vw, 1.125rem);
+  font-weight: 300;
+  line-height: 2;
+  letter-spacing: 0.005em;
+}
+
+/* Approved FACE 2.0 body scale: shared by all 16 profiles. */
+.reading-editorial--approved-body .editorial-body-l {
+  font-size: 1.0625rem;
+  font-weight: 400;
+}
+
+.reading-editorial--approved-body .editorial-body-m {
+  font-family: var(--face-sans);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.95;
+  letter-spacing: 0.005em;
+}
+
+.reading-editorial--approved-body .editorial-body-s {
+  font-family: var(--face-sans);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: 0.005em;
+}
+
+.reading-editorial--approved-body .editorial-body-xs {
+  font-family: var(--face-sans);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.reading-editorial--approved-body .editorial-caption {
+  font-family: var(--face-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+.reading-editorial--approved-body .editorial-button {
+  font-family: var(--face-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+body:has(.reading-editorial--approved-body) .face-site nav {
+  font-family: var(--face-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .reading-editorial--approved-body .editorial-body-l {
+    font-size: 1.125rem;
+  }
+
+  body:has(.reading-editorial--approved-body) .face-site nav {
+    font-size: 1.0625rem;
+  }
+}
+
+.reading-editorial--pilot .editorial-lead {
+  max-width: 41rem;
+  color: #3f3530;
+  font-size: clamp(1.3rem, 3.7vw, 1.72rem);
+  line-height: 1.82;
+  letter-spacing: 0.012em;
+}
+
+.reading-editorial--pilot .editorial-subhead {
+  color: var(--editorial-ink);
+  font-size: clamp(1.28rem, 3.4vw, 1.58rem);
+  line-height: 1.72;
+  text-wrap: balance;
+}
+
+.reading-editorial--pilot .editorial-supporting {
+  color: var(--editorial-muted);
+  font-size: 0.98rem;
+  line-height: 1.9;
+}
+
+.reading-editorial--pilot .editorial-takeaway {
+  margin-top: clamp(2rem, 5vw, 2.75rem);
+  border-color: #cab9aa;
+  background: rgba(244, 235, 228, 0.86);
+}
+
+.reading-editorial--pilot .editorial-takeaway-text {
+  max-width: 38rem;
+  color: #413631;
+  font-size: clamp(1.18rem, 3.2vw, 1.42rem);
+  line-height: 1.82;
+}
+
+.reading-editorial--pilot .editorial-quote {
+  max-width: 22em;
+  font-size: clamp(1.55rem, 4.8vw, 2.2rem);
+  line-height: 1.62;
+  letter-spacing: 0.012em;
+  hanging-punctuation: first allow-end;
+  word-break: normal;
+}
+
+.reading-editorial--pilot .editorial-action {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+}
+
+/* 名人堂照片採冷灰藍線稿，文字沿用同一組色階，正文則維持深灰閱讀對比。 */
+.reading-editorial--pilot .editorial-master-card {
+  border-color: #bcc4c6;
+}
+
+.reading-editorial--pilot .editorial-master-kicker,
+.reading-editorial--pilot .editorial-master-action {
+  color: #68777f;
+}
+
+.reading-editorial--pilot .editorial-master-name {
+  color: #414d53;
+}
+
+.reading-editorial--pilot .editorial-master-highlight {
+  color: #687b85;
+}
+
+.reading-editorial--pilot .editorial-master-divider {
+  border-color: #c5cbcc;
+}
+
+.reading-editorial--pilot .editorial-scene-emphasis {
+  color: #9a5f55;
+}
+
+.reading-editorial--pilot .editorial-dark-copy {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.reading-editorial--pilot .editorial-on-dark {
+  color: rgba(255, 255, 255, 0.96);
+}
+
+@media (max-width: 639px) {
+  .reading-editorial--pilot .editorial-section {
+    padding-inline: 1.25rem;
+  }
+
+  .reading-editorial--pilot .editorial-chapter-title {
+    max-width: 12em;
+  }
+
+  .reading-editorial--pilot .editorial-body {
+    line-height: 1.95;
+  }
+
+  .reading-editorial--pilot .editorial-kicker {
+    font-size: 0.75rem;
+  }
+
+  .reading-editorial--pilot .editorial-action {
+    min-height: 2.75rem;
+  }
+
+  .reading-editorial--pilot .editorial-situation-trigger {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: 0.6rem;
+  }
+
+  .reading-editorial--pilot .editorial-situation-title {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .reading-editorial--pilot .editorial-situation-chevron {
+    grid-column: 2;
+    grid-row: 1;
+  }
 }
 
 button,

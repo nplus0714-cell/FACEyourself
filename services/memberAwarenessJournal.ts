@@ -22,7 +22,7 @@ export const getMemberAwarenessJournal = async (): Promise<MemberAwarenessJourna
   const { supabase, userId } = await requireUserId();
   const [profileResult, entriesResult] = await Promise.all([
     supabase.from('member_profiles').select('nickname').eq('user_id', userId).maybeSingle(),
-    supabase.from('awareness_diary_entries').select('entry_date, content, state_code, answers').eq('user_id', userId).order('entry_date', { ascending: false }),
+    supabase.from('awareness_diary_entries').select('entry_date, content, state_code, answers, result').eq('user_id', userId).order('entry_date', { ascending: false }),
   ]);
 
   if (profileResult.error) throw profileResult.error;
@@ -35,12 +35,13 @@ export const getMemberAwarenessJournal = async (): Promise<MemberAwarenessJourna
       .filter((entry) => entry.state_code)
       .map((entry) => {
         const payload = entry.answers as (Record<string, unknown> | null);
-        const result = payload?._result as DailyAwarenessResult | undefined;
+        const legacyResult = payload?._result as DailyAwarenessResult | undefined;
+        const result = (entry.result as unknown as DailyAwarenessResult | null) ?? legacyResult ?? null;
         const answers = payload ? Object.fromEntries(Object.entries(payload).filter(([key]) => key !== '_result')) as DailyAwarenessAnswers : null;
         return [entry.entry_date, {
           stateCode: entry.state_code as DailyAwarenessStateCode,
           answers,
-          result: result ?? null,
+          result,
         }];
       })),
   };
@@ -54,14 +55,31 @@ export const saveDailyAwarenessResult = async (
   const { supabase, userId } = await requireUserId();
   const updatedAt = new Date().toISOString();
   const stateCode: DailyAwarenessStateCode = result.patternCode === 'mixed' ? 'watching' : result.patternCode;
-  const payload = JSON.parse(JSON.stringify({ ...answers, _result: result })) as Json;
+  const answersPayload = JSON.parse(JSON.stringify(answers)) as Json;
+  const resultPayload = JSON.parse(JSON.stringify(result)) as Json;
   const updated = await supabase.from('awareness_diary_entries')
-    .update({ state_code: stateCode, answers: payload, updated_at: updatedAt })
+    .update({
+      state_code: stateCode,
+      answers: answersPayload,
+      result: resultPayload,
+      face_code: result.faceCode,
+      assessment_version: result.modelVersion,
+      completed_at: updatedAt,
+      updated_at: updatedAt,
+    })
     .eq('user_id', userId).eq('entry_date', entryDate).select('id').maybeSingle();
   if (updated.error) throw updated.error;
   if (!updated.data) {
     const { error } = await supabase.from('awareness_diary_entries').insert({
-      user_id: userId, entry_date: entryDate, state_code: stateCode, answers: payload, updated_at: updatedAt,
+      user_id: userId,
+      entry_date: entryDate,
+      state_code: stateCode,
+      answers: answersPayload,
+      result: resultPayload,
+      face_code: result.faceCode,
+      assessment_version: result.modelVersion,
+      completed_at: updatedAt,
+      updated_at: updatedAt,
     });
     if (error) throw error;
   }

@@ -1,4 +1,16 @@
+import article001Source from '../docs/content/articles/001-trading-decisions-under-uncertainty.md?raw';
+import article002Source from '../docs/content/articles/002-investing-or-speculating.md?raw';
+import article003Source from '../docs/content/articles/003-no-holy-grail-from-many-cups-to-humility.md?raw';
+import article004Source from '../docs/content/articles/004-trading-requires-belief.md?raw';
+import article005Source from '../docs/content/articles/005-action-over-prediction.md?raw';
+import article006Source from '../docs/content/articles/006-survival-stay-alive-to-have-a-voice.md?raw';
+import article007Source from '../docs/content/articles/007-what-is-your-tuition-budget.md?raw';
+import article008Source from '../docs/content/articles/008-stop-loss-is-an-entry-fee.md?raw';
+import article009Source from '../docs/content/articles/009-three-dimensions-for-surviving-the-trading-jungle.md?raw';
+
 export type ContentKind = 'video' | 'article';
+export type ContentSeries = '序言' | '破繭篇' | '生存篇';
+export type ContentChannel = 'face-survival-guide' | 'topic-articles' | 'market-notes';
 
 export interface ContentItem {
   id: string;
@@ -10,10 +22,22 @@ export interface ContentItem {
   duration?: string;
   youtubeId?: string;
   body?: string[];
+  bodyMarkdown?: string;
   previewParagraphs?: number;
   isDemo?: boolean;
+  articleNumber?: string;
+  channel?: ContentChannel;
+  series?: ContentSeries;
+  seriesOrder?: number;
+  requiresLogin?: boolean;
   status: 'draft' | 'published';
 }
+
+const getArticleBody = (source: string) => source
+  .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '')
+  .trimStart()
+  .replace(/^#\s+.+\r?\n+/, '')
+  .trim();
 
 // 之後新增內容時，只要在此加入一筆資料即可。影片只需要填入 youtubeId。
 // 這三支為版面與流程示範；正式上線前請換成自己的影片。
@@ -55,22 +79,131 @@ export const CONTENT_CATALOG: ContentItem[] = [
     status: 'published',
   },
   {
-    id: 'demo-article-comfort-zone',
-    slug: 'demo-article-comfort-zone',
+    id: 'article-001',
+    slug: 'trading-decisions-under-uncertainty',
     kind: 'article',
-    title: '交易舒適圈不是保守，而是你能持續執行的範圍',
-    summary: '當一筆部位讓你睡不好，問題不一定是你不夠勇敢，而是規則還不夠適合你。',
+    articleNumber: '001',
+    channel: 'face-survival-guide',
+    series: '序言',
+    seriesOrder: 1,
+    title: '交易不是找到正確性，而是學會在不確定中做決定',
+    summary: '真正讓人留在市場裡的，通常不是知道更多答案，而是慢慢知道自己該怎麼面對沒有答案的時候。',
+    faceTags: ['Analysis｜決策邏輯', 'Focus｜獲利動機'],
+    bodyMarkdown: getArticleBody(article001Source),
+    status: 'published',
+  },
+  {
+    id: 'article-002',
+    slug: 'investing-or-speculating',
+    kind: 'article',
+    articleNumber: '002',
+    channel: 'face-survival-guide',
+    series: '破繭篇',
+    seriesOrder: 1,
+    title: '一筆交易，到底是投資，還是投機？',
+    summary: '比起急著定義自己是哪一種人，更重要的是：你知不知道自己現在為什麼還持有。',
+    faceTags: ['Analysis｜決策邏輯', 'Cycle｜交易週期'],
+    bodyMarkdown: getArticleBody(article002Source),
+    status: 'published',
+  },
+  {
+    id: 'article-003',
+    slug: 'no-holy-grail-from-many-cups-to-humility',
+    kind: 'article',
+    articleNumber: '003',
+    channel: 'face-survival-guide',
+    series: '破繭篇',
+    seriesOrder: 2,
+    title: '交易沒有聖杯：從千杯，到謙卑',
+    summary: '真正重要的，不是找到最厲害的方法，而是開始不再需要證明自己什麼都懂。',
+    faceTags: ['Analysis｜決策邏輯', 'Focus｜獲利動機'],
+    bodyMarkdown: getArticleBody(article003Source),
+    status: 'published',
+  },
+  {
+    id: 'article-004',
+    slug: 'trading-requires-belief',
+    kind: 'article',
+    articleNumber: '004',
+    channel: 'face-survival-guide',
+    series: '破繭篇',
+    seriesOrder: 3,
+    title: '交易其實需要「相信」',
+    summary: '相信不是確定自己會對，而是在答案還沒出現時，仍然知道自己為什麼留下。',
+    faceTags: ['Focus｜獲利動機', 'Analysis｜決策邏輯'],
+    bodyMarkdown: getArticleBody(article004Source),
+    status: 'published',
+  },
+  {
+    id: 'article-005',
+    slug: 'action-over-prediction',
+    kind: 'article',
+    articleNumber: '005',
+    channel: 'face-survival-guide',
+    series: '破繭篇',
+    seriesOrder: 4,
+    title: '行動大於預測',
+    summary: '看對只是觀點，做對才是交易；市場最後留下的是你真正做過的決定。',
+    faceTags: ['Analysis｜決策邏輯', 'Exposure｜資金管理'],
+    bodyMarkdown: getArticleBody(article005Source),
+    status: 'published',
+  },
+  {
+    id: 'article-006',
+    slug: 'survival-stay-alive-to-have-a-voice',
+    kind: 'article',
+    articleNumber: '006',
+    channel: 'face-survival-guide',
+    series: '生存篇',
+    seriesOrder: 1,
+    title: '生存——活下來才有發言權',
+    summary: '生存不是不受傷，而是受傷以後還走得下去，仍然保有下一次選擇。',
     faceTags: ['Exposure｜資金管理', 'Focus｜獲利動機'],
-    body: [
-      '很多人把「敢不敢下單」當成交易能力的證明。但真正讓人走得久的，通常不是一次壓對，而是你能不能在波動出現時，仍然照著原本的規則行動。',
-      '先從一個很簡單的問題開始：如果這筆部位明天上下波動 5%，你還能正常工作、睡覺，並且不急著改變計畫嗎？如果不能，部位可能已經超過你目前能承受的範圍。',
-      '舒適圈不是把風險降到零，而是把風險放到你能辨識、能處理的位置。這會影響你選擇的標的數量、持有週期，以及進出場的規則。',
-      '第一步，請把「我看好」和「我願意承受多少波動」分開寫。前者是觀點，後者才是部位管理。兩件事混在一起時，市場的一點變化就很容易變成情緒壓力。',
-      '第二步，替每一筆交易寫下一個不需要臨場思考的調整條件。例如價格跌破什麼位置、基本面出現何種變化、或你的整體曝險來到多少時，才需要重新檢視。',
-      '最後，不要用別人的部位大小來評價自己。你的交易舒適圈會隨經驗、資金與生活狀態改變；能穩定執行的節奏，才是可以慢慢擴大的起點。',
-    ],
-    previewParagraphs: 3,
-    isDemo: true,
+    bodyMarkdown: getArticleBody(article006Source),
+    status: 'published',
+  },
+  {
+    id: 'article-007',
+    slug: 'what-is-your-tuition-budget',
+    kind: 'article',
+    articleNumber: '007',
+    channel: 'face-survival-guide',
+    series: '生存篇',
+    seriesOrder: 2,
+    title: '你的學費預算是多少？',
+    summary: '學費可以繳，但不要繳到自己動不了；每一次付出都要知道自己正在學什麼。',
+    faceTags: ['Exposure｜資金管理', 'Analysis｜決策邏輯'],
+    bodyMarkdown: getArticleBody(article007Source),
+    status: 'published',
+  },
+  {
+    id: 'article-008',
+    slug: 'stop-loss-is-an-entry-fee',
+    kind: 'article',
+    articleNumber: '008',
+    channel: 'face-survival-guide',
+    series: '生存篇',
+    seriesOrder: 3,
+    requiresLogin: true,
+    title: '停損不是失敗，是入場費',
+    summary: '停損不是證明你錯了，而是讓你在看錯時，只付一開始願意付的價格。',
+    faceTags: ['Exposure｜資金管理', 'Analysis｜決策邏輯'],
+    bodyMarkdown: getArticleBody(article008Source),
+    status: 'published',
+  },
+  {
+    id: 'article-009',
+    slug: 'three-dimensions-for-surviving-the-trading-jungle',
+    kind: 'article',
+    articleNumber: '009',
+    channel: 'face-survival-guide',
+    series: '生存篇',
+    seriesOrder: 4,
+    requiresLogin: true,
+    title: '在交易叢林生存，只看三個維度',
+    summary: '有錢、有策略、有膽識：三者互相配合，才有機會從活下來走向進攻。',
+    faceTags: ['Exposure｜資金管理', 'Focus｜獲利動機'],
+    bodyMarkdown: getArticleBody(article009Source),
     status: 'published',
   },
 ];

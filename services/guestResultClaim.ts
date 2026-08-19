@@ -25,7 +25,7 @@ const PENDING_ASSESSMENTS: Array<{
   questions: FaceQuestion[];
 }> = [
   {
-    storageKey: 'face_pending_assessment_v2',
+    storageKey: 'face_pending_assessment_v3',
     version: FACE_BASELINE_V2_VERSION,
     questionCount: FACE_BASELINE_V2_QUESTION_COUNT,
     questions: FACE_BASELINE_V2_QUESTIONS,

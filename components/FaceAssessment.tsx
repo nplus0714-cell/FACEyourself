@@ -107,7 +107,7 @@ const emptyDimensionCounts = (): Record<FaceDimension, number> => ({
   CYCLE: 0,
   EXPOSURE: 0,
 });
-const LOCAL_PENDING_ASSESSMENT_KEY = 'face_pending_assessment_v2';
+const LOCAL_PENDING_ASSESSMENT_KEY = 'face_pending_assessment_v3';
 
 const cacheCompletedAssessment = (
   answers: Record<string, FaceResponse>,
@@ -196,7 +196,12 @@ const calculateScores = (answers: Record<string, FaceResponse>): { scores: FaceS
   const confidenceByDimension = Object.fromEntries(
     Object.entries(answeredCountByDimension).map(([dimension, count]) => [
       dimension,
-      count === 10 ? 'high' : count >= 9 ? 'medium' : 'low',
+      (() => {
+        const expectedCount = FACE_BASELINE_V2_QUESTIONS.filter((question) => question.dimension === dimension).length;
+        if (count === expectedCount) return 'high';
+        if (count >= Math.max(1, expectedCount - 1)) return 'medium';
+        return 'low';
+      })(),
     ]),
   ) as FaceAssessmentMeta['confidenceByDimension'];
   const scenarioQuestionCount = FACE_BASELINE_V2_QUESTIONS.filter((question) => question.allowNotApplicable).length;
@@ -271,7 +276,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
       }
       onComplete(scores);
     } catch (error) {
-      console.error('Failed to persist FACE 40q assessment', error);
+      console.error('Failed to persist FACE 24q assessment', error);
 
       // Do not make an anonymous visitor lose a completed result because a
       // cloud write is unavailable. The browser copy remains available until

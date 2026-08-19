@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ZenLayout } from './components/ZenLayout';
-import { Assessment } from './components/Assessment';
 import { FaceAssessment } from './components/FaceAssessment';
 import { FaceSequentialMockup } from './components/FaceSequentialMockup';
 import { Dashboard } from './components/Dashboard';
 import { RoleGallery } from './components/RoleGallery';
-import { RoleDetail } from './components/RoleDetail';
 import { CompatibilityWheel } from './components/CompatibilityWheel';
 import { AboutFace } from './components/AboutFace';
 import { CoachProfile } from './components/CoachProfile';
 import { ContentHub } from './components/ContentHub';
 import { ContentDetail } from './components/ContentDetail';
+import { SurvivalKitPricing } from './components/SurvivalKitPricing';
 import { LandingInfo } from './components/LandingInfo';
 import { MirrorTrade } from './components/MirrorTrade';
 import { ResultPreview } from './components/ResultPreview';
@@ -32,10 +31,13 @@ import { translations } from './i18n';
 import { signOut, toAuthUser } from './services/authService';
 import { getSupabaseClient } from './lib/supabase';
 import { claimPendingGuestAssessment } from './services/guestResultClaim';
+import { generateDailyAwarenessReflection } from './services/geminiService';
+import { hasSurvivalKitEntitlement } from './services/memberEntitlements';
+import { recordMemberActivity } from './services/memberActivity';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 
-type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'daily-result' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin';
+type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'daily-result' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin';
 
 const viewFromPath = (path: string): AppView => {
   if (path === '/my-result') return 'dashboard';
@@ -52,6 +54,7 @@ const viewFromPath = (path: string): AppView => {
   if (path === '/types') return 'role-gallery';
   if (path.startsWith('/watch/')) return 'content-detail';
   if (path === '/watch') return 'content-hub';
+  if (path === '/survival-kit') return 'survival-kit';
   if (path === '/test') return 'dna-test';
   if (path === '/test-mockup') return 'sequential-test-mockup';
   if (path === '/daily-awareness') return 'daily-test';
@@ -71,6 +74,7 @@ const pathForView = (view: AppView) => ({
   'role-gallery': '/types',
   compatibility: '/types/compatibility',
   'content-hub': '/watch',
+  'survival-kit': '/survival-kit',
   'mirror-trade': '/mirror-trade',
   'result-preview': '/preview-results',
   'reading-prototype': '/reading-prototype',
@@ -102,7 +106,9 @@ const App: React.FC = () => {
   });
   const [showDailyResultAfterLogin, setShowDailyResultAfterLogin] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [hasSurvivalKitAccess, setHasSurvivalKitAccess] = useState(false);
   const claimedGuestResultRef = useRef(false);
+  const recordedActivityRef = useRef(new Set<string>());
   
   const t = translations[language];
 
@@ -220,9 +226,21 @@ const App: React.FC = () => {
         } else if (!authUser) {
           claimedGuestResultRef.current = false;
         }
+        if (authUser) {
+          const activityKey = `session_restored:${authUser.id}`;
+          if (!recordedActivityRef.current.has(activityKey)) {
+            recordedActivityRef.current.add(activityKey);
+            void recordMemberActivity('session_restored', authUser.id).catch((error) => console.warn('Unable to record restored session', error));
+          }
+          void hasSurvivalKitEntitlement()
+            .then(setHasSurvivalKitAccess)
+            .catch((error) => console.warn('Unable to load member entitlement', error));
+        } else {
+          setHasSurvivalKitAccess(false);
+        }
       });
 
-      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
         const authUser = session ? toAuthUser(session.user) : null;
         setState((previous) => (
           previous.user?.id === authUser?.id ? previous : { ...previous, user: authUser }
@@ -241,8 +259,19 @@ const App: React.FC = () => {
             claimedGuestResultRef.current = true;
             void claimPendingGuestAssessment().catch((error) => console.warn('Unable to claim the guest result yet', error));
           }
+          if (event === 'SIGNED_IN') {
+            const activityKey = `signed_in:${authUser.id}`;
+            if (!recordedActivityRef.current.has(activityKey)) {
+              recordedActivityRef.current.add(activityKey);
+              void recordMemberActivity('signed_in', authUser.id).catch((error) => console.warn('Unable to record sign in', error));
+            }
+          }
+          void hasSurvivalKitEntitlement()
+            .then(setHasSurvivalKitAccess)
+            .catch((error) => console.warn('Unable to refresh member entitlement', error));
         } else {
           claimedGuestResultRef.current = false;
+          setHasSurvivalKitAccess(false);
         }
       });
       unsubscribe = () => data.subscription.unsubscribe();
@@ -257,6 +286,11 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
+      if (state.user) {
+        await recordMemberActivity('signed_out', state.user.id).catch((error) => console.warn('Unable to record sign out', error));
+        recordedActivityRef.current.delete(`signed_in:${state.user.id}`);
+        recordedActivityRef.current.delete(`session_restored:${state.user.id}`);
+      }
       await signOut();
     } catch (error) {
       console.error('Unable to sign out', error);
@@ -270,7 +304,7 @@ const App: React.FC = () => {
       id: 'dna-' + Date.now(), 
       date: new Date().toLocaleDateString('zh-TW'), 
       scores, 
-      marketScenario: language === 'zh' ? "40 題基準測驗" : "40-Question Baseline Test",
+      marketScenario: language === 'zh' ? "24 題基準測驗" : "24-Question Baseline Test",
       isBaseline: true 
     };
     setState(p => ({ ...p, dna: scores, history: [baseline, ...p.history] }));
@@ -282,9 +316,35 @@ const App: React.FC = () => {
     navigateTo('dashboard');
   };
 
+  useEffect(() => {
+    const paymentStatus = new URLSearchParams(window.location.search).get('payment');
+    if (paymentStatus !== 'success' || !state.user) return undefined;
+    let active = true;
+    let attempts = 0;
+    const refresh = async () => {
+      attempts += 1;
+      try {
+        const entitled = await hasSurvivalKitEntitlement();
+        if (!active) return;
+        setHasSurvivalKitAccess(entitled);
+        if (!entitled && attempts < 6) window.setTimeout(() => void refresh(), 1500);
+      } catch (error) {
+        console.warn('Unable to verify payment entitlement yet', error);
+        if (active && attempts < 6) window.setTimeout(() => void refresh(), 1500);
+      }
+    };
+    void refresh();
+    return () => { active = false; };
+  }, [state.user]);
+
   const completeDailyAwareness = async (answers: DailyAwarenessAnswers) => {
     setPendingDailyAwareness(answers);
-    const dailyResult = scoreDailyAwareness(answers, state.dna ? getFaceCode(state.dna) : 'ARTC');
+    const scoredResult = scoreDailyAwareness(answers, state.dna ? getFaceCode(state.dna) : 'ARTC');
+    const generatedReflection = await generateDailyAwarenessReflection(answers);
+    const dailyResult: DailyAwarenessResult = {
+      ...scoredResult,
+      reflectionText: generatedReflection ?? scoredResult.inferredMindset,
+    };
     setPendingDailyResult(dailyResult);
     sessionStorage.setItem('face-daily-v1-result', JSON.stringify(dailyResult));
     if (!state.user) {
@@ -308,7 +368,7 @@ const App: React.FC = () => {
 
   const startDailyAwareness = () => {
     if (!state.dna) {
-      alert(language === 'zh' ? '你還沒有完成基準測驗。\n請先完成 40 題交易人格測驗。' : 'You have not completed the baseline test yet.\nPlease finish the 40-question trading style test first.');
+      alert(language === 'zh' ? '你還沒有完成基準測驗。\n請先完成 24 題交易人格測驗。' : 'You have not completed the baseline test yet.\nPlease finish the 24-question trading style test first.');
       navigateTo('landing');
       return;
     }
@@ -359,7 +419,7 @@ const App: React.FC = () => {
         }
         navigateTo(v as AppView);
       }}
-      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'mirror-trade', 'result-preview', 'reading-prototype', 'member-home', 'research-admin'].includes(view)}
+      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'survival-kit', 'mirror-trade', 'result-preview', 'reading-prototype', 'member-home', 'research-admin'].includes(view)}
       isLanding={view === 'landing'}
       language={language}
       onToggleLanguage={toggleLanguage}
@@ -368,7 +428,9 @@ const App: React.FC = () => {
         {new URLSearchParams(window.location.search).get('payment') && (
           <div className={`mb-8 border px-5 py-4 text-sm leading-7 ${new URLSearchParams(window.location.search).get('payment') === 'success' ? 'border-[#78947A] bg-[#EEF4EE] text-[#314D35]' : 'border-[#B98A83] bg-[#F8EFED] text-[#75463F]'}`} role="status">
             {new URLSearchParams(window.location.search).get('payment') === 'success'
-              ? '付款已完成，我們正在準備你的 FACE 交易生存指南。'
+              ? hasSurvivalKitAccess
+                ? '付款已完成，FACE 交易生存指南與付費工具權益已綁定到你的會員帳號。'
+                : '付款已完成，系統正在核對並開通你的會員權益。'
               : new URLSearchParams(window.location.search).get('payment') === 'cancelled'
                 ? '你已返回 FACE，這筆付款尚未完成。'
                 : '付款未完成或驗證失敗，請重新操作；若已扣款請先聯絡我們確認。'}
@@ -457,6 +519,10 @@ const App: React.FC = () => {
           onExploreTypes={() => navigateTo('role-gallery')}
           onOpenContent={() => navigateTo('content-hub')}
           onAbout={() => navigateTo('about-face')}
+          isLoggedIn={!!state.user}
+          hasSurvivalKitAccess={hasSurvivalKitAccess}
+          onRequireLogin={handleLogin}
+          onOpenMemberHome={() => navigateTo('member-home')}
         />
       </>}
 
@@ -551,7 +617,7 @@ const App: React.FC = () => {
       {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} onOpenCoach={() => navigateTo('coach-profile')} />}
       {view === 'coach-profile' && <CoachProfile onStartTest={() => navigateTo('dna-test')} onBackToAbout={() => navigateTo('about-face')} />}
       {view === 'mirror-trade' && <MirrorTrade user={state.user} onLogin={handleLogin} />}
-      {view === 'member-home' && state.user && <MemberHome user={state.user} dna={state.dna} onViewResult={(code) => openResultPreview(code)} onStartTest={() => navigateTo('dna-test')} onStartAwareness={openDailyAwareness} onOpenContent={() => navigateTo('content-hub')} onNicknameChange={(nickname) => setState((previous) => previous.user ? { ...previous, user: { ...previous.user, name: nickname } } : previous)} />}
+      {view === 'member-home' && state.user && <MemberHome user={state.user} dna={state.dna} onViewResult={(code) => openResultPreview(code)} onStartTest={() => navigateTo('dna-test')} onStartAwareness={openDailyAwareness} onOpenContent={() => navigateTo('content-hub')} onNicknameChange={(nickname) => setState((previous) => previous.user ? { ...previous, user: { ...previous.user, name: nickname } } : previous)} hasSurvivalKitAccess={hasSurvivalKitAccess} />}
       {view === 'member-home' && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">登入後可以保存測驗結果、回看變化，並使用 RATE 鏡相診股。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">登入並保存結果</button></div>}
       {view === 'result-preview' && <ResultPreview selectedCode={previewResultCode} onSelectCode={openResultPreview} onBackToList={backToResultPreviewList} language={language} onOpenDeepDive={() => openDailyAwareness()} onStartAwareness={openDailyAwareness} onRetest={() => navigateTo('dna-test')} />}
       {view === 'reading-prototype' && <ReadingLayerPrototype />}
@@ -560,13 +626,30 @@ const App: React.FC = () => {
       {view === 'content-hub' && (
         <ContentHub
           hasDna={!!state.dna}
+          isLoggedIn={!!state.user}
           language={language}
           onStartTest={() => navigateTo('dna-test')}
           onViewResult={() => state.dna ? openResultPreview(getFaceCode(state.dna)) : navigateTo('dna-test')}
+          onLoginRequest={handleLogin}
+          onOpenPricing={() => navigateTo('survival-kit')}
           onOpenContent={openContent}
         />
       )}
-      {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} onBack={() => navigateTo('content-hub')} />}
+      {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} isLoggedIn={!!state.user} onBack={() => navigateTo('content-hub')} onLoginRequest={handleLogin} onOpenPricing={() => navigateTo('survival-kit')} />}
+      {view === 'survival-kit' && <section className="mx-auto max-w-6xl pb-28 pt-4 fade-in md:pt-10">
+        <button type="button" onClick={() => navigateTo('content-hub')} className="text-sm font-medium text-[#70665D] transition hover:text-[#2D2D2D]">← 回到內容中心</button>
+        <header className="mx-auto max-w-3xl pb-10 pt-12 text-center md:pb-14 md:pt-16">
+          <p className="text-xs font-medium tracking-[0.28em] text-[#8C635B]">FACE PAID PLAN</p>
+          <h1 className="mt-5 serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-6xl">FACE 交易生存指南</h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-[2] text-[#70665D] md:text-lg">從公開文章建立觀念，再把它整理成適合你這一型的交易使用說明書。</p>
+        </header>
+        <SurvivalKitPricing
+          isLoggedIn={!!state.user}
+          hasAccess={hasSurvivalKitAccess}
+          onRequireLogin={handleLogin}
+          onOpenMemberAccess={() => navigateTo('member-home')}
+        />
+      </section>}
 
       {view === 'history' && (
         <div className="space-y-12 fade-in pb-40">
@@ -579,7 +662,7 @@ const App: React.FC = () => {
                     <span className="text-[10px] font-mono font-black text-[#8C7E6D] uppercase tracking-widest">{h.date}</span>
                     {h.isBaseline && <span className="bg-[#2D2D2D] text-white px-3 py-1 text-[8px] uppercase tracking-widest font-bold">DNA Baseline</span>}
                   </div>
-                  <h4 className="text-xl serif font-bold text-[#2D2D2D]">{h.isBaseline ? (language === 'zh' ? '40 題基準測驗' : 'Baseline test') : (language === 'zh' ? '今日交易回顧' : 'Daily check-in')}</h4>
+                  <h4 className="text-xl serif font-bold text-[#2D2D2D]">{h.isBaseline ? (language === 'zh' ? '24 題基準測驗' : 'Baseline test') : (language === 'zh' ? '今日交易回顧' : 'Daily check-in')}</h4>
                 </div>
                 <button onClick={() => { setSelectedEntry(h); setView('report-detail'); }} className="px-8 py-3 bg-[#2D2D2D] text-white text-[10px] tracking-widest uppercase font-bold rounded-sm group-hover:bg-black transition-all">檢視詳情 View</button>
               </div>
@@ -593,8 +676,16 @@ const App: React.FC = () => {
       )}
       
       {view === 'role-gallery' && <RoleGallery dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} onOpenMyFace={() => state.dna && openResultPreview(getFaceCode(state.dna))} />}
-      {view === 'role-detail' && selectedRoleCode && FACE_MAP[selectedRoleCode] && <RoleDetail role={FACE_MAP[selectedRoleCode]} isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode} onBack={() => navigateTo('role-gallery')} onOpenCompatibility={() => navigateTo('compatibility')} onOpenDeepDive={() => openDailyAwareness()} onOpenRole={(code) => { const next = FACE_MAP[code]; if (next) { openRole(next); window.scrollTo({ top: 0 }); } }} />}
-      {view === 'compatibility' && <CompatibilityWheel dna={state.dna} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
+      {view === 'role-detail' && selectedRoleCode && FACE_MAP[selectedRoleCode] && (
+        <ReadingLayerPrototype
+          key={selectedRoleCode}
+          profileCode={selectedRoleCode}
+          showPrototypeControls={false}
+          isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode}
+          onBack={() => navigateTo('role-gallery')}
+        />
+      )}
+      {view === 'compatibility' && <CompatibilityWheel dna={state.dna} initialCode={new URLSearchParams(window.location.search).get('type')} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
     </ZenLayout>
     {isAuthDialogOpen && <AuthDialog onClose={() => setIsAuthDialogOpen(false)} />}
     </>

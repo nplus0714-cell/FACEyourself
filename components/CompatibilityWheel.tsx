@@ -4,6 +4,7 @@ import { FaceScores, PersonalityProfile } from '../types';
 
 interface CompatibilityWheelProps {
   dna: FaceScores | null;
+  initialCode?: string | null;
   onOpenRole: (role: PersonalityProfile) => void;
   onStartTest: () => void;
 }
@@ -35,19 +36,21 @@ const pointForIndex = (index: number, total: number, radius = 43) => {
   return { x: 50 + Math.cos(angle) * radius, y: 50 + Math.sin(angle) * radius };
 };
 
-export const CompatibilityWheel: React.FC<CompatibilityWheelProps> = ({ dna, onOpenRole, onStartTest }) => {
+export const CompatibilityWheel: React.FC<CompatibilityWheelProps> = ({ dna, initialCode, onOpenRole, onStartTest }) => {
   const codes = useMemo(() => Object.keys(FACE_MAP).sort(), []);
   const measuredCode = dna ? getFaceCode(dna) : null;
-  const [selectedCode, setSelectedCode] = useState(measuredCode ?? codes[0]);
-  const [activeCode, setActiveCode] = useState(measuredCode ?? flipAt(codes[0], 0));
+  const linkedCode = initialCode && FACE_MAP[initialCode] ? initialCode : null;
+  const startingCode = linkedCode ?? measuredCode ?? codes[0];
+  const [selectedCode, setSelectedCode] = useState(startingCode);
+  const [activeCode, setActiveCode] = useState(flipAt(startingCode, 0));
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
 
   useEffect(() => {
-    if (measuredCode) {
-      setSelectedCode(measuredCode);
-      setActiveCode(flipAt(measuredCode, 0));
-    }
-  }, [measuredCode]);
+    const nextCode = linkedCode ?? measuredCode;
+    if (!nextCode) return;
+    setSelectedCode(nextCode);
+    setActiveCode(flipAt(nextCode, 0));
+  }, [linkedCode, measuredCode]);
 
   const relations = useMemo<WheelNode[]>(() => [
     ...AXES.map((axis, index) => {
@@ -157,7 +160,7 @@ export const CompatibilityWheel: React.FC<CompatibilityWheelProps> = ({ dna, onO
       </aside>
     </section>
 
-    {!measuredCode && <section className="relative mt-10 min-h-[15rem] overflow-hidden border border-[#D1D1C7] bg-[#EEE8DF]">
+    {!linkedCode && !measuredCode && <section className="relative mt-10 min-h-[15rem] overflow-hidden border border-[#D1D1C7] bg-[#EEE8DF]">
       <img src="/images/homepage-trading-salon-lineart.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-65 mix-blend-multiply" />
       <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#FBFAF7]/92 via-[#FBFAF7]/76 to-[#EEE8DF]/86" aria-hidden="true" />
       <div className="relative z-10 flex min-h-[15rem] flex-col gap-5 p-7 md:flex-row md:items-center md:justify-between md:p-9">

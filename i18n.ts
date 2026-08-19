@@ -11,7 +11,7 @@ export const translations: Record<Language, any> = {
       watch: '內容中心'
     },
     landing: {
-      title: '交易心態，像一面鏡子。\n映照出每一次買賣背後的你。',
+      title: '交易心態像一面鏡子\n決定你能走多遠',
       motto: '只要 5 分鐘，',
       supportingLine: '看懂自己的交易性格、情緒反應與決策模式，\n找到真正適合你的交易方式。',
       startTest: '開始測驗',
@@ -25,7 +25,7 @@ export const translations: Record<Language, any> = {
       logout: '登出',
       login: '登入',
       retest: '重新測驗',
-      retestDna: '重新做 40 題測驗',
+      retestDna: '重新做 24 題測驗',
       back: '返回',
       share: '分享結果',
       archive: '儲存今日回顧',
@@ -70,7 +70,7 @@ export const translations: Record<Language, any> = {
       logout: 'Logout',
       login: 'GOOGLE SIGN IN',
       retest: 'Retest',
-      retestDna: 'Retake the 40-Question Test',
+      retestDna: 'Retake the 24-Question Test',
       back: 'Back',
       share: 'SHARE MY RESULTS',
       archive: 'SAVE TODAY\'S REVIEW',

@@ -49,7 +49,7 @@ export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade, onOpenC
     </section>
 
     <section className="grid gap-5 md:grid-cols-3">
-      {[['01', '做測驗', '用 40 題了解目前的交易傾向。'], ['02', '看內容', '用影片與專欄，把感覺變成可以整理的觀察。'], ['03', '需要時再聊', '當問題真的困擾你，再主動進入 LINE@ 諮詢。']].map(([number, title, copy]) => <article key={number} className="border border-[#D1D1C7] bg-[#F7F4EF] p-7 md:p-8"><p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">{number}</p><h3 className="mt-8 serif text-3xl text-[#2D2D2D]">{title}</h3><p className="mt-4 text-sm leading-[1.9] text-[#70665D]">{copy}</p></article>)}
+      {[['01', '做測驗', '用 24 題了解目前的交易傾向。'], ['02', '看內容', '用影片與專欄，把感覺變成可以整理的觀察。'], ['03', '需要時再聊', '當問題真的困擾你，再主動進入 LINE@ 諮詢。']].map(([number, title, copy]) => <article key={number} className="border border-[#D1D1C7] bg-[#F7F4EF] p-7 md:p-8"><p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">{number}</p><h3 className="mt-8 serif text-3xl text-[#2D2D2D]">{title}</h3><p className="mt-4 text-sm leading-[1.9] text-[#70665D]">{copy}</p></article>)}
     </section>
 
     <section className="mx-auto max-w-2xl border border-[#D1D1C7] bg-[#F7F4EF] px-6 py-12 text-center md:px-12 md:py-16">

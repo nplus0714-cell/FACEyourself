@@ -4,6 +4,7 @@ import type {
   Question,
   ReportContent,
 } from '../types';
+import type { DailyAwarenessAnswers } from '../data/dailyAwarenessQuestions';
 
 interface ApiErrorBody {
   error?: {
@@ -103,4 +104,20 @@ export async function generateBarResponse(drinkId: string): Promise<string> {
     { drinkId },
   );
   return result.text;
+}
+
+export async function generateDailyAwarenessReflection(
+  answers: DailyAwarenessAnswers,
+): Promise<string | null> {
+  try {
+    const result = await postJson<{ reflectionText: string }>(
+      '/api/gemini/daily-awareness',
+      { answers },
+      30_000,
+    );
+    return result.reflectionText?.trim() || null;
+  } catch (error) {
+    console.error('Daily awareness reflection unavailable', error);
+    return null;
+  }
 }

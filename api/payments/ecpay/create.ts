@@ -5,14 +5,21 @@ import {
   formatEcpayTradeDate,
   getEcpayConfig,
 } from '../../_lib/ecpay';
-import { assertSameOrigin, jsonResponse } from '../../_lib/http';
-import { createPaymentOrder } from '../../_lib/paymentOrders';
+import { ApiError, assertSameOrigin, jsonResponse, readJsonBody } from '../../_lib/http';
+import { createPaymentOrder, getLatestFaceCodeForUser } from '../../_lib/paymentOrders';
 import { enforceRateLimit } from '../../_lib/rateLimit';
+import { requireAuthenticatedUser } from '../../_lib/supabaseAdmin';
 
 export async function POST(request: Request): Promise<Response> {
   try {
     assertSameOrigin(request);
     enforceRateLimit(request, 'ecpay-create', 8, 60_000);
+    const body = await readJsonBody<{ productCode?: string }>(request);
+    if (body.productCode !== ECPAY_PRODUCT.code) {
+      throw new ApiError(400, 'INVALID_PRODUCT', '商品資料不正確，請重新整理後再試。');
+    }
+    const user = await requireAuthenticatedUser(request);
+    const faceCode = await getLatestFaceCodeForUser(user.id);
 
     const config = getEcpayConfig();
     const merchantTradeNo = createMerchantTradeNo();
@@ -23,6 +30,9 @@ export async function POST(request: Request): Promise<Response> {
       merchantTradeNo,
       amount: ECPAY_PRODUCT.amount,
       environment: config.isProduction ? 'production' : 'stage',
+      userId: user.id,
+      customerEmail: user.email ?? null,
+      faceCode,
     });
 
     const fields: Record<string, string> = {
@@ -45,6 +55,9 @@ export async function POST(request: Request): Promise<Response> {
     return jsonResponse({ action: config.checkoutUrl, fields });
   } catch (error) {
     console.error('ECPay order creation failed', error instanceof Error ? error.message : error);
+    if (error instanceof ApiError) {
+      return jsonResponse({ error: { code: error.code, message: error.message } }, error.status);
+    }
     return jsonResponse({
       error: {
         code: 'PAYMENT_UNAVAILABLE',

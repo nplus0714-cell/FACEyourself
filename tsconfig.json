@@ -28,6 +28,7 @@
   },
   "exclude": [
     "compound-engineering-plugin",
-    "supabase/functions"
+    "supabase/functions",
+    "_exports"
   ]
 }

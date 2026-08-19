@@ -1,8 +1,7 @@
 import type { FaceQuestion, FaceTrait } from '../types';
-import { FACE_SEQUENTIAL_MOCKUP_QUESTIONS } from './faceSequentialMockup';
+import { FACE_24_REVIEW_QUESTIONS } from './faceQuestions24Review';
 
-export const FACE_BASELINE_V2_VERSION = 'face-baseline-40q-v2.1-two-stage';
-export const FACE_BASELINE_V2_QUESTION_COUNT = 40;
+export const FACE_BASELINE_V2_VERSION = 'face-baseline-24q-v3.0-two-stage';
 
 export const FACE_V2_AGREEMENT_SCALE = [
   '非常同意', '有點同意', '中立／不一定', '有點不同意', '非常不同意',
@@ -10,7 +9,7 @@ export const FACE_V2_AGREEMENT_SCALE = [
 
 const optionId = (side: 'a' | 'b', label: string, trait: FaceTrait) => ({ id: side, label, trait });
 
-export const FACE_BASELINE_V2_QUESTIONS: FaceQuestion[] = FACE_SEQUENTIAL_MOCKUP_QUESTIONS.map((question) => {
+export const FACE_BASELINE_V2_QUESTIONS: FaceQuestion[] = FACE_24_REVIEW_QUESTIONS.map((question) => {
   const base: FaceQuestion = {
     id: `face-v2-${String(question.id).padStart(2, '0')}`,
     order: question.id,
@@ -45,6 +44,8 @@ export const FACE_BASELINE_V2_QUESTIONS: FaceQuestion[] = FACE_SEQUENTIAL_MOCKUP
     scenarioStage: question.stage,
   };
 });
+
+export const FACE_BASELINE_V2_QUESTION_COUNT = FACE_BASELINE_V2_QUESTIONS.length;
 
 export const getFaceV2QuestionCounts = (questions = FACE_BASELINE_V2_QUESTIONS) =>
   questions.reduce<Record<'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE', number>>(

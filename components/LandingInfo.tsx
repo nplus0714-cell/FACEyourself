@@ -6,9 +6,13 @@ interface LandingInfoProps {
   onExploreTypes: () => void;
   onOpenContent: () => void;
   onAbout: () => void;
+  isLoggedIn: boolean;
+  hasSurvivalKitAccess: boolean;
+  onRequireLogin: () => void;
+  onOpenMemberHome: () => void;
 }
 
-export const LandingInfo: React.FC<LandingInfoProps> = ({ onStartTest, onExploreTypes, onOpenContent, onAbout }) => (
+export const LandingInfo: React.FC<LandingInfoProps> = ({ onStartTest, onExploreTypes, onOpenContent, onAbout, isLoggedIn, hasSurvivalKitAccess, onRequireLogin, onOpenMemberHome }) => (
   <section className="mx-auto max-w-6xl space-y-14 pb-24 pt-14 md:space-y-24 md:pt-24" aria-label="FACE 介紹">
     <div className="border-y border-[#D1D1C7] py-12 text-center md:py-16">
       <p className="text-xs font-bold tracking-[0.28em] text-[#8C635B]">WHAT IS FACE</p>
@@ -38,6 +42,11 @@ export const LandingInfo: React.FC<LandingInfoProps> = ({ onStartTest, onExplore
       </button>
     </div>
 
-    <SurvivalKitPricing />
+    <SurvivalKitPricing
+      isLoggedIn={isLoggedIn}
+      hasAccess={hasSurvivalKitAccess}
+      onRequireLogin={onRequireLogin}
+      onOpenMemberAccess={onOpenMemberHome}
+    />
   </section>
 );

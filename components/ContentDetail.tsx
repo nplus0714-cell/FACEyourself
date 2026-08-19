@@ -1,23 +1,73 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ContentItem } from '../data/contentCatalog';
+import { createReadingSessionId, recordContentReading } from '../services/contentReading';
 
 interface ContentDetailProps {
   item: ContentItem;
+  isLoggedIn: boolean;
   onBack: () => void;
+  onLoginRequest: () => void;
+  onOpenPricing: () => void;
 }
 
-export const ContentDetail: React.FC<ContentDetailProps> = ({ item, onBack }) => {
+export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, onBack, onLoginRequest, onOpenPricing }) => {
+  const articleRef = useRef<HTMLElement>(null);
+  const readingSessionRef = useRef(createReadingSessionId());
   const embedUrl = item.youtubeId
     ? `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`
     : undefined;
+  const isLocked = item.kind === 'article' && item.requiresLogin && !isLoggedIn;
+
+  useEffect(() => {
+    if (isLocked) return undefined;
+    const sessionId = readingSessionRef.current;
+    let maxProgress = 0;
+    let lastSentProgress = 0;
+    let animationFrame = 0;
+    void recordContentReading(item, sessionId, 'open', 0)
+      .catch((error) => console.warn('Unable to record article open', error));
+
+    const measure = () => {
+      animationFrame = 0;
+      const element = articleRef.current;
+      if (!element) return;
+      const rect = element.getBoundingClientRect();
+      const readableHeight = Math.max(1, element.scrollHeight);
+      const readPixels = Math.max(0, Math.min(readableHeight, window.innerHeight - rect.top));
+      maxProgress = Math.max(maxProgress, Math.round((readPixels / readableHeight) * 100));
+      if (maxProgress >= lastSentProgress + 10 || maxProgress >= 90) {
+        lastSentProgress = maxProgress;
+        void recordContentReading(item, sessionId, 'progress', maxProgress)
+          .catch((error) => console.warn('Unable to record reading progress', error));
+      }
+    };
+    const onScroll = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      if (maxProgress > lastSentProgress) {
+        void recordContentReading(item, sessionId, 'progress', maxProgress).catch(() => undefined);
+      }
+    };
+  }, [isLocked, item]);
 
   return (
-    <article className="mx-auto max-w-4xl pb-28 pt-4 md:pt-10 fade-in">
+    <article ref={articleRef} className="mx-auto max-w-4xl pb-28 pt-4 md:pt-10 fade-in">
       <button type="button" onClick={onBack} className="text-sm font-bold text-[#70665D] transition hover:text-[#2D2D2D]">← 回到內容中心</button>
       <header className="mt-10 border-b border-[#D1D1C7] pb-9 text-center md:mt-14 md:pb-12">
-        <p className="text-xs font-bold tracking-[0.28em] text-[#8C635B]">FACE {item.kind === 'video' ? 'VIDEO' : 'COLUMN'} {item.isDemo ? '· DEMO' : ''}</p>
+        <p className="text-xs font-bold tracking-[0.28em] text-[#8C635B]">
+          FACE {item.kind === 'video' ? 'VIDEO' : 'COLUMN'} {item.series ? `· ${item.articleNumber} · ${item.series}` : item.isDemo ? '· DEMO' : ''}
+        </p>
         <h1 className="mx-auto mt-5 max-w-3xl serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">{item.title}</h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-[2] text-[#70665D] md:text-lg">{item.summary}</p>
+        {item.requiresLogin && <p className="mx-auto mt-6 w-fit border border-[#B9AA9D] bg-[#F7F1EC] px-4 py-2 text-xs font-medium tracking-[0.12em] text-[#7A5148]">LOCK · 登入限定文章</p>}
       </header>
 
       {item.kind === 'video' ? <>
@@ -25,32 +75,57 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, onBack }) =>
           {embedUrl ? <iframe className="aspect-video w-full" src={embedUrl} title={item.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /> : null}
         </div>
         {item.isDemo && <p className="mt-3 text-center text-xs leading-[1.7] text-[#8C7E6D]">這是播放版面示範。正式發布時會換成你的 YouTube 影片，不會改變頁面網址或流程。</p>}
-      </> : <section className="mx-auto mt-10 max-w-2xl md:mt-14">
-        <div className="space-y-7 text-lg leading-[2.05] text-[#413C38] md:text-xl">
-          {(item.body ?? []).slice(0, item.previewParagraphs ?? 0).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-        </div>
-        <div className="relative mt-2 overflow-hidden pt-14">
-          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white via-white/90 to-white" />
-          <div className="select-none space-y-7 blur-[5px] text-lg leading-[2.05] text-[#70665D] md:text-xl" aria-hidden="true">
-            {(item.body ?? []).slice(item.previewParagraphs ?? 0).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+      </> : isLocked ? (
+        <section className="mx-auto mt-10 max-w-2xl border border-[#B9AA9D] bg-[#F7F1EC] p-7 text-center md:mt-14 md:p-12">
+          <p className="text-xs font-medium tracking-[0.22em] text-[#8C635B]">MEMBER READING</p>
+          <h2 className="mt-4 serif text-3xl leading-[1.55] text-[#2D2D2D]">登入後閱讀完整文章</h2>
+          <p className="mx-auto mt-5 max-w-lg text-[16px] leading-[1.95] text-[#70665D]">這篇文章屬於 FACE 生存指南的會員內容。登入不需要付費，完成登入後即可繼續閱讀。</p>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <button type="button" onClick={onLoginRequest} className="bg-[#2D2D2D] px-7 py-4 text-sm font-medium text-white transition hover:bg-[#3A302B]">登入並繼續閱讀 →</button>
+            <button type="button" onClick={onOpenPricing} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">查看 NT$590 完整方案</button>
           </div>
-          <div className="absolute inset-x-0 bottom-0 flex min-h-64 items-end justify-center bg-gradient-to-t from-white via-white/95 to-transparent px-4 pb-3 text-center">
-            <div className="max-w-md border border-[#D1D1C7] bg-[#F7F4EF] p-7 shadow-lg md:p-9">
-              <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">MEMBERS ONLY</p>
-              <h2 className="mt-3 serif text-2xl text-[#2D2D2D]">後半篇留給訂閱讀者</h2>
-              <p className="mt-3 text-sm leading-[1.8] text-[#70665D]">正式版將在這裡提供單篇解鎖與月訂閱；現在先讓你確認閱讀和鎖定內容的呈現方式。</p>
-              <button type="button" disabled className="mt-6 cursor-not-allowed bg-[#2D2D2D] px-6 py-4 text-sm font-bold text-white opacity-50">解鎖完整文章（示範）</button>
-            </div>
-          </div>
+        </section>
+      ) : item.bodyMarkdown ? (
+        <section className="mx-auto mt-10 max-w-[44rem] md:mt-14">
+          <ReactMarkdown
+            components={{
+              h2: ({ children }) => <h2 className="mb-6 mt-16 border-l-2 border-[#A05F54] pl-5 serif text-[1.75rem] leading-[1.55] text-[#2D2D2D] md:text-[2rem]">{children}</h2>,
+              h3: ({ children }) => <h3 className="mb-5 mt-12 serif text-2xl leading-[1.6] text-[#2D2D2D]">{children}</h3>,
+              p: ({ children }) => <p className="my-5 text-[17px] font-normal leading-[2] text-[#413C38] md:text-lg">{children}</p>,
+              strong: ({ children }) => <strong className="font-medium text-[#A05F54]">{children}</strong>,
+              hr: () => <hr className="my-12 border-0 border-t border-[#D8D0C6]" />,
+              ul: ({ children }) => <ul className="my-6 list-disc space-y-3 pl-6 text-[17px] leading-[1.9] text-[#413C38] md:text-lg">{children}</ul>,
+              ol: ({ children }) => <ol className="my-6 list-decimal space-y-3 pl-6 text-[17px] leading-[1.9] text-[#413C38] md:text-lg">{children}</ol>,
+              blockquote: ({ children }) => <blockquote className="my-10 border-l-2 border-[#A05F54] bg-[#F7F1EC] px-6 py-4 text-[#594A43]">{children}</blockquote>,
+            }}
+          >
+            {item.bodyMarkdown}
+          </ReactMarkdown>
+        </section>
+      ) : (
+        <section className="mx-auto mt-10 max-w-2xl space-y-7 text-lg leading-[2.05] text-[#413C38] md:mt-14 md:text-xl">
+          {(item.body ?? []).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        </section>
+      )}
+
+      {item.kind === 'article' && !isLocked && <section className="mt-16 grid overflow-hidden border border-[#B9AA9D] bg-[#F7F4EF] md:grid-cols-[1fr_auto]">
+        <div className="p-7 md:p-9">
+          <p className="text-xs font-medium tracking-[0.2em] text-[#8C635B]">FACE 交易生存指南 · 完整方案</p>
+          <h2 className="mt-3 serif text-2xl leading-[1.55] text-[#2D2D2D] md:text-3xl">把閱讀變成適合你這一型的交易使用說明書</h2>
+          <p className="mt-3 text-[15px] leading-[1.9] text-[#70665D]">查看七個關鍵問題、完整內容與早鳥方案。</p>
         </div>
+        <button type="button" onClick={onOpenPricing} className="flex min-h-24 items-center justify-between gap-8 bg-[#2D2D2D] px-7 py-5 text-left text-white transition hover:bg-[#3A302B] md:min-w-64 md:px-9">
+          <span><span className="block text-xs tracking-[0.16em] text-white/55">EARLY BIRD</span><span className="mt-2 block serif text-2xl">NT$590</span></span>
+          <span className="text-xl" aria-hidden="true">→</span>
+        </button>
       </section>}
 
-      <section className="mt-14 border border-[#D1D1C7] bg-[#F7F4EF] p-7 text-center md:p-10">
+      {item.kind === 'video' && <section className="mt-14 border border-[#D1D1C7] bg-[#F7F4EF] p-7 text-center md:p-10">
         <p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">NEXT STEP</p>
         <h2 className="mt-3 serif text-2xl text-[#2D2D2D] md:text-3xl">這個問題，也正在困擾你嗎？</h2>
         <p className="mx-auto mt-4 max-w-xl text-sm leading-[1.9] text-[#70665D]">之後這裡會放你的 LINE@ 諮詢入口；使用者看完內容後，再選擇是否主動和你聊聊。</p>
         <button type="button" disabled className="mt-7 cursor-not-allowed bg-[#2D2D2D] px-6 py-4 text-sm font-bold text-white opacity-50">LINE@ 諮詢入口（等待你的連結）</button>
-      </section>
+      </section>}
     </article>
   );
 };

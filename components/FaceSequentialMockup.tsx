@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Check, Maximize2, RotateCcw, X } from 'lucide-react';
 import {
-  FACE_SEQUENTIAL_MOCKUP_QUESTIONS,
   MOCK_DIMENSIONS,
   MOCK_TRAIT_LABELS,
   MockAnswer,
-  scoreSequentialMockup,
 } from '../data/faceSequentialMockup';
+import { FACE_24_REVIEW_QUESTIONS, scoreFace24Review } from '../data/faceQuestions24Review';
 
 interface Props { onExit: () => void; }
 
@@ -26,7 +25,7 @@ const AGREEMENT_SCALE: Array<{ answer: MockAnswer; label: string }> = [
   { answer: 'very_b', label: '非常不同意' },
 ];
 
-const sectionLabel = (id: number) => id <= 8 ? '直覺題' : id <= 16 ? '圖片題' : id <= 24 ? '同意程度題' : '兩階段情境題';
+const sectionLabel = (kind: 'intuition' | 'image' | 'agreement' | 'scenario') => kind === 'image' ? '圖片直覺題' : '兩階段交易情境';
 
 export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
   const [index, setIndex] = useState(0);
@@ -34,8 +33,8 @@ export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
   const [finished, setFinished] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches);
   const [preview, setPreview] = useState<{ side: 'A' | 'B'; label: string; description: string; src: string } | null>(null);
-  const question = FACE_SEQUENTIAL_MOCKUP_QUESTIONS[index];
-  const result = useMemo(() => scoreSequentialMockup(answers), [answers]);
+  const question = FACE_24_REVIEW_QUESTIONS[index];
+  const result = useMemo(() => scoreFace24Review(answers), [answers]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 767px)');
@@ -47,7 +46,7 @@ export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
 
   const choose = (answer: MockAnswer) => {
     setAnswers((previous) => ({ ...previous, [question.id]: answer }));
-    if (index === FACE_SEQUENTIAL_MOCKUP_QUESTIONS.length - 1) setFinished(true);
+    if (index === FACE_24_REVIEW_QUESTIONS.length - 1) setFinished(true);
     else setIndex((value) => value + 1);
   };
 
@@ -73,7 +72,7 @@ export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
         <div className="border border-[#D4CCC1] bg-[#FBF9F5] p-6 shadow-[0_20px_60px_rgba(70,55,43,0.08)] sm:p-10 lg:p-14">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#D8D0C5] pb-6">
             <div>
-              <p className="text-[11px] font-bold tracking-[0.24em] text-[#9A6B61]">FACE 2.0 · MOCKUP RESULT</p>
+              <p className="text-[11px] font-bold tracking-[0.24em] text-[#9A6B61]">FACE 2.0 · 24 題生活化審稿版</p>
               <h1 className="mt-3 serif text-3xl text-[#2D2D2D] sm:text-5xl">你的測試代碼：{result.code}</h1>
             </div>
             <span className="border border-[#BFAFA1] bg-white px-4 py-2 text-xs tracking-[0.14em] text-[#6E6259]">僅供審稿 · 未儲存</span>
@@ -132,8 +131,8 @@ export const FaceSequentialMockup: React.FC<Props> = ({ onExit }) => {
         <span className="border border-[#CFC6BA] bg-white/80 px-3 py-2 text-[10px] font-bold tracking-[0.18em] text-[#8C635B]">MOCKUP · 不會儲存</span>
       </div>
 
-      <div className="h-1 overflow-hidden bg-[#E1DAD1]"><div className="h-full bg-[#8C635B] transition-all" style={{ width: `${((index + 1) / 40) * 100}%` }} /></div>
-      <div className="mt-4 flex items-center justify-between text-xs text-[#80766E]"><span>{sectionLabel(question.id)}</span><span>{question.id} / 40</span></div>
+      <div className="h-1 overflow-hidden bg-[#E1DAD1]"><div className="h-full bg-[#8C635B] transition-all" style={{ width: `${((index + 1) / FACE_24_REVIEW_QUESTIONS.length) * 100}%` }} /></div>
+      <div className="mt-4 flex items-center justify-between text-xs text-[#80766E]"><span>{sectionLabel(question.kind)}</span><span>{index + 1} / {FACE_24_REVIEW_QUESTIONS.length}</span></div>
 
       <main className={`mt-6 border border-[#D4CCC1] bg-[#FBF9F5] shadow-[0_18px_55px_rgba(70,55,43,0.07)] sm:p-8 lg:p-11 ${question.kind === 'image' ? 'p-3' : 'p-5'}`}>
         {question.group && (

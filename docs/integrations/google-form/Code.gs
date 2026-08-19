@@ -1,6 +1,8 @@
 const WEBHOOK_URL = 'https://uudmqsvdtiizamsbevih.supabase.co/functions/v1/research-form-webhook';
-const AGREEMENT = ['非常同意', '有些同意', '中立／不一定', '有些不同意', '非常不同意'];
+const SURVEY_RELEASE = 'google-form-v2.5-24q';
+const ASSESSMENT_VERSION = 'face-baseline-24q-v3.0-two-stage';
 const BIPOLAR = ['非常接近 A', '比較接近 A', '兩者都有可能', '比較接近 B', '非常接近 B', '這個情境不適用於我'];
+
 const CALIBRATION = {
   focus: { title: '[校準01] 你認為自己的交易風格比較接近哪一側？', choices: ['非常偏積極', '比較偏積極', '介於兩者之間', '比較偏保守', '非常偏保守'] },
   analysis: { title: '[校準02] 做交易決策時，你通常比較依賴哪一側？', choices: ['非常依賴數據與規則', '比較依賴數據與規則', '兩種方式並用', '比較依賴盤面感受', '非常依賴盤面感受'] },
@@ -12,50 +14,57 @@ const CALIBRATION = {
   realism: { title: '[回饋04] 整體而言，這份問卷呈現的交易情境是否貼近你的實際經驗？', choices: ['非常貼近', '大致貼近', '一半貼近', '不太貼近', '完全不貼近'] },
 };
 
+const MARKET_RESEARCH = {
+  experience: { title: '[背景01] 你接觸投資或交易大約多久？', choices: ['尚未開始／不到 1 年', '1～3 年', '3～5 年', '5～10 年', '10 年以上'] },
+  frequency: { title: '[背景02] 你目前大約多久會做一次買進、賣出或調整部位？', choices: ['幾乎每天', '每週數次', '每月數次', '每季數次', '很少交易／目前沒有交易'] },
+  challenge: {
+    title: '[需求01] 交易時，哪些事情最容易讓你卡住？（可複選）',
+    choices: ['不知道何時進場', '不知道何時賣出或停損', '容易追高或害怕錯過', '虧損時容易改變原本計畫', '資訊太多，難以形成自己的判斷', '部位與風險不知道怎麼安排', '方法很多，但很難持續執行', '目前沒有明顯困擾'],
+  },
+  interest: {
+    title: '[需求02] 如果日後收到更完整的個人分析，你最想先看到什麼？（可複選）',
+    choices: ['我的交易優勢與盲點', '壓力下最容易出現的反應', '適合我的進出場與風險提醒', '可以每天記錄情緒與決策的工具', '交易計畫與風險報酬工具', '實際交易情境與案例', '目前只想看測驗結果'],
+  },
+  price: {
+    title: '[需求03] 如果未來有一份完整個人說明書、交易指南與實用工具，你目前比較接近哪一種想法？',
+    choices: ['目前不會考慮付費', '需要先看內容再決定', '可接受 NT$199 以下', '可接受 NT$200～399', '可接受 NT$400～699', '可接受 NT$700～999', '可接受 NT$1,000 以上'],
+  },
+};
+
+// [題號, 類型, 題目, A, B]
+// 題目與網站 face-baseline-24q-v3.0-two-stage 完全同源；Google Form 只移除圖片呈現。
 const QUESTIONS = [
-  [1,'intuition','一個潛在報酬很高、但資訊還不完整的機會出現時，你第一個想確認的是：','上行空間可能有多大？','最壞情況可能損失多少？'],
-  [2,'intuition','需要在有限時間內做交易決定時，你會先抓住：','可以核對的條件與證據','盤面節奏與資金反應'],
-  [3,'intuition','哪一種投資過程更接近你想要的感覺？','陪一個看懂的標的走過完整成長週期','把握一段明確行情，結束後尋找下一個機會'],
-  [4,'intuition','當你對某一個機會的信心明顯高於其他選項，更自然的做法是：','把較多資金放在這個少數高信念機會','把資金分配給幾個各有理由的機會'],
-  [5,'intuition','哪一種結果對你來說更難接受？','看對大方向，卻因參與太少而幾乎沒賺到','判斷錯誤，讓帳戶出現明顯回撤'],
-  [6,'intuition','面對沒有標準答案的市場時，你通常更信任：','可以在事前寫下、事後檢驗的方法','長期觀察後形成、能讀懂情境變化的市場感'],
-  [7,'intuition','哪一種狀況更容易打亂你的交易節奏？','為了找短線機會頻繁進出','資金長時間停在沒有進展的部位'],
-  [8,'intuition','配置資金時，哪一個方向對你更自然？','讓資金明顯集中在最有把握的少數機會','讓多個不同機會共同影響整體結果'],
-  [9,'preference','如果兩種走勢都有獲利機會，你比較偏好哪一種持有體驗？','短期快速拉升，過程波動可能較明顯','較平穩地逐步上行，等待時間可能較長'],
-  [10,'preference','如果長期期望報酬相近，你比較能接受哪一種價格路徑？','價格波動較大，但可能較早出現明顯漲幅','價格波動較小，以較穩定的節奏逐步累積'],
-  [11,'preference','準備做一筆交易時，哪種方式比較像你？','交易前先寫好條件與計畫','先觀察盤面，再依變化決定'],
-  [12,'preference','你平常比較像哪一種選股方式？','依數據與條件篩選標的','從市場熱門題材與強勢股尋找機會'],
-  [13,'preference','你的持股創下新高時，你通常比較想怎麼做？','只要長期理由仍在，就繼續持有','依短期行情節奏分批賣出'],
-  [14,'preference','投入資金時，哪種節奏比較像你？','固定時間投入，不特別判斷進場時點','觀察行情變化後，再決定何時投入'],
-  [15,'preference','你通常會怎麼安排持股數量？','集中持有少數較有把握的標的','分散持有多個不同標的'],
-  [16,'preference','哪一種資產配置方式比較像你？','以一項主要資產或策略為核心','配置多種資產與不同策略'],
-  [17,'agreement','面對上行空間與回撤風險都較大的機會，我通常願意承受較大的短期波動來換取上行。','',''],
-  [18,'agreement','我比較信任能在事前寫成條件、事後回頭檢驗的買進理由。','',''],
-  [19,'agreement','資金長時間沒有進展，對我來說本身就是一種成本。','',''],
-  [20,'agreement','當我對某個機會的信心明顯高於其他選項時，我傾向讓資金比重也明顯不同。','',''],
-  [21,'agreement','即使因此少賺一段行情，我也傾向優先降低帳戶出現大幅回撤的可能。','',''],
-  [22,'agreement','有些市場訊號很難拆成單一數據，但整體節奏仍能支持我的判斷。','',''],
-  [23,'agreement','只要原本的長期假設沒有改變，我可以接受一段時間沒有交易動作。','',''],
-  [24,'agreement','即使很有把握，我仍傾向限制單一部位對整體結果的影響。','',''],
-  [25,'scenario','你今天才剛買進，市場隨即出現急跌，這個部位下跌約 3%。原本交易理由沒有失效，損失仍在預設範圍內。你比較可能怎麼做？','維持原定部位，先讓交易按照原本計畫發展','先降低一部分部位，等風險輪廓更清楚再決定'],
-  [26,'scenario','一週後價格仍劇烈波動，損失已接近、但尚未觸發原本設定的風險上限，交易理由仍可能成立。你比較可能怎麼做？','保留剩餘核心部位，接受可能觸及原定上限以換取反轉空間','把部位降到很小，先保留重新進場的選擇權'],
-  [27,'scenario','你憑初步感覺用小部位買進，還沒研究完整，股價就快速上漲 8%。你比較可能怎麼做？','先保留部位，同時加快研究，避免太早放掉可能的上行','先收回一部分部位，等自己真正理解後再決定是否加回'],
-  [28,'scenario','之後股價一度大漲又回吐約一半漲幅，但仍高於成本；研究仍不足以形成高信念判斷。你比較可能怎麼做？','重新設定可承受的回吐範圍，保留部位等待上行延續','先保住剩餘成果，等研究完成後再重新評估'],
-  [29,'scenario','你原本因盤面感覺買進，股價隨後上漲。現在要決定是否續抱，你比較可能先做什麼？','補齊可核對的資料、成立條件與失效點','回看當時的價格反應、資金流與類股呼應是否仍存在'],
-  [30,'scenario','後來出現一項偏空消息，價格卻沒有明顯轉弱，類股資金也仍在。你比較可能怎麼判斷？','依消息的實際影響與原定失效條件，決定是否改變交易','把價格韌性與資金反應視為重要訊號，綜合判斷市場狀態'],
-  [31,'scenario','公司突然發布一項負面消息，價格開低後又快速收回大部分跌幅，細節還不完整。你比較可能先看什麼？','先確認公告內容與可能造成的量化影響','先觀察價格收回的力道、成交節奏與承接反應'],
-  [32,'scenario','幾天後，數據仍偏弱，但股價持續抗跌、同類股票也同步轉強。你比較可能依什麼做最後決定？','依明確的證據權重與退出條件，決定持有、減碼或離場','依價格、類股與資金訊號的整體一致性，判斷行情是否仍成立'],
-  [33,'scenario','你買進隔天，價格小幅下跌。原本假設沒有改變，也沒有觸發退出條件。你比較可能怎麼做？','先按原定持有週期觀察，不因一天的變化改變計畫','立即重看短期結構，確認這筆交易是否失去原本節奏'],
-  [34,'scenario','兩個月後，價格依然沒有明顯進展；長期假設仍在，但市場上已有其他較清楚的行情。你比較可能怎麼做？','只要長期期望沒有改變，就接受等待並維持主要部位','把大部分資金轉向週期較清楚的機會，等原標的啟動再回來'],
-  [35,'scenario','你依照原本規則完成兩筆交易，兩筆都小幅虧損，執行過程沒有明顯失誤。你比較可能怎麼做？','維持原本策略，先累積足夠樣本再判斷是否失效','先降低交易頻率，確認目前市場節奏是否仍適合這套做法'],
-  [36,'scenario','完成一個原先設定的觀察樣本後，策略表現仍偏弱，但還無法確定是正常低潮或市場環境已改變。你比較可能怎麼做？','保留核心策略，用更長週期資料確認是否真的失去優勢','先把主要資金移到目前較有效的節奏，原策略只保留小規模追蹤'],
-  [37,'scenario','市場突然下跌，你最大、也最有信心的持倉跟著下跌。原本假設仍在，組合損失也在預設範圍內。你比較可能怎麼做？','維持主要部位，接受它對組合造成較大的波動','降低最大部位比重，把風險重新分配到其他部位或現金'],
-  [38,'scenario','一週後，原本不同的部位開始同步波動，組合相關性明顯升高。你比較可能怎麼做？','把資金收斂到少數最理解、最有信念的部位，減少管理雜訊','降低各部位上限，重新配置到相關性較低的方向'],
-  [39,'scenario','你有五個部位，其中三個開始虧損，只有一個方向仍相對強勢。整體風險仍在預算內。你比較可能怎麼做？','把更多風險預算集中到證據最強的方向，縮減較弱部位','維持單一部位上限，避免短期強勢部位成為新的集中風險'],
-  [40,'scenario','市場逐漸穩定，最強的方向率先回升，其他方向仍沒有明顯反應。你比較可能怎麼重新投入？','以最強方向作為核心，等證據改變後再調整集中程度','分批配置到幾個低相關方向，避免復甦判斷依賴單一標的']
+  [1,'binary','如果最後都有機會賺錢，你第一眼比較喜歡哪一種走勢？','短期內快速上漲','波動較小，慢慢往上走'],
+  [2,'binary','如果最後可能賺得差不多，哪一種過程比較能讓你抱得住？','中間漲跌較大','中間漲跌較小'],
+  [3,'binary','準備做一筆交易時，哪個畫面比較像你？','先把買進與賣出條件寫好','看當時盤面，再決定怎麼做'],
+  [4,'binary','平常找股票時，哪一種方式比較像你？','按照自己設定的條件篩選','從市場正在關注的方向尋找'],
+  [5,'binary','持股漲到新高時，你更可能怎麼做？','繼續持有，讓行情走下去','先賣出一部分，把握這段漲幅'],
+  [6,'binary','你通常比較像哪一種買進方式？','固定時間慢慢買進','看到適合的行情再買進'],
+  [7,'binary','下面哪一種持股方式比較像你？','資金集中在少數幾檔','資金分散到比較多檔股票'],
+  [8,'binary','如果總資金一樣，你比較習慣怎麼分？','讓最看好的方向占比較多','分配到幾種不同的資產'],
+  [9,'bipolar','你今天剛買進，股價就跌了 3%。買進的理由沒有改變，也還沒碰到停損。你會？','照原計畫再觀察，不急著調整','先賣一部分，保留之後再買回的空間'],
+  [10,'bipolar','一週後，股價還是大幅上下震盪，已經快碰到停損，但買進的理由仍然存在。你會？','保留主要部位，等到原本設定的停損再處理','現在先把部位降到很小，之後再找機會'],
+  [11,'bipolar','你只是先買一點試試，還沒研究清楚，股價就大漲 8%。你會？','先留著，同時趕快把研究做完','先賣一部分，弄懂以後再決定'],
+  [12,'bipolar','之後股價又把一半漲幅吐了回去。你仍然沒有研究清楚，但目前還有賺。你會？','保留部位，看行情會不會再往上','先把剩下的獲利收好，研究完再說'],
+  [13,'bipolar','你原本是看盤面的感覺買進，後來股價上漲。現在要決定要不要繼續抱，你會先做什麼？','查資料，確認這家公司值得繼續持有的理由','看股價、成交量和同類股票是不是還很強'],
+  [14,'bipolar','後來出現一則壞消息，但股價沒有明顯下跌，同類股票也還在上漲。你會先相信？','先判斷這則消息到底會影響公司多少','先看市場是不是根本沒把它當成嚴重壞消息'],
+  [15,'bipolar','公司突然發布壞消息，股價開低後又拉了回來，消息內容還不完整。你會先看？','公告寫了什麼，以及可能造成多少影響','股價拉回的力道和成交量反應'],
+  [16,'bipolar','幾天後，公司數字還是偏弱，但股價沒有再跌，同類股票也開始上漲。最後你比較依靠？','原本寫下的買進、持有與退出條件','股價、成交量和同類股票的整體反應'],
+  [17,'bipolar','你買進隔天，股價小幅下跌。買進理由沒有改變，也還沒碰到停損。你會？','按照原本預計的時間繼續持有','重新看短線走勢，考慮要不要換掉'],
+  [18,'bipolar','兩個月後，這檔股票還是沒什麼變化，但其他股票已經開始上漲。你會？','繼續等原本看好的股票','先把部分資金移到有行情的股票'],
+  [19,'bipolar','你照原本的方法做了兩筆交易，結果都小幅虧損，但過程沒有明顯做錯。你會？','繼續照原方法做，累積更多次再判斷','先減少交易，看看現在的行情是否適合'],
+  [20,'bipolar','按照原本設定的次數做完後，結果還是不太好，但你不確定只是短期不順，還是方法真的不適合現在。你會？','用更長一段時間繼續確認','先停用大部分資金，只用小部位觀察'],
+  [21,'bipolar','市場突然下跌，你最大、也最有把握的持股跟著跌。買進理由沒變，整體虧損也還能接受。你會？','維持它原本較大的比重','先減碼，把部分資金移到其他持股或現金'],
+  [22,'bipolar','一週後，你原本以為不同類型的股票，開始一起上漲、一起下跌。你會？','只留下自己最了解、最有把握的幾檔','降低每一檔的上限，再找不同方向分散'],
+  [23,'bipolar','你有五檔持股，其中三檔正在虧損，只有一檔明顯比較強。整體虧損還能接受。你會？','增加最強那一檔的比重，減少較弱的持股','維持每一檔的上限，不讓資金全往一檔集中'],
+  [24,'bipolar','市場開始穩定，最強的那一檔先漲回來，其他持股還沒什麼反應。你會怎麼重新投入？','先把最強的方向當成主要部位','分批投入幾個不同方向，不只押一檔'],
 ];
 
 function setupResearchForm() {
+  return setupResearchFormV25();
+}
+
+function setupResearchFormV25() {
   const properties = PropertiesService.getScriptProperties();
   const webhookSecret = properties.getProperty('WEBHOOK_SECRET');
   if (!webhookSecret) throw new Error('請先在專案設定的指令碼屬性加入 WEBHOOK_SECRET');
@@ -64,51 +73,64 @@ function setupResearchForm() {
   if (previousFormId) {
     try {
       const previousForm = FormApp.openById(previousFormId);
-      if (previousForm.getTitle().indexOf('技術草稿') < 0) previousForm.setTitle(`${previousForm.getTitle()}（技術草稿，請勿發布）`);
+      if (previousForm.getTitle().indexOf('已封存') < 0) previousForm.setTitle(`${previousForm.getTitle()}（已封存）`);
       previousForm.setAcceptingResponses(false);
     } catch (error) {
-      console.warn(`無法標記先前表單：${error}`);
+      console.warn(`無法封存先前表單：${error}`);
     }
   }
 
   const form = FormApp.create('交易決策與行為模式前期研究問卷');
-  form.setDescription('本問卷旨在研究投資者面對不同市場情境時的決策反應。共40題，約需8～12分鐘，沒有標準答案，請依照最自然的反應作答。為避免影響作答，本階段不揭露完整研究假設與分類方式；研究完成後將提供補充說明。回答將以代碼保存並用於統計分析，不會公開可直接識別個人身分的資料。你可以自由決定是否參與，也可以隨時停止填答。');
+  form.setDescription('本問卷旨在研究投資者面對不同市場情境時的決策反應。共 24 題及研究回饋，約需 8～12 分鐘。沒有標準答案，請依照最自然的反應作答。為避免影響作答，本階段不揭露完整研究假設與分類方式。原始回覆僅限研究管理使用，分析時將以代碼進行去識別化處理，不會公開可直接識別個人身分的資料。你可以自由決定是否參與，也可以隨時停止填答。');
   form.setConfirmationMessage('感謝完成本次前期研究問卷。為避免影響研究結果，本階段不會立即顯示分析分類。待資料檢核與研究階段完成後，我們會依你的通知意願寄送個人結果。');
   form.setProgressBar(true);
   form.setCollectEmail(false);
-  form.addCheckboxItem().setTitle('研究參與同意').setHelpText('我已閱讀上述說明，並同意參與本次研究及使用匿名化資料進行分析。').setChoiceValues(['我同意']).setRequired(true);
-  form.addTextItem().setTitle('Email').setHelpText('僅用於日後寄送本次研究的個人分析結果；Email 將與答案分開保存。').setRequired(true);
-  form.addMultipleChoiceItem().setTitle('是否同意日後收到本次研究的個人分析結果？').setChoiceValues(['同意','不同意']).setRequired(true);
-  form.addMultipleChoiceItem().setTitle('是否願意收到相關網站上線、活動及內容通知？').setChoiceValues(['願意','不願意']).setRequired(true);
+  form.addCheckboxItem().setTitle('研究參與同意').setHelpText('我已閱讀上述說明，並同意參與本次研究及使用去識別化資料進行分析。').setChoiceValues(['我同意']).setRequired(true);
+  form.addTextItem().setTitle('Email（選填）').setHelpText('只有想收到個人分析結果或後續通知時才需要填寫。原始回覆將限制研究管理者存取，分析時不使用 Email 作為研究變項。').setRequired(false);
+  form.addMultipleChoiceItem().setTitle('是否同意日後收到本次研究的個人分析結果？').setChoiceValues(['同意（請確認已填 Email）','不同意']).setRequired(true);
+  form.addMultipleChoiceItem().setTitle('是否願意收到相關網站上線、活動及內容通知？').setChoiceValues(['願意（請確認已填 Email）','不願意']).setRequired(true);
 
-  QUESTIONS.forEach((question, index) => {
+  QUESTIONS.forEach((question) => {
     const [number, kind, prompt, optionA, optionB] = question;
-    if (number === 1 || number === 9 || number === 17 || number === 25) {
-      const section = number === 1 ? '第一部分｜直覺選擇' : number === 9 ? '第二部分｜交易偏好選擇' : number === 17 ? '第三部分｜同意程度' : '第四部分｜市場情境';
+    if (number === 1 || number === 9) {
+      const section = number === 1 ? '第一部分｜直覺選擇' : '第二部分｜交易情境';
       form.addPageBreakItem().setTitle(section);
     }
     const item = form.addMultipleChoiceItem().setTitle(`[Q${String(number).padStart(2,'0')}] ${prompt}`).setRequired(true);
-    if (kind === 'agreement') item.setHelpText('請選擇你對這句描述的同意程度。');
-    if (kind === 'scenario') item.setHelpText(`A｜${optionA}\n\nB｜${optionB}\n\n請依你當下比較可能採取的做法選擇；若兩者都可能，請選「兩者都有可能」。`);
-    item.setChoiceValues(kind === 'agreement' ? AGREEMENT : kind === 'scenario' ? BIPOLAR : [`A｜${optionA}`, `B｜${optionB}`]);
+    if (kind === 'bipolar') {
+      item.setHelpText(`A｜${optionA}\n\nB｜${optionB}\n\n請選擇比較接近你當下反應的程度；如果兩種都可能，可選「兩者都有可能」。`);
+      item.setChoiceValues(BIPOLAR);
+    } else {
+      item.setHelpText('請選擇第一眼比較接近你的選項，不需要把自己想成理想狀態。');
+      item.setChoiceValues([`A｜${optionA}`, `B｜${optionB}`]);
+    }
   });
-  addCalibrationSection(form);
 
-  const sheet = SpreadsheetApp.create('交易決策與行為模式前期研究｜原始回覆');
+  addCalibrationSection(form);
+  addMarketResearchSection(form);
+
+  const sheet = SpreadsheetApp.create('交易決策與行為模式前期研究｜v2.5 原始回覆');
   form.setDestination(FormApp.DestinationType.SPREADSHEET, sheet.getId());
   const info = sheet.insertSheet('研究設定');
-  info.getRange('A1:B6').setValues([
-    ['項目','內容'], ['表單編輯網址', form.getEditUrl()], ['表單填寫網址', form.getPublishedUrl()],
-    ['Supabase Webhook', WEBHOOK_URL], ['建立時間', new Date()], ['注意', '請勿在試算表中直接公開或轉寄受測者 Email'],
+  info.getRange('A1:B9').setValues([
+    ['項目','內容'],
+    ['研究版本', SURVEY_RELEASE],
+    ['計分版本', ASSESSMENT_VERSION],
+    ['表單編輯網址', form.getEditUrl()],
+    ['表單填寫網址', form.getPublishedUrl()],
+    ['Supabase Webhook', WEBHOOK_URL],
+    ['建立時間', new Date()],
+    ['資料提醒', 'Email 與答案會先存在受限的原始回覆；研究分析請使用 Supabase 去識別化資料'],
+    ['安全提醒', '請勿在試算表中保存 WEBHOOK_SECRET，亦不要公開或轉寄受測者 Email'],
   ]);
   info.autoResizeColumns(1, 2);
   ScriptApp.newTrigger('onResearchFormSubmit').forForm(form).onFormSubmit().create();
-  properties.setProperties({ FORM_ID: form.getId(), SHEET_ID: sheet.getId() });
-  console.log(JSON.stringify({ formId: form.getId(), editUrl: form.getEditUrl(), publishedUrl: form.getPublishedUrl(), sheetUrl: sheet.getUrl() }));
+  properties.setProperties({ FORM_ID: form.getId(), SHEET_ID: sheet.getId(), FORM_VERSION: SURVEY_RELEASE });
+  console.log(JSON.stringify({ formId: form.getId(), editUrl: form.getEditUrl(), publishedUrl: form.getPublishedUrl(), sheetUrl: sheet.getUrl(), surveyRelease: SURVEY_RELEASE }));
 }
 
 function addCalibrationSection(form) {
-  form.addPageBreakItem().setTitle('第五部分｜自我評估與問卷回饋').setHelpText('以下題目僅用於檢驗問卷是否準確、清楚，不會影響你的交易行為分類結果。');
+  form.addPageBreakItem().setTitle('第三部分｜自我評估與問卷回饋').setHelpText('以下題目只用於檢驗問卷是否準確、清楚，不會影響你的交易行為分類結果。');
   ['focus', 'analysis', 'cycle', 'exposure'].forEach((key) => {
     const question = CALIBRATION[key];
     form.addMultipleChoiceItem().setTitle(question.title).setChoiceValues(question.choices).setRequired(true);
@@ -119,55 +141,13 @@ function addCalibrationSection(form) {
   form.addMultipleChoiceItem().setTitle(CALIBRATION.realism.title).setChoiceValues(CALIBRATION.realism.choices).setRequired(true);
 }
 
-function addCalibrationSectionToCurrentForm() {
-  const properties = PropertiesService.getScriptProperties();
-  const form = FormApp.openById(properties.getProperty('FORM_ID'));
-  const exists = form.getItems(FormApp.ItemType.PAGE_BREAK)
-    .some((item) => item.asPageBreakItem().getTitle() === '第五部分｜自我評估與問卷回饋');
-  if (!exists) addCalibrationSection(form);
-  form.setDescription(form.getDescription().replace('共40題，約需8～12分鐘', '共40題及8題作答回饋，約需10～15分鐘'));
-  form.setAcceptingResponses(true);
-  console.log(JSON.stringify({ added: !exists, publishedUrl: form.getPublishedUrl(), totalItems: form.getItems().length }));
-}
-
-function convertCurrentFormToTextOnly() {
-  const properties = PropertiesService.getScriptProperties();
-  const form = FormApp.openById(properties.getProperty('FORM_ID'));
-  let removedImages = 0;
-
-  for (let index = form.getItems().length - 1; index >= 0; index -= 1) {
-    if (form.getItems()[index].getType() === FormApp.ItemType.IMAGE) {
-      form.deleteItem(index);
-      removedImages += 1;
-    }
-  }
-
-  form.getItems().forEach((formItem) => {
-    if (formItem.getType() === FormApp.ItemType.PAGE_BREAK) {
-      const page = formItem.asPageBreakItem();
-      if (page.getTitle() === '第二部分｜圖片選擇') page.setTitle('第二部分｜交易偏好選擇');
-      return;
-    }
-    if (formItem.getType() !== FormApp.ItemType.MULTIPLE_CHOICE) return;
-
-    const item = formItem.asMultipleChoiceItem();
-    const match = item.getTitle().match(/^\[Q(\d{2})\]/);
-    if (!match) return;
-    const question = QUESTIONS.find((entry) => entry[0] === Number(match[1]));
-    if (!question) return;
-
-    const [number, kind, prompt, optionA, optionB] = question;
-    item.setTitle(`[Q${String(number).padStart(2,'0')}] ${prompt}`);
-    item.setHelpText(kind === 'agreement'
-      ? '請選擇你對這句描述的同意程度。'
-      : kind === 'scenario'
-        ? `A｜${optionA}\n\nB｜${optionB}\n\n請依你當下比較可能採取的做法選擇；若兩者都可能，請選「兩者都有可能」。`
-        : '');
-    item.setChoiceValues(kind === 'agreement' ? AGREEMENT : kind === 'scenario' ? BIPOLAR : [`A｜${optionA}`, `B｜${optionB}`]);
-  });
-
-  form.setAcceptingResponses(true);
-  console.log(JSON.stringify({ removedImages, editUrl: form.getEditUrl(), publishedUrl: form.getPublishedUrl() }));
+function addMarketResearchSection(form) {
+  form.addPageBreakItem().setTitle('第四部分｜使用經驗與後續需求').setHelpText('以下題目只用於了解受測者背景與後續需求，不會影響分類結果。');
+  form.addMultipleChoiceItem().setTitle(MARKET_RESEARCH.experience.title).setChoiceValues(MARKET_RESEARCH.experience.choices).setRequired(true);
+  form.addMultipleChoiceItem().setTitle(MARKET_RESEARCH.frequency.title).setChoiceValues(MARKET_RESEARCH.frequency.choices).setRequired(true);
+  form.addCheckboxItem().setTitle(MARKET_RESEARCH.challenge.title).setChoiceValues(MARKET_RESEARCH.challenge.choices).setRequired(true);
+  form.addCheckboxItem().setTitle(MARKET_RESEARCH.interest.title).setChoiceValues(MARKET_RESEARCH.interest.choices).setRequired(true);
+  form.addMultipleChoiceItem().setTitle(MARKET_RESEARCH.price.title).setChoiceValues(MARKET_RESEARCH.price.choices).setRequired(true);
 }
 
 function onResearchFormSubmit(event) {
@@ -181,28 +161,53 @@ function onResearchFormSubmit(event) {
     const number = Number(match[1]);
     const code = `face-v2-${match[1]}`;
     const value = responses[title];
-    if (number <= 16) answers[code] = String(value).startsWith('A｜') ? 'A' : 'B';
-    else if (number <= 24) answers[code] = ({'非常同意':'very_agree','有些同意':'somewhat_agree','中立／不一定':'neutral','有些不同意':'somewhat_disagree','非常不同意':'very_disagree'})[value];
-    else answers[code] = ({'非常接近 A':'very_a','比較接近 A':'somewhat_a','兩者都有可能':'balanced','比較接近 B':'somewhat_b','非常接近 B':'very_b','這個情境不適用於我':'not_applicable'})[value];
+    if (number <= 8) {
+      answers[code] = String(value).startsWith('A｜') ? 'A' : 'B';
+      return;
+    }
+    answers[code] = ({'非常接近 A':'very_a','比較接近 A':'somewhat_a','兩者都有可能':'balanced','比較接近 B':'somewhat_b','非常接近 B':'very_b','這個情境不適用於我':'not_applicable'})[value];
   });
-  const resultConsent = responses['是否同意日後收到本次研究的個人分析結果？'] === '同意';
-  const marketingConsent = responses['是否願意收到相關網站上線、活動及內容通知？'] === '願意';
+
+  const resultConsent = String(responses['是否同意日後收到本次研究的個人分析結果？'] || '').startsWith('同意');
+  const marketingConsent = String(responses['是否願意收到相關網站上線、活動及內容通知？'] || '').startsWith('願意');
   const payload = {
-    responseId: event.response.getId(), formId: event.source.getId(), submittedAt: event.response.getTimestamp().toISOString(),
+    responseId: event.response.getId(),
+    formId: event.source.getId(),
+    submittedAt: event.response.getTimestamp().toISOString(),
+    surveyRelease: SURVEY_RELEASE,
+    assessmentVersion: ASSESSMENT_VERSION,
+    instrumentMode: 'google-form-text-only',
     consentResearch: Array.isArray(responses['研究參與同意']) ? responses['研究參與同意'].indexOf('我同意') >= 0 : String(responses['研究參與同意']).includes('我同意'),
-    email: responses['Email'], consentResultEmail: resultConsent, consentMarketing: marketingConsent, answers,
+    email: responses['Email（選填）'] || '',
+    consentResultEmail: resultConsent,
+    consentMarketing: marketingConsent,
+    answers,
     calibration: {
-      focus: responses[CALIBRATION.focus.title], analysis: responses[CALIBRATION.analysis.title],
-      cycle: responses[CALIBRATION.cycle.title], exposure: responses[CALIBRATION.exposure.title],
+      focus: responses[CALIBRATION.focus.title],
+      analysis: responses[CALIBRATION.analysis.title],
+      cycle: responses[CALIBRATION.cycle.title],
+      exposure: responses[CALIBRATION.exposure.title],
       realism: responses[CALIBRATION.realism.title],
     },
     feedback: {
-      difficult: responses[CALIBRATION.difficult] || '', repetitive: responses[CALIBRATION.repetitive] || '',
+      difficult: responses[CALIBRATION.difficult] || '',
+      repetitive: responses[CALIBRATION.repetitive] || '',
       neither: responses[CALIBRATION.neither] || '',
     },
+    market: {
+      experience: responses[MARKET_RESEARCH.experience.title],
+      frequency: responses[MARKET_RESEARCH.frequency.title],
+      challenge: responses[MARKET_RESEARCH.challenge.title] || [],
+      interest: responses[MARKET_RESEARCH.interest.title] || [],
+      price: responses[MARKET_RESEARCH.price.title],
+    },
   };
+
   const response = UrlFetchApp.fetch(WEBHOOK_URL, {
-    method: 'post', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true,
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true,
     headers: { 'x-research-secret': properties.getProperty('WEBHOOK_SECRET') },
   });
   if (response.getResponseCode() >= 300) throw new Error(`Supabase webhook ${response.getResponseCode()}: ${response.getContentText()}`);
@@ -212,5 +217,5 @@ function showSetupResult() {
   const properties = PropertiesService.getScriptProperties();
   const form = FormApp.openById(properties.getProperty('FORM_ID'));
   const sheet = SpreadsheetApp.openById(properties.getProperty('SHEET_ID'));
-  console.log(JSON.stringify({ editUrl: form.getEditUrl(), publishedUrl: form.getPublishedUrl(), sheetUrl: sheet.getUrl() }));
+  console.log(JSON.stringify({ editUrl: form.getEditUrl(), publishedUrl: form.getPublishedUrl(), sheetUrl: sheet.getUrl(), surveyRelease: properties.getProperty('FORM_VERSION') }));
 }

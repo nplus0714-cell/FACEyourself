@@ -207,7 +207,7 @@ export const CONSERVATIVE_FACE_2_PROTOTYPES: Record<string, FaceProfilePrototype
       { title: '市場大跌，平常的平靜突然失效', event: '帳面損失大到超過想像。', emotion: '可能第一次強烈懷疑長期策略。', behavior: '在壓力最大時全部重新檢查甚至退出。', consequence: '多年低頻紀律被一次未準備的情緒打斷。', watchFor: '平時就知道最壞情境，真正發生時才不需要臨時認識自己。' },
       { title: '自動投入多年，人生目標已改變', event: '收入、家庭或使用資金的時間不同。', emotion: '可能覺得原計畫一直運作就不必碰。', behavior: '配置繼續服務舊需求。', consequence: '投資很穩定，卻逐漸離生活目的更遠。', watchFor: '自動化應減少重複決策，不應取消人生更新。' },
     ],
-    selfDeception: { quote: '「我不是沒在管，長期投資本來就不用一直看。」', context: '這句話可能是健康的低頻，也可能出現在你已經錯過預定複查時。', reframe: '不需要一直看，不等於永遠不檢查。把「長期」改成固定日曆上的複查與明確紅旗。' },
+    selfDeception: { quote: '「我不是沒在管，長期投資本來就不用一直看。」', context: '', reframe: '不需要一直看，不等於永遠不檢查。把「長期」改成固定日曆上的複查與明確紅旗。' },
     comfortZone: { intro: '你適合低維護、可自動化的系統，但每一份省心都要由少數可靠的檢查點支撐。', items: [
       { label: '市場節奏', fit: '長期成長、短期噪音可忽略。', friction: '資產品質快速變化。' },
       { label: '決策頻率', fit: '半年複查、事件提醒。', friction: '完全沒有檢查日。' },
