@@ -45,16 +45,53 @@ type VercelResponseLike = {
   send: (body: string) => void;
 };
 
-export default function handler(
+const replaceFirst = (html: string, pattern: RegExp, replacement: string): string =>
+  pattern.test(html) ? html.replace(pattern, replacement) : html;
+
+const renderAppShell = async (profile: ShareProfile): Promise<string> => {
+  const pageUrl = `${SITE_ORIGIN}/types/${profile.code}`;
+  const imageUrl = new URL(profile.landscapeImageUrl, SITE_ORIGIN).toString();
+  const title = `FACE 交易人格｜${profile.name}`;
+  const description = `「${profile.motto}」`;
+  const shellResponse = await fetch(`${SITE_ORIGIN}/index.html`);
+  let html = await shellResponse.text();
+
+  html = replaceFirst(html, /<title>[^<]*<\/title>/i, `<title>${escapeHtml(title)}</title>`);
+  html = replaceFirst(html, /<meta name="description" content="[^"]*">/i, `<meta name="description" content="${escapeHtml(description)}">`);
+  html = replaceFirst(html, /<link rel="canonical" href="[^"]*">/i, `<link rel="canonical" href="${escapeHtml(pageUrl)}">`);
+  html = replaceFirst(html, /<meta property="og:url" content="[^"]*">/i, `<meta property="og:url" content="${escapeHtml(pageUrl)}">`);
+  html = replaceFirst(html, /<meta property="og:title" content="[^"]*">/i, `<meta property="og:title" content="${escapeHtml(title)}">`);
+  html = replaceFirst(html, /<meta property="og:description" content="[^"]*">/i, `<meta property="og:description" content="${escapeHtml(description)}">`);
+  html = replaceFirst(html, /<meta property="og:image" content="[^"]*">/i, `<meta property="og:image" content="${escapeHtml(imageUrl)}">`);
+  html = replaceFirst(html, /<meta property="og:image:width" content="[^"]*">/i, '<meta property="og:image:width" content="1672">');
+  html = replaceFirst(html, /<meta property="og:image:height" content="[^"]*">/i, '<meta property="og:image:height" content="941">');
+  html = replaceFirst(html, /<meta name="twitter:url" content="[^"]*">/i, `<meta name="twitter:url" content="${escapeHtml(pageUrl)}">`);
+  html = replaceFirst(html, /<meta name="twitter:title" content="[^"]*">/i, `<meta name="twitter:title" content="${escapeHtml(title)}">`);
+  html = replaceFirst(html, /<meta name="twitter:description" content="[^"]*">/i, `<meta name="twitter:description" content="${escapeHtml(description)}">`);
+  html = replaceFirst(html, /<meta name="twitter:image" content="[^"]*">/i, `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">`);
+
+  return html;
+};
+
+export default async function handler(
   request: VercelRequestLike,
   response: VercelResponseLike,
-): void {
+): Promise<void> {
   const requestUrl = new URL(request.url ?? '/', `https://${request.headers?.host ?? 'faceyourself.vercel.app'}`);
   const code = (requestUrl.searchParams.get('code') ?? '').toUpperCase();
   const profile = SHARE_PROFILES[code];
 
   if (!profile) {
     response.redirect(302, `${SITE_ORIGIN}/types`);
+    return;
+  }
+
+  if (requestUrl.searchParams.get('render') === 'app') {
+    const appHtml = await renderAppShell(profile);
+    response.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400');
+    response.setHeader('Content-Type', 'text/html; charset=utf-8');
+    response.setHeader('X-Content-Type-Options', 'nosniff');
+    response.status(200).send(appHtml);
     return;
   }
 

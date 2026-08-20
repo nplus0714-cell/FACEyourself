@@ -5,6 +5,14 @@
       "destination": "/api/share?code=:code"
     },
     {
+      "source": "/types/compatibility",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/types/:code",
+      "destination": "/api/share?code=:code&render=app"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
