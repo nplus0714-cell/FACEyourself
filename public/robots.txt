@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /test
+Disallow: /test-mockup
+Disallow: /my-result
+Disallow: /me
+Disallow: /daily-awareness
+Disallow: /daily-awareness-result
+Disallow: /research-admin
+Disallow: /preview-results
+Disallow: /reading-prototype
+Disallow: /mirror-trade
+Disallow: /journal/
+
+Sitemap: https://faceyourself.vercel.app/sitemap.xml

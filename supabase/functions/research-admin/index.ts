@@ -17,6 +17,46 @@ const expectedCodesFor = (version: string) => {
   return Array.from({ length: count }, (_, index) => `face-v2-${String(index + 1).padStart(2, '0')}`);
 };
 const scoreKeys = ['A', 'P', 'R', 'I', 'L', 'T', 'C', 'D'] as const;
+type Dimension = 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
+type ResearchAnswerRow = {
+  submission_id: string;
+  question_code: string;
+  selected_option: string;
+  dimension: Dimension;
+  score_value: number;
+};
+
+const DIMENSION_META: Record<Dimension, { calibrationKey: string; leftTrait: typeof scoreKeys[number] }> = {
+  FOCUS: { calibrationKey: 'focus', leftTrait: 'A' },
+  ANALYSIS: { calibrationKey: 'analysis', leftTrait: 'R' },
+  CYCLE: { calibrationKey: 'cycle', leftTrait: 'L' },
+  EXPOSURE: { calibrationKey: 'exposure', leftTrait: 'C' },
+};
+const CURRENT_QUESTION_DIMENSIONS: Record<number, Dimension> = {
+  1:'FOCUS',2:'FOCUS',3:'ANALYSIS',4:'ANALYSIS',5:'CYCLE',6:'CYCLE',7:'EXPOSURE',8:'EXPOSURE',
+  9:'FOCUS',10:'FOCUS',11:'FOCUS',12:'FOCUS',13:'ANALYSIS',14:'ANALYSIS',15:'ANALYSIS',16:'ANALYSIS',
+  17:'CYCLE',18:'CYCLE',19:'CYCLE',20:'CYCLE',21:'EXPOSURE',22:'EXPOSURE',23:'EXPOSURE',24:'EXPOSURE',
+};
+const CURRENT_QUESTION_GROUPS: Record<number, string> = {
+  9:'F1',10:'F1',11:'F2',12:'F2',13:'A1',14:'A1',15:'A2',16:'A2',
+  17:'C1',18:'C1',19:'C2',20:'C2',21:'E1',22:'E1',23:'E2',24:'E2',
+};
+const CURRENT_QUESTION_DEFINITIONS = Array.from({ length: 24 }, (_, index) => {
+  const number = index + 1;
+  return {
+    code: `face-v2-${String(number).padStart(2, '0')}`,
+    dimension: CURRENT_QUESTION_DIMENSIONS[number],
+    type: number <= 8 ? 'binary' as const : 'bipolar' as const,
+    group: CURRENT_QUESTION_GROUPS[number] ?? null,
+  };
+});
+
+const CALIBRATION_VALUES: Record<Dimension, Record<string, number>> = {
+  FOCUS: { '非常偏積極':100, '比較偏積極':75, '介於兩者之間':50, '比較偏保守':25, '非常偏保守':0 },
+  ANALYSIS: { '非常依賴數據與規則':100, '比較依賴數據與規則':75, '兩種方式並用':50, '比較依賴盤面感受':25, '非常依賴盤面感受':0 },
+  CYCLE: { '非常偏向長期持有':100, '比較偏向長期持有':75, '兩種方式並用':50, '比較偏向掌握波段':25, '非常偏向掌握波段':0 },
+  EXPOSURE: { '非常偏向集中配置':100, '比較偏向集中配置':75, '介於兩者之間':50, '比較偏向分散配置':25, '非常偏向分散配置':0 },
+};
 
 const isEmailUsable = (email: string | null) => {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
@@ -44,6 +84,47 @@ const toStringRecord = (value: unknown): Record<string, string> => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   return Object.fromEntries(Object.entries(value as Record<string, unknown>)
     .filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
+};
+
+const round = (value: number, digits = 0) => {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+};
+
+const sampleVariance = (values: number[]) => {
+  if (values.length < 2) return null;
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  return values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (values.length - 1);
+};
+
+const pearson = (pairs: Array<[number, number]>) => {
+  if (pairs.length < 3) return null;
+  const xs = pairs.map(([x]) => x);
+  const ys = pairs.map(([, y]) => y);
+  const meanX = xs.reduce((sum, value) => sum + value, 0) / xs.length;
+  const meanY = ys.reduce((sum, value) => sum + value, 0) / ys.length;
+  const numerator = pairs.reduce((sum, [x, y]) => sum + (x - meanX) * (y - meanY), 0);
+  const denominator = Math.sqrt(
+    xs.reduce((sum, value) => sum + (value - meanX) ** 2, 0)
+    * ys.reduce((sum, value) => sum + (value - meanY) ** 2, 0),
+  );
+  return denominator === 0 ? null : numerator / denominator;
+};
+
+const cronbachAlpha = (matrix: number[][]) => {
+  if (matrix.length < 3 || matrix[0]?.length < 2) return null;
+  const itemCount = matrix[0].length;
+  const itemVariances = Array.from({ length: itemCount }, (_, index) => sampleVariance(matrix.map((row) => row[index])) ?? 0);
+  const totalVariance = sampleVariance(matrix.map((row) => row.reduce((sum, value) => sum + value, 0)));
+  if (!totalVariance || totalVariance <= 0) return null;
+  return (itemCount / (itemCount - 1)) * (1 - itemVariances.reduce((sum, value) => sum + value, 0) / totalVariance);
+};
+
+const answerSide = (selectedOption: string) => {
+  if (selectedOption === 'A' || selectedOption === 'very_a' || selectedOption === 'somewhat_a') return 'a';
+  if (selectedOption === 'B' || selectedOption === 'very_b' || selectedOption === 'somewhat_b') return 'b';
+  if (selectedOption === 'balanced' || selectedOption === 'neutral') return 'middle';
+  return 'not_applicable';
 };
 
 Deno.serve(async (request) => {
@@ -126,7 +207,7 @@ Deno.serve(async (request) => {
       ? admin.from('research_participants').select('id, email, consent_research, consent_result_email, consent_marketing, unsubscribed_at').in('id', participantIds)
       : Promise.resolve({ data: [], error: null }),
     submissionIds.length > 0
-      ? admin.from('research_answers').select('submission_id, question_code, selected_option').in('submission_id', submissionIds)
+      ? admin.from('research_answers').select('submission_id, question_code, selected_option, dimension, score_value').in('submission_id', submissionIds)
       : Promise.resolve({ data: [], error: null }),
     submissionIds.length > 0
       ? admin.from('research_submission_reviews').select('submission_id, decision, exclusion_reason, notes, reviewed_at').in('submission_id', submissionIds)
@@ -146,7 +227,7 @@ Deno.serve(async (request) => {
     ids.push(submission.id);
     duplicateGroups.set(key, ids);
   }
-  const answersBySubmission = new Map<string, Array<{ question_code: string; selected_option: string }>>();
+  const answersBySubmission = new Map<string, ResearchAnswerRow[]>();
   for (const answer of answers || []) {
     const current = answersBySubmission.get(answer.submission_id) || [];
     current.push(answer);
@@ -245,6 +326,131 @@ Deno.serve(async (request) => {
 
   const versions = [...new Set(rows.map((row) => row.assessmentVersion))];
   const currentRows = rows.filter((row) => row.assessmentVersion === CURRENT_ASSESSMENT_VERSION);
+  const includedRows = currentRows.filter((row) => row.includedInAnalysis);
+  const includedIds = new Set(includedRows.map((row) => row.id));
+  const analysisStage = includedRows.length < 30 ? 'collecting'
+    : includedRows.length < 100 ? 'preliminary'
+      : includedRows.length < 200 ? 'screening' : 'stable';
+
+  const questionAnalytics = CURRENT_QUESTION_DEFINITIONS.map((question) => {
+    const questionAnswers = includedRows
+      .map((row) => answersBySubmission.get(row.id)?.find((answer) => answer.question_code === question.code))
+      .filter((answer): answer is ResearchAnswerRow => Boolean(answer));
+    const sideCounts = { a: 0, middle: 0, b: 0, not_applicable: 0 };
+    questionAnswers.forEach((answer) => { sideCounts[answerSide(answer.selected_option)] += 1; });
+    const applicableAnswers = questionAnswers.filter((answer) => answer.selected_option !== 'not_applicable');
+    const applicableCount = applicableAnswers.length;
+    const percentage = (count: number, denominator: number) => denominator > 0 ? round((count / denominator) * 100) : 0;
+    const discriminationPairs: Array<[number, number]> = [];
+    const dimensionCodes = CURRENT_QUESTION_DEFINITIONS
+      .filter((candidate) => candidate.dimension === question.dimension && candidate.code !== question.code)
+      .map((candidate) => candidate.code);
+    includedRows.forEach((row) => {
+      const submissionAnswers = answersBySubmission.get(row.id) || [];
+      const item = submissionAnswers.find((answer) => answer.question_code === question.code);
+      if (!item || item.selected_option === 'not_applicable') return;
+      const otherItems = dimensionCodes
+        .map((code) => submissionAnswers.find((answer) => answer.question_code === code))
+        .filter((answer): answer is ResearchAnswerRow => Boolean(answer) && answer.selected_option !== 'not_applicable');
+      if (otherItems.length !== dimensionCodes.length) return;
+      discriminationPairs.push([Number(item.score_value), otherItems.reduce((sum, answer) => sum + Number(answer.score_value), 0)]);
+    });
+    const discriminationValue = pearson(discriminationPairs);
+    const sideAPercentage = percentage(sideCounts.a, applicableCount);
+    const middlePercentage = percentage(sideCounts.middle, applicableCount);
+    const sideBPercentage = percentage(sideCounts.b, applicableCount);
+    const notApplicablePercentage = percentage(sideCounts.not_applicable, includedRows.length);
+    const dominantPercentage = Math.max(sideAPercentage, sideBPercentage);
+    const flags: string[] = [];
+    if (includedRows.length >= 30 && dominantPercentage >= 85) flags.push('單側選項過度集中');
+    if (includedRows.length >= 30 && middlePercentage >= 35) flags.push('中間選項偏高');
+    if (includedRows.length >= 30 && notApplicablePercentage >= 20) flags.push('不適用比例偏高');
+    if (includedRows.length >= 30 && discriminationValue !== null && discriminationValue < 0) flags.push('鑑別方向相反');
+    else if (includedRows.length >= 30 && discriminationValue !== null && discriminationValue < 0.2) flags.push('鑑別度偏低');
+    const status = includedRows.length < 30 ? 'collecting'
+      : flags.some((flag) => ['單側選項過度集中', '不適用比例偏高', '鑑別方向相反'].includes(flag)) ? 'review'
+        : flags.length > 0 ? 'watch' : 'healthy';
+    return {
+      code: question.code,
+      dimension: question.dimension,
+      type: question.type,
+      group: question.group,
+      sampleSize: includedRows.length,
+      applicableCount,
+      sideACount: sideCounts.a,
+      middleCount: sideCounts.middle,
+      sideBCount: sideCounts.b,
+      notApplicableCount: sideCounts.not_applicable,
+      sideAPercentage,
+      middlePercentage,
+      sideBPercentage,
+      notApplicablePercentage,
+      meanAValue: applicableCount > 0
+        ? round(applicableAnswers.reduce((sum, answer) => sum + Number(answer.score_value), 0) / applicableCount, 1)
+        : null,
+      discrimination: discriminationValue === null ? null : round(discriminationValue, 2),
+      discriminationSampleSize: discriminationPairs.length,
+      status,
+      flags,
+    };
+  });
+
+  const dimensionAnalytics = (Object.keys(DIMENSION_META) as Dimension[]).map((dimension) => {
+    const definitions = CURRENT_QUESTION_DEFINITIONS.filter((question) => question.dimension === dimension);
+    const matrix = includedRows.map((row) => {
+      const submissionAnswers = answersBySubmission.get(row.id) || [];
+      return definitions.map((question) => submissionAnswers.find((answer) => answer.question_code === question.code));
+    }).filter((answerRow) => answerRow.every((answer) => answer && answer.selected_option !== 'not_applicable'))
+      .map((answerRow) => answerRow.map((answer) => Number(answer!.score_value)));
+    const meta = DIMENSION_META[dimension];
+    const calibrationPairs = includedRows.map((row) => {
+      const label = row.calibration[meta.calibrationKey];
+      const selfValue = CALIBRATION_VALUES[dimension][label];
+      const scoreValue = Number((row.scores as Record<string, number>)[meta.leftTrait]);
+      return Number.isFinite(selfValue) && Number.isFinite(scoreValue) ? { selfValue, scoreValue } : null;
+    }).filter((pair): pair is { selfValue: number; scoreValue: number } => Boolean(pair));
+    const directionalPairs = calibrationPairs.filter((pair) => pair.selfValue !== 50 && pair.scoreValue !== 50);
+    const directionalAgreementCount = directionalPairs.filter((pair) => (pair.selfValue > 50) === (pair.scoreValue > 50)).length;
+    const alpha = cronbachAlpha(matrix);
+    return {
+      dimension,
+      completeCaseCount: matrix.length,
+      cronbachAlpha: alpha === null ? null : round(alpha, 2),
+      calibrationCount: calibrationPairs.length,
+      directionalCalibrationCount: directionalPairs.length,
+      directionalAgreementPercentage: directionalPairs.length > 0
+        ? round((directionalAgreementCount / directionalPairs.length) * 100)
+        : null,
+      meanCalibrationGap: calibrationPairs.length > 0
+        ? round(calibrationPairs.reduce((sum, pair) => sum + Math.abs(pair.selfValue - pair.scoreValue), 0) / calibrationPairs.length, 1)
+        : null,
+    };
+  });
+
+  const scenarioGroups = [...new Set(CURRENT_QUESTION_DEFINITIONS.flatMap((question) => question.group ? [question.group] : []))]
+    .map((group) => {
+      const definitions = CURRENT_QUESTION_DEFINITIONS.filter((question) => question.group === group);
+      let eligibleCount = 0;
+      let sameDirectionCount = 0;
+      includedRows.forEach((row) => {
+        const submissionAnswers = answersBySubmission.get(row.id) || [];
+        const sides = definitions.map((question) => {
+          const answer = submissionAnswers.find((candidate) => candidate.question_code === question.code);
+          return answer ? answerSide(answer.selected_option) : 'not_applicable';
+        });
+        if (!sides.every((side) => side === 'a' || side === 'b')) return;
+        eligibleCount += 1;
+        if (sides.every((side) => side === sides[0])) sameDirectionCount += 1;
+      });
+      return {
+        group,
+        dimension: definitions[0].dimension,
+        eligibleCount,
+        sameDirectionCount,
+        sameDirectionPercentage: eligibleCount > 0 ? round((sameDirectionCount / eligibleCount) * 100) : null,
+      };
+    });
+
   return Response.json({
     generatedAt: new Date().toISOString(),
     currentAssessmentVersion: CURRENT_ASSESSMENT_VERSION,
@@ -261,6 +467,15 @@ Deno.serve(async (request) => {
       canSendResult: rows.filter((row) => row.canSendResult).length,
       canMarket: rows.filter((row) => row.canMarket).length,
       byVersion: Object.fromEntries(versions.map((version) => [version, rows.filter((row) => row.assessmentVersion === version).length])),
+    },
+    questionAnalysis: {
+      sampleSize: includedRows.length,
+      stage: analysisStage,
+      minimumForItemReview: 30,
+      minimumForStableReview: 200,
+      questions: questionAnalytics,
+      dimensions: dimensionAnalytics,
+      scenarioGroups,
     },
     submissions: rows,
   }, { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

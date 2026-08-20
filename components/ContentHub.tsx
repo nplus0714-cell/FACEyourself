@@ -83,7 +83,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
         </p>
       </header>
 
-      <section aria-labelledby="video-heading">
+      {publishedVideos.length > 0 && <section aria-labelledby="video-heading">
         <div className="mb-7 flex items-end justify-between gap-6 border-b border-[#D1D1C7] pb-5">
           <div>
             <p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">WATCH</p>
@@ -113,7 +113,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
             </button>
           ))}
         </div>
-      </section>
+      </section>}
 
       <section aria-labelledby="collection-heading" className="space-y-12 md:space-y-16">
         <div className="border-b border-[#D1D1C7] pb-5">
@@ -154,10 +154,10 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
             <h4 className="mt-3 serif text-2xl leading-[1.55] text-[#2D2D2D] md:text-3xl">想把文章裡的觀念，變成你這一型的交易使用說明書？</h4>
             <p className="mt-3 text-[15px] leading-[1.9] text-[#70665D]">查看完整內容、七個關鍵問題與早鳥方案。</p>
           </div>
-          <button type="button" onClick={onOpenPricing} className="flex min-h-24 items-center justify-between gap-8 bg-[#2D2D2D] px-7 py-5 text-left text-white transition hover:bg-[#3A302B] md:min-w-64 md:px-9">
-            <span><span className="block text-xs tracking-[0.16em] text-white/55">EARLY BIRD</span><span className="mt-2 block serif text-2xl">NT$590</span></span>
+          <a href="/survival-kit" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="flex min-h-24 items-center justify-between gap-8 bg-[#2D2D2D] px-7 py-5 text-left text-white transition hover:bg-[#3A302B] md:min-w-64 md:px-9">
+            <span><span className="block text-xs tracking-[0.16em] text-white/55">EARLY ACCESS</span><span className="mt-2 block serif text-2xl">查看方案</span></span>
             <span className="text-xl" aria-hidden="true">→</span>
-          </button>
+          </a>
         </div>
 
         {ARTICLE_SERIES.map((series, seriesIndex) => {
@@ -177,10 +177,10 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
 
               <div className={`grid gap-5 ${articles.length === 1 ? 'md:grid-cols-1' : 'md:grid-cols-2'}`}>
                 {articles.map((item) => (
-                  <button
+                  <a
                     key={item.id}
-                    type="button"
-                    onClick={() => openArticle(item)}
+                    href={`/watch/${item.slug}`}
+                    onClick={(event) => { event.preventDefault(); openArticle(item); }}
                     className={`group flex min-h-72 flex-col justify-between border bg-white p-7 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#B18A80] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-4 md:p-9 ${item.requiresLogin ? 'border-[#B9AA9D]' : 'border-[#D1D1C7]'} ${articles.length === 1 ? 'md:min-h-80' : ''}`}
                   >
                     <div>
@@ -199,7 +199,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
                       </div>
                       <span className="shrink-0 text-sm font-medium text-[#2D2D2D]">{item.requiresLogin && !isLoggedIn ? '登入閱讀 →' : '閱讀文章 →'}</span>
                     </div>
-                  </button>
+                  </a>
                 ))}
               </div>
             </div>

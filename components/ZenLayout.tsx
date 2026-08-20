@@ -53,6 +53,11 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
     onViewChange?.('landing');
   };
 
+  const handleInternalLink = (event: React.MouseEvent<HTMLAnchorElement>, view: string) => {
+    event.preventDefault();
+    onViewChange?.(view);
+  };
+
   const isAssessmentView = activeView === 'dna-test' || activeView === 'daily-test';
 
   return (
@@ -62,30 +67,24 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
         {/* Header - 質感深度優化 */}
         <header className={`${isAssessmentView ? 'mb-5 md:mb-8' : isLanding ? 'mb-0' : 'mb-10 md:mb-16'} text-center relative`}>
           <div className="flex justify-between items-center gap-3 mb-7 md:mb-9">
-            <div 
-              className="flex items-center gap-3 cursor-pointer group"
-              onClick={handleLogoClick}
+            <a
+              href="/"
+              className="group flex items-center gap-3"
+              onClick={(event) => { event.preventDefault(); handleLogoClick(); }}
               title="返回首頁"
+              aria-label="FACE 首頁"
             >
                <FaceWordmark className="h-auto w-[8.25rem] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 sm:w-[9.75rem]" />
-            </div>
+            </a>
 
             <div className="flex shrink-0 items-center gap-2 sm:gap-6">
-              {/* Language Switcher - 提升點擊範圍 */}
-              <button 
-                onClick={onToggleLanguage}
-                className="px-3 py-2 sm:px-8 sm:py-2.5 border border-[#D1D1C7] text-xs tracking-[0.12em] sm:tracking-[0.2em] uppercase hover:bg-[#2D2D2D] hover:text-white transition-all font-bold bg-white/50 shadow-sm"
-              >
-                {language === 'zh' ? 'EN' : '中'}
-              </button>
-
               {user ? (
                 <div 
                   className="relative -mb-3 pb-3"
                   onMouseEnter={openUserMenu}
                   onMouseLeave={closeUserMenuLater}
                 >
-                  <div className="flex items-center gap-3 cursor-pointer p-1.5 rounded-full hover:bg-white/60 transition-all">
+                  <button type="button" onClick={() => setIsMenuOpen((open) => !open)} aria-expanded={isMenuOpen} aria-label="開啟會員選單" className="flex items-center gap-3 rounded-full p-1.5 transition-all hover:bg-white/60">
                     <div className="text-right hidden md:block px-1">
                       {/* ✅ 用戶名稱放大 */}
                       <p className={`text-xs font-black uppercase tracking-widest text-[#2D2D2D]`}>{user.name}</p>
@@ -95,7 +94,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                       className="w-10 h-10 rounded-full border border-white shadow-md grayscale hover:grayscale-0 transition-all" 
                       alt={user.name} 
                     />
-                  </div>
+                  </button>
                   
                   <div className={`absolute top-full right-0 z-50 transition-all duration-200 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'}`}>
                     <div className="bg-white border border-[#D1D1C7] shadow-2xl rounded-sm min-w-[180px] overflow-hidden">
@@ -134,30 +133,34 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
           {/* Nav */}
           {showNav && !isAssessmentView && onViewChange && (
             <nav className={`${isLanding ? 'mb-0' : 'mb-8 md:mb-10'} hide-scrollbar -mx-4 flex snap-x items-end gap-x-5 overflow-x-auto border-b border-[#D1D1C7]/60 px-4 text-sm font-medium leading-6 tracking-[0.04em] sm:mx-0 sm:justify-center sm:gap-x-9 sm:px-0 md:gap-x-12 md:text-base`}>
-                <button 
-                  onClick={() => onViewChange('dna-test')} 
+                <a
+                  href="/test"
+                  onClick={(event) => handleInternalLink(event, 'dna-test')}
                   className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${(activeView === 'dna-test' || activeView === 'landing') ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   開始測驗
-                </button>
-                <button 
-                  onClick={() => onViewChange('role-gallery')} 
+                </a>
+                <a
+                  href="/types"
+                  onClick={(event) => handleInternalLink(event, 'role-gallery')}
                   className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'role-gallery' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   {t.nav.gallery}
-                </button>
-                <button 
-                  onClick={() => onViewChange('about-face')} 
+                </a>
+                <a
+                  href="/about"
+                  onClick={(event) => handleInternalLink(event, 'about-face')}
                   className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'about-face' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   {t.nav.about}
-                </button>
-                <button 
-                  onClick={() => onViewChange('content-hub')} 
+                </a>
+                <a
+                  href="/watch"
+                  onClick={(event) => handleInternalLink(event, 'content-hub')}
                   className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${['content-hub', 'content-detail', 'survival-kit'].includes(activeView ?? '') ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
                 >
                   {t.nav.watch}
-                </button>
+                </a>
                 <button
                   onClick={() => user ? onViewChange('member-home') : onLogin?.()}
                   className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'member-home' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}

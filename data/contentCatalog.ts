@@ -52,7 +52,7 @@ export const CONTENT_CATALOG: ContentItem[] = [
     duration: '08:42',
     youtubeId: 'M7lc1UVf-VE',
     isDemo: true,
-    status: 'published',
+    status: 'draft',
   },
   {
     id: 'demo-position',
@@ -64,7 +64,7 @@ export const CONTENT_CATALOG: ContentItem[] = [
     duration: '11:05',
     youtubeId: 'M7lc1UVf-VE',
     isDemo: true,
-    status: 'published',
+    status: 'draft',
   },
   {
     id: 'demo-review',
@@ -76,7 +76,7 @@ export const CONTENT_CATALOG: ContentItem[] = [
     duration: '06:18',
     youtubeId: 'M7lc1UVf-VE',
     isDemo: true,
-    status: 'published',
+    status: 'draft',
   },
   {
     id: 'article-001',

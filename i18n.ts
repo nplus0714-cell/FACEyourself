@@ -11,7 +11,7 @@ export const translations: Record<Language, any> = {
       watch: '內容中心'
     },
     landing: {
-      title: '交易心態像一面鏡子\n決定你能走多遠',
+      title: '交易像一面鏡子\n心態決定你能走多遠',
       motto: '只要 5 分鐘，',
       supportingLine: '看懂自己的交易性格、情緒反應與決策模式，\n找到真正適合你的交易方式。',
       startTest: '開始測驗',

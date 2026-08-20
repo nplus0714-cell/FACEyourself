@@ -1,16 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle, BarChart3, CheckCircle2, ClipboardCopy, Download, Eye, EyeOff,
-  FileCheck2, Flag, Mail, MessageSquareText, RefreshCw, Save, Search, ShieldCheck, Users,
+  FileCheck2, Flag, FlaskConical, ListChecks, Mail, MessageSquareText, RefreshCw, Save, Search, ShieldCheck, Users,
 } from 'lucide-react';
 import { FACE_MAP } from '../constants';
+import { FACE_24_REVIEW_QUESTIONS } from '../data/faceQuestions24Review';
 import {
   loadResearchAdminData, saveResearchReview, type FaceScoreKey, type ResearchAdminData,
-  type ResearchReviewDecision, type ResearchSubmission,
+  type ResearchQuestionStatus, type ResearchReviewDecision, type ResearchSubmission,
 } from '../services/researchAdminService';
 
-type AdminTab = 'overview' | 'responses' | 'feedback';
+type AdminTab = 'overview' | 'questions' | 'responses' | 'feedback';
 type StatusFilter = 'all' | 'included' | 'excluded' | 'sample_review' | 'duplicate' | 'result' | 'marketing';
+type QuestionDimensionFilter = 'all' | 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
+type QuestionStatusFilter = 'all' | ResearchQuestionStatus;
 
 const SCORE_KEYS: FaceScoreKey[] = ['A', 'P', 'R', 'I', 'L', 'T', 'C', 'D'];
 const AXES: Array<{ label: string; left: FaceScoreKey; right: FaceScoreKey; leftLabel: string; rightLabel: string }> = [
@@ -19,6 +22,29 @@ const AXES: Array<{ label: string; left: FaceScoreKey; right: FaceScoreKey; left
   { label: '交易週期', left: 'L', right: 'T', leftLabel: '長期', rightLabel: '短期' },
   { label: '資金管理', left: 'C', right: 'D', leftLabel: '集中', rightLabel: '分散' },
 ];
+const DIMENSION_LABELS: Record<Exclude<QuestionDimensionFilter, 'all'>, string> = {
+  FOCUS: '獲利動機 A／P', ANALYSIS: '決策邏輯 R／I', CYCLE: '交易週期 L／T', EXPOSURE: '資金管理 C／D',
+};
+const QUESTION_STATUS_LABELS: Record<ResearchQuestionStatus, string> = {
+  collecting: '蒐集中', healthy: '目前穩定', watch: '持續觀察', review: '優先檢查',
+};
+const ANALYSIS_STAGE_LABELS = {
+  collecting: '資料蒐集中', preliminary: '初步題目檢查', screening: '修題候選篩選', stable: '穩定性驗證',
+};
+const QUESTION_BY_CODE = new Map(FACE_24_REVIEW_QUESTIONS.map((question) => [
+  `face-v2-${String(question.id).padStart(2, '0')}`,
+  question,
+]));
+
+const QuestionStatusBadge = ({ status }: { status: ResearchQuestionStatus }) => {
+  const className = {
+    collecting: 'bg-[#EEEAE4] text-[#70675F]',
+    healthy: 'bg-[#E7F0E8] text-[#426248]',
+    watch: 'bg-[#F4EEDC] text-[#7A643A]',
+    review: 'bg-[#F4E4E1] text-[#914D46]',
+  }[status];
+  return <span className={`inline-flex px-2.5 py-1 text-xs font-medium ${className}`}>{QUESTION_STATUS_LABELS[status]}</span>;
+};
 
 const Stat = ({ label, value, note, icon }: { label: string; value: number; note?: string; icon: React.ReactNode }) => (
   <div className="border border-[#D6CEC2] bg-white p-5 shadow-[0_8px_24px_rgba(70,54,44,0.04)]">
@@ -88,6 +114,8 @@ export const ResearchAdmin: React.FC = () => {
   const [reviewNotes, setReviewNotes] = useState('');
   const [reviewSaving, setReviewSaving] = useState(false);
   const [reviewError, setReviewError] = useState('');
+  const [questionDimension, setQuestionDimension] = useState<QuestionDimensionFilter>('all');
+  const [questionStatus, setQuestionStatus] = useState<QuestionStatusFilter>('all');
 
   const refresh = async () => {
     setLoading(true); setError('');
@@ -108,6 +136,12 @@ export const ResearchAdmin: React.FC = () => {
     return [...counts.entries()].map(([code, count]) => ({ code, count })).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
   }, [analysisRows]);
   const qualitativeRows = useMemo(() => currentRows.filter((row) => Object.values(row.feedback).some((value) => value.trim())), [currentRows]);
+  const questionAnalysis = data?.questionAnalysis;
+  const filteredQuestionAnalysis = useMemo(() => (questionAnalysis?.questions ?? []).filter((question) => {
+    if (questionDimension !== 'all' && question.dimension !== questionDimension) return false;
+    if (questionStatus !== 'all' && question.status !== questionStatus) return false;
+    return true;
+  }), [questionAnalysis, questionDimension, questionStatus]);
   const filteredRows = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return (data?.submissions ?? []).filter((row) => {
@@ -222,7 +256,7 @@ export const ResearchAdmin: React.FC = () => {
 
     <nav className="mt-8 flex gap-1 overflow-x-auto border-b border-[#CFC6BA]" aria-label="研究後台分頁">
       {([
-        ['overview', '研究總覽'], ['responses', '回覆名單'], ['feedback', `質性回饋 ${qualitativeRows.length}`],
+        ['overview', '研究總覽'], ['questions', '題目分析'], ['responses', '回覆名單'], ['feedback', `質性回饋 ${qualitativeRows.length}`],
       ] as Array<[AdminTab, string]>).map(([value, label]) => <button key={value} type="button" onClick={() => setTab(value)} className={`shrink-0 border-b-2 px-5 py-3 text-sm font-medium transition ${tab === value ? 'border-[#8C635B] text-[#5E4039]' : 'border-transparent text-[#746A61] hover:text-[#2D2D2D]'}`}>{label}</button>)}
     </nav>
 
@@ -256,6 +290,71 @@ export const ResearchAdmin: React.FC = () => {
         <DistributionList title="最想獲得的內容" items={distribution(analysisRows, 'interest')} denominator={currentReady} />
       </div>
       <p className="text-xs leading-6 text-[#7B7168]">本頁統計只採用「24 題 v2.5、通過資料品質檢查，且審查決策為納入分析」的樣本。疑似重複只會進入人工確認，不會自動刪除原始回覆。</p>
+    </div>}
+
+    {tab === 'questions' && <div className="mt-7 space-y-6">
+      {!questionAnalysis ? <section className="border border-[#D6CEC2] bg-white px-6 py-14 text-center">
+        <FlaskConical size={28} className="mx-auto text-[#9B7268]" />
+        <h2 className="serif mt-4 text-2xl text-[#332E2A]">題目分析資料尚未連線</h2>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#746A61]">前端框架已完成；更新 research-admin Edge Function 後，這裡會顯示 24 題分布、區辨度、四面向信度與兩階段情境一致性。</p>
+      </section> : <>
+        <section className="border border-[#CDBFB1] bg-[#F4EEE7] p-5 sm:p-7">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-4">
+              <FlaskConical size={24} className="mt-1 shrink-0 text-[#8C635B]" />
+              <div><p className="text-xs font-medium tracking-[0.16em] text-[#8C635B]">ANALYSIS STAGE</p><h2 className="serif mt-2 text-2xl text-[#332E2A]">{ANALYSIS_STAGE_LABELS[questionAnalysis.stage]}</h2><p className="mt-2 text-sm leading-7 text-[#6F655D]">目前納入 n = {questionAnalysis.sampleSize}。n &lt; {questionAnalysis.minimumForItemReview} 時只描述分布，不判定題目好壞；達 n = {questionAnalysis.minimumForStableReview} 後才進入穩定性驗證。</p></div>
+            </div>
+            <div className="grid shrink-0 grid-cols-2 gap-px border border-[#CDBFB1] bg-[#CDBFB1] text-center">
+              <div className="bg-white px-5 py-3"><span className="block text-xs text-[#82776F]">開始題目檢查</span><span className="serif mt-1 block text-2xl">n ≥ {questionAnalysis.minimumForItemReview}</span></div>
+              <div className="bg-white px-5 py-3"><span className="block text-xs text-[#82776F]">穩定性驗證</span><span className="serif mt-1 block text-2xl">n ≥ {questionAnalysis.minimumForStableReview}</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="flex items-center gap-3"><BarChart3 size={20} className="text-[#8C635B]" /><div><p className="text-xs tracking-[0.14em] text-[#8C635B]">DIMENSION CHECK</p><h2 className="serif mt-1 text-2xl">四面向整體檢查</h2></div></div>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2 xl:grid-cols-4">{questionAnalysis.dimensions.map((dimension) => <article key={dimension.dimension} className="border border-[#D6CEC2] bg-white p-5">
+            <h3 className="text-sm font-medium text-[#4F4741]">{DIMENSION_LABELS[dimension.dimension]}</h3>
+            <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+              <div><dt className="text-xs text-[#887D74]">Cronbach α</dt><dd className="serif mt-1 text-2xl text-[#332E2A]">{dimension.cronbachAlpha ?? '—'}</dd><span className="text-[11px] text-[#998F86]">完整樣本 n={dimension.completeCaseCount}</span></div>
+              <div><dt className="text-xs text-[#887D74]">自評方向一致</dt><dd className="serif mt-1 text-2xl text-[#332E2A]">{dimension.directionalAgreementPercentage === null ? '—' : `${dimension.directionalAgreementPercentage}%`}</dd><span className="text-[11px] text-[#998F86]">有效 n={dimension.directionalCalibrationCount}</span></div>
+              <div className="col-span-2 border-t border-[#E4DDD4] pt-3"><dt className="text-xs text-[#887D74]">自評與測驗平均落差</dt><dd className="mt-1 text-sm text-[#4F4741]">{dimension.meanCalibrationGap === null ? '資料不足' : `${dimension.meanCalibrationGap} 分`} <span className="ml-1 text-xs text-[#998F86]">校準 n={dimension.calibrationCount}</span></dd></div>
+            </dl>
+          </article>)}</div>
+        </section>
+
+        <section>
+          <div className="flex items-center gap-3"><ListChecks size={20} className="text-[#8C635B]" /><div><p className="text-xs tracking-[0.14em] text-[#8C635B]">TWO-STAGE SCENARIOS</p><h2 className="serif mt-1 text-2xl">兩階段情境一致性</h2></div></div>
+          <p className="mt-2 text-sm leading-7 text-[#746A61]">同一情境的兩題都明確選向 A 或 B 時，檢查方向是否一致。它用來觀察壓力延續後是否轉向，不代表轉向就是錯誤。</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{questionAnalysis.scenarioGroups.map((group) => <article key={group.group} className="border border-[#D6CEC2] bg-white p-4">
+            <div className="flex items-center justify-between gap-3"><span className="text-xs font-medium tracking-wider text-[#8C635B]">{group.group}</span><span className="serif text-2xl">{group.sameDirectionPercentage === null ? '—' : `${group.sameDirectionPercentage}%`}</span></div>
+            <p className="mt-2 text-sm text-[#4F4741]">{DIMENSION_LABELS[group.dimension]}</p><p className="mt-1 text-xs text-[#8A8077]">明確作答 n={group.eligibleCount}</p>
+          </article>)}</div>
+        </section>
+
+        <section>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs tracking-[0.14em] text-[#8C635B]">ITEM REVIEW</p><h2 className="serif mt-1 text-2xl">24 題逐題檢查</h2><p className="mt-2 text-sm leading-7 text-[#746A61]">分布與統計只負責指出「值得看哪一題」，修題仍需搭配難選、重複、都不像我的文字回饋。</p></div><span className="text-sm text-[#746A61]">顯示 {filteredQuestionAnalysis.length} 題</span></div>
+          <div className="mt-4 grid gap-3 border border-[#D6CEC2] bg-white p-4 sm:grid-cols-2">
+            <label><span className="mb-1.5 block text-xs text-[#746A61]">FACE 面向</span><select value={questionDimension} onChange={(event) => setQuestionDimension(event.target.value as QuestionDimensionFilter)} className="h-11 w-full border border-[#CFC6BA] bg-[#FCFBF8] px-3 text-sm"><option value="all">全部面向</option>{Object.entries(DIMENSION_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+            <label><span className="mb-1.5 block text-xs text-[#746A61]">檢查狀態</span><select value={questionStatus} onChange={(event) => setQuestionStatus(event.target.value as QuestionStatusFilter)} className="h-11 w-full border border-[#CFC6BA] bg-[#FCFBF8] px-3 text-sm"><option value="all">全部狀態</option>{Object.entries(QUESTION_STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          </div>
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">{filteredQuestionAnalysis.map((item) => {
+            const number = Number(item.code.slice(-2));
+            const question = QUESTION_BY_CODE.get(item.code);
+            return <article key={item.code} className="border border-[#D6CEC2] bg-white p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><span className="text-xs font-medium tracking-[0.14em] text-[#8C635B]">Q{number} · {DIMENSION_LABELS[item.dimension]}</span>{item.group && <span className="bg-[#F0ECE6] px-2 py-1 text-[11px] text-[#746A61]">{item.group}</span>}</div><h3 className="serif mt-2 text-xl text-[#332E2A]">{question?.title ?? item.code}</h3></div><QuestionStatusBadge status={item.status} /></div>
+              {question && <><p className="mt-3 text-sm leading-7 text-[#5E554E]">{question.prompt}</p><div className="mt-3 grid gap-2 text-xs leading-5 sm:grid-cols-2"><div className="border-l-2 border-[#A97B70] bg-[#F8F3EF] px-3 py-2"><span className="mr-1 text-[#9B7268]">A</span>{question.optionA}</div><div className="border-l-2 border-[#66767B] bg-[#F1F4F4] px-3 py-2"><span className="mr-1 text-[#66767B]">B</span>{question.optionB}</div></div></>}
+              <div className="mt-5">
+                <div className="flex h-3 overflow-hidden bg-[#EEE9E2]" aria-label={`A ${item.sideAPercentage}%，中間 ${item.middlePercentage}%，B ${item.sideBPercentage}%`}><div className="bg-[#A97B70]" style={{ width: `${item.sideAPercentage}%` }} /><div className="bg-[#C9C2B8]" style={{ width: `${item.middlePercentage}%` }} /><div className="bg-[#66767B]" style={{ width: `${item.sideBPercentage}%` }} /></div>
+                <div className="mt-2 flex flex-wrap justify-between gap-x-3 gap-y-1 text-xs tabular-nums text-[#746A61]"><span>A {item.sideAPercentage}%</span>{item.type === 'bipolar' && <span>中間 {item.middlePercentage}%</span>}<span>B {item.sideBPercentage}%</span><span>不適用 {item.notApplicablePercentage}%</span></div>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 border-t border-[#E4DDD4] pt-4 text-xs"><div><span className="block text-[#8A8077]">修正後題目－總分相關</span><strong className="mt-1 block text-base font-medium text-[#3F3934]">{item.discrimination === null ? '—' : `r = ${item.discrimination}`}</strong><span className="text-[#998F86]">完整樣本 n={item.discriminationSampleSize}</span></div><div><span className="block text-[#8A8077]">A 向平均值</span><strong className="mt-1 block text-base font-medium text-[#3F3934]">{item.meanAValue ?? '—'} / 10</strong><span className="text-[#998F86]">有效 n={item.applicableCount}</span></div></div>
+              {item.flags.length > 0 ? <ul className="mt-4 flex flex-wrap gap-2">{item.flags.map((flag) => <li key={flag} className="bg-[#F4E4E1] px-2.5 py-1 text-xs text-[#914D46]">{flag}</li>)}</ul> : <p className="mt-4 text-xs leading-6 text-[#7B7168]">{item.status === 'collecting' ? `樣本未達 ${questionAnalysis.minimumForItemReview}，暫不產生警示。` : '目前沒有觸發量化警示。'}</p>}
+            </article>;
+          })}</div>
+          {filteredQuestionAnalysis.length === 0 && <div className="border border-t-0 border-[#D6CEC2] bg-white py-14 text-center text-sm text-[#857A70]">沒有符合篩選條件的題目。</div>}
+        </section>
+      </>}
     </div>}
 
     {tab === 'responses' && <div className="mt-7">

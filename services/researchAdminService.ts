@@ -2,6 +2,58 @@ import { getSupabaseClient } from '../lib/supabase';
 
 export type FaceScoreKey = 'A' | 'P' | 'R' | 'I' | 'L' | 'T' | 'C' | 'D';
 export type ResearchReviewDecision = 'included' | 'excluded' | 'needs_review';
+export type ResearchAnalysisStage = 'collecting' | 'preliminary' | 'screening' | 'stable';
+export type ResearchQuestionStatus = 'collecting' | 'healthy' | 'watch' | 'review';
+
+export type ResearchQuestionAnalysis = {
+  code: string;
+  dimension: 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
+  type: 'binary' | 'bipolar';
+  group: string | null;
+  sampleSize: number;
+  applicableCount: number;
+  sideACount: number;
+  middleCount: number;
+  sideBCount: number;
+  notApplicableCount: number;
+  sideAPercentage: number;
+  middlePercentage: number;
+  sideBPercentage: number;
+  notApplicablePercentage: number;
+  meanAValue: number | null;
+  discrimination: number | null;
+  discriminationSampleSize: number;
+  status: ResearchQuestionStatus;
+  flags: string[];
+};
+
+export type ResearchDimensionAnalysis = {
+  dimension: 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
+  completeCaseCount: number;
+  cronbachAlpha: number | null;
+  calibrationCount: number;
+  directionalCalibrationCount: number;
+  directionalAgreementPercentage: number | null;
+  meanCalibrationGap: number | null;
+};
+
+export type ResearchScenarioGroupAnalysis = {
+  group: string;
+  dimension: 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
+  eligibleCount: number;
+  sameDirectionCount: number;
+  sameDirectionPercentage: number | null;
+};
+
+export type ResearchQuestionAnalysisData = {
+  sampleSize: number;
+  stage: ResearchAnalysisStage;
+  minimumForItemReview: number;
+  minimumForStableReview: number;
+  questions: ResearchQuestionAnalysis[];
+  dimensions: ResearchDimensionAnalysis[];
+  scenarioGroups: ResearchScenarioGroupAnalysis[];
+};
 
 export type ResearchReview = {
   decision: ResearchReviewDecision;
@@ -71,6 +123,7 @@ export type ResearchAdminData = {
     canMarket: number;
     byVersion: Record<string, number>;
   };
+  questionAnalysis?: ResearchQuestionAnalysisData;
   submissions: ResearchSubmission[];
 };
 

@@ -131,10 +131,10 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
             ? `/images/personalities-v2-text/v2-${String(editorialV2.index).padStart(2, '0')}-${editorialV2.slug}-text.png`
             : role.landscapeImageUrl;
           return (
-            <button
+            <a
               key={role.code}
-              type="button"
-              onClick={() => onOpenRole(role)}
+              href={`/types/${role.code}`}
+              onClick={(event) => { event.preventDefault(); onOpenRole(role); }}
               className={`group overflow-hidden border bg-white text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_34px_-20px_rgba(45,45,45,0.35)] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-2 ${sole ? 'border-[#8C635B] ring-2 ring-[#8C635B]/30' : own ? 'border-[#8C635B]' : 'border-[#D1D1C7] hover:border-[#8C635B]'}`}
             >
               <div className="relative aspect-[16/9] overflow-hidden bg-[#F4F0E9]">
@@ -147,7 +147,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
                 <h3 className="mt-3 serif text-2xl leading-[1.5] text-[#2D2D2D]">{role.name}</h3>
                 {role.slang && <p className="mt-2 border-t border-dashed border-[#D1D1C7] pt-3 text-sm leading-[1.7] text-[#70665D]">{role.slang}</p>}
               </div>
-            </button>
+            </a>
           );
         })}
         </div>
@@ -158,7 +158,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
         <p className="text-xs font-bold tracking-[0.34em] text-[#E7DFCE]/75">FACE · TRADING PERSONA</p>
         <h2 className="mt-7 serif text-4xl leading-[1.4] md:text-5xl">認識自己，是交易的第一課</h2>
         <div className="mt-10 flex justify-stretch md:mt-12 md:justify-end">
-          <button type="button" onClick={onStartTest} className="w-full border border-[#F5F0E5]/65 bg-transparent px-7 py-4 text-sm font-medium tracking-[0.04em] text-[#F5F0E5] transition hover:border-[#F5F0E5] hover:bg-[#F5F0E5] hover:text-[#344A38] md:w-auto">開始 FACE 測驗 →</button>
+          <a href="/test" onClick={(event) => { event.preventDefault(); onStartTest(); }} className="w-full border border-[#F5F0E5]/65 bg-transparent px-7 py-4 text-sm font-medium tracking-[0.04em] text-[#F5F0E5] transition hover:border-[#F5F0E5] hover:bg-[#F5F0E5] hover:text-[#344A38] md:w-auto">開始 FACE 測驗 →</a>
         </div>
       </section>
     </div>

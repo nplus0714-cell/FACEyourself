@@ -12,6 +12,9 @@ import { requireAuthenticatedUser } from '../../_lib/supabaseAdmin';
 
 export async function POST(request: Request): Promise<Response> {
   try {
+    if (process.env.PAYMENTS_ENABLED !== 'true') {
+      throw new ApiError(503, 'PAYMENTS_PAUSED', '方案仍在完成交付驗證，目前暫不收款。');
+    }
     assertSameOrigin(request);
     enforceRateLimit(request, 'ecpay-create', 8, 60_000);
     const body = await readJsonBody<{ productCode?: string }>(request);

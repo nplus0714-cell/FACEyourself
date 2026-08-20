@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { getMemberAssessmentHistory, type MemberAssessmentRecord } from '../services/memberAssessmentHistory';
+import { getBrowserPendingAssessment } from '../services/localAssessmentResult';
 import type { AuthUser, FaceScores } from '../types';
 
 interface LastAssessmentCardProps {
@@ -17,29 +18,14 @@ type DisplayedResult = {
   source: 'member' | 'browser';
 };
 
-const PENDING_ASSESSMENT_KEY = 'face_pending_assessment_v1';
-
-const isFaceScores = (value: unknown): value is FaceScores => {
-  if (!value || typeof value !== 'object') return false;
-  const candidate = value as Record<string, unknown>;
-  return ['A', 'P', 'R', 'I', 'L', 'T', 'C', 'D'].every((key) => typeof candidate[key] === 'number');
-};
-
 const getBrowserPendingResult = (): DisplayedResult | null => {
-  try {
-    const raw = localStorage.getItem(PENDING_ASSESSMENT_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { scores?: unknown; savedAt?: unknown };
-    if (!isFaceScores(parsed.scores)) return null;
-    return {
-      code: getFaceCode(parsed.scores),
-      scores: parsed.scores,
-      completedAt: typeof parsed.savedAt === 'string' ? parsed.savedAt : undefined,
-      source: 'browser',
-    };
-  } catch {
-    return null;
-  }
+  const pending = getBrowserPendingAssessment();
+  return pending ? {
+    code: getFaceCode(pending.scores),
+    scores: pending.scores,
+    completedAt: pending.completedAt,
+    source: 'browser',
+  } : null;
 };
 
 const formatDate = (value?: string): string | null => {
