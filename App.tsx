@@ -43,6 +43,24 @@ const STORAGE_KEY = 'face_zen_diary_v3';
 
 type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'daily-result' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'not-found';
 
+const roleCodeFromPath = (path: string): string | null => {
+  const prefix = path.startsWith('/types/')
+    ? '/types/'
+    : path.startsWith('/share/')
+      ? '/share/'
+      : null;
+  if (!prefix) return null;
+
+  try {
+    const code = decodeURIComponent(path.slice(prefix.length))
+      .replace(/\/+$/, '')
+      .toUpperCase();
+    return FACE_MAP[code]?.code ?? null;
+  } catch {
+    return null;
+  }
+};
+
 const viewFromPath = (path: string): AppView => {
   if (path === '/my-result') return 'dashboard';
   if (path === '/journal/history') return 'history';
@@ -54,9 +72,8 @@ const viewFromPath = (path: string): AppView => {
   if (path === '/me') return 'member-home';
   if (path === '/mirror-trade') return 'mirror-trade';
   if (path === '/types/compatibility') return 'compatibility';
-  if (path.startsWith('/types/')) {
-    const code = path.slice('/types/'.length);
-    return FACE_MAP[code] ? 'role-detail' : 'not-found';
+  if (path.startsWith('/types/') || path.startsWith('/share/')) {
+    return roleCodeFromPath(path) ? 'role-detail' : 'not-found';
   }
   if (path === '/types') return 'role-gallery';
   if (path.startsWith('/watch/')) {
@@ -107,8 +124,7 @@ const App: React.FC = () => {
     return CONTENT_CATALOG.find((item) => item.slug === slug) ?? null;
   });
   const [selectedRoleCode, setSelectedRoleCode] = useState<string | null>(() => {
-    const code = window.location.pathname.replace('/types/', '');
-    return FACE_MAP[code]?.code ?? null;
+    return roleCodeFromPath(window.location.pathname);
   });
   const [previewResultCode, setPreviewResultCode] = useState<string | null>(() => new URLSearchParams(window.location.search).get('type'));
   const [pendingDailyAwareness, setPendingDailyAwareness] = useState<DailyAwarenessAnswers | null>(null);
@@ -189,8 +205,7 @@ const App: React.FC = () => {
         setSelectedContent(CONTENT_CATALOG.find((item) => item.slug === slug) ?? null);
       }
       if (nextView === 'role-detail') {
-        const code = window.location.pathname.replace('/types/', '');
-        setSelectedRoleCode(FACE_MAP[code]?.code ?? null);
+        setSelectedRoleCode(roleCodeFromPath(window.location.pathname));
       }
       if (nextView === 'result-preview') {
         setPreviewResultCode(new URLSearchParams(window.location.search).get('type'));

@@ -2,7 +2,7 @@ import type { ContentItem, } from '../data/contentCatalog';
 import type { PersonalityProfile } from '../types';
 
 const SITE_ORIGIN = 'https://faceyourself.vercel.app';
-const DEFAULT_IMAGE = `${SITE_ORIGIN}/images/og-image.png`;
+const DEFAULT_IMAGE = `${SITE_ORIGIN}/images/face-og-v25.jpg`;
 
 type PageMetadataInput = {
   path: string;

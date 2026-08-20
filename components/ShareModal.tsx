@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FaceScores, PersonalityProfile } from '../types';
-import { PERSONALITY_EDITORIAL } from '../data/personalityEditorial';
 
 interface ShareModalProps {
   dna: FaceScores;
@@ -26,11 +25,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
   const shareUrl = useMemo(() => {
     const traits = ['A', 'P', 'R', 'I', 'L', 'T', 'C', 'D'] as const;
     const scores = traits.map((key) => `${key}${dna[key]}`).join('_');
-    return `https://faceyourself.vercel.app?dna_share=${scores}`;
-  }, [dna]);
+    return `https://faceyourself.vercel.app/share/${profile.code}?dna_share=${scores}`;
+  }, [dna, profile.code]);
 
-  const shareText = PERSONALITY_EDITORIAL[profile.code]?.shareText
-    ?? `我完成 FACE 交易人格測驗，結果是「${profile.name}」。`;
+  const shareText = `FACE 交易人格｜${profile.name}\n「${profile.motto}」`;
 
   const copyShareMessage = async () => {
     try {
@@ -77,7 +75,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
   const nativeShare = async () => {
     try {
       await navigator.share({
-        title: '我的 FACE 交易人格',
+        title: `FACE 交易人格｜${profile.name}`,
         text: shareText,
         url: shareUrl,
       });
