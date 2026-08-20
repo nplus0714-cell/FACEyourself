@@ -63,6 +63,7 @@ const renderAppShell = async (profile: ShareProfile): Promise<string> => {
   html = replaceFirst(html, /<meta property="og:title" content="[^"]*">/i, `<meta property="og:title" content="${escapeHtml(title)}">`);
   html = replaceFirst(html, /<meta property="og:description" content="[^"]*">/i, `<meta property="og:description" content="${escapeHtml(description)}">`);
   html = replaceFirst(html, /<meta property="og:image" content="[^"]*">/i, `<meta property="og:image" content="${escapeHtml(imageUrl)}">`);
+  html = replaceFirst(html, /<meta property="og:image:type" content="[^"]*">/i, '<meta property="og:image:type" content="image/png">');
   html = replaceFirst(html, /<meta property="og:image:width" content="[^"]*">/i, '<meta property="og:image:width" content="1672">');
   html = replaceFirst(html, /<meta property="og:image:height" content="[^"]*">/i, '<meta property="og:image:height" content="941">');
   html = replaceFirst(html, /<meta name="twitter:url" content="[^"]*">/i, `<meta name="twitter:url" content="${escapeHtml(pageUrl)}">`);
