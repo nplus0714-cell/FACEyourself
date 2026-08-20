@@ -9,13 +9,29 @@ const escapeHtml = (value: string): string => value
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&#039;');
 
-export async function GET(request: Request): Promise<Response> {
-  const requestUrl = new URL(request.url);
+type VercelRequestLike = {
+  url?: string;
+  headers?: { host?: string };
+};
+
+type VercelResponseLike = {
+  redirect: (status: number, location: string) => void;
+  setHeader: (name: string, value: string) => void;
+  status: (status: number) => VercelResponseLike;
+  send: (body: string) => void;
+};
+
+export default function handler(
+  request: VercelRequestLike,
+  response: VercelResponseLike,
+): void {
+  const requestUrl = new URL(request.url ?? '/', `https://${request.headers?.host ?? 'faceyourself.vercel.app'}`);
   const code = (requestUrl.searchParams.get('code') ?? '').toUpperCase();
   const profile = FACE_MAP[code];
 
   if (!profile) {
-    return Response.redirect(`${SITE_ORIGIN}/types`, 302);
+    response.redirect(302, `${SITE_ORIGIN}/types`);
+    return;
   }
 
   const dnaShare = requestUrl.searchParams.get('dna_share');
@@ -54,12 +70,8 @@ export async function GET(request: Request): Promise<Response> {
   </body>
 </html>`;
 
-  return new Response(html, {
-    status: 200,
-    headers: {
-      'Cache-Control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
-      'Content-Type': 'text/html; charset=utf-8',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
+  response.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400');
+  response.setHeader('Content-Type', 'text/html; charset=utf-8');
+  response.setHeader('X-Content-Type-Options', 'nosniff');
+  response.status(200).send(html);
 }
