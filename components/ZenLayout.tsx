@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { AuthUser, Language } from '../types';
 import { translations } from '../i18n';
 import { FaceWordmark } from './FaceWordmark';
+import { SiteFooter } from './SiteFooter';
 
 interface ZenLayoutProps {
   children: React.ReactNode;
@@ -183,6 +184,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
         <main className={`fade-in relative z-10`}>
           {children}
         </main>
+        {!isAssessmentView && <SiteFooter />}
       </div>
     </div>
   );

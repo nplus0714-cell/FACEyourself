@@ -22,6 +22,7 @@ import { DailyAwarenessCheckIn } from './components/DailyAwarenessCheckIn';
 import { DailyAwarenessResultPreview } from './components/DailyAwarenessResultPreview';
 import { ReadingLayerPrototype } from './components/ReadingLayerPrototype';
 import { NotFoundPage } from './components/NotFoundPage';
+import { LegalPage } from './components/LegalPage';
 import { scoreDailyAwareness, type DailyAwarenessAnswers } from './data/dailyAwarenessQuestions';
 import type { DailyAwarenessResult } from './data/dailyAwarenessPreview';
 import { saveDailyAwarenessResult } from './services/memberAwarenessJournal';
@@ -41,7 +42,7 @@ import { applyPageMetadata } from './lib/pageMetadata';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 
-type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'daily-result' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'not-found';
+type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'daily-result' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'privacy' | 'terms' | 'refund-policy' | 'data-deletion' | 'not-found';
 
 const roleCodeFromPath = (path: string): string | null => {
   const prefix = path.startsWith('/types/')
@@ -62,6 +63,10 @@ const roleCodeFromPath = (path: string): string | null => {
 };
 
 const viewFromPath = (path: string): AppView => {
+  if (path === '/privacy') return 'privacy';
+  if (path === '/terms') return 'terms';
+  if (path === '/refund-policy') return 'refund-policy';
+  if (path === '/data-deletion') return 'data-deletion';
   if (path === '/my-result') return 'dashboard';
   if (path === '/journal/history') return 'history';
   if (path === '/preview-results') return 'result-preview';
@@ -108,6 +113,10 @@ const pathForView = (view: AppView) => ({
   'reading-prototype': '/reading-prototype',
   'research-admin': '/research-admin',
   'member-home': '/me',
+  privacy: '/privacy',
+  terms: '/terms',
+  'refund-policy': '/refund-policy',
+  'data-deletion': '/data-deletion',
   dashboard: '/my-result',
   history: '/journal/history',
   'not-found': window.location.pathname,
@@ -522,7 +531,7 @@ const App: React.FC = () => {
         }
         navigateTo(v as AppView);
       }}
-      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'survival-kit', 'mirror-trade', 'result-preview', 'reading-prototype', 'member-home', 'research-admin'].includes(view)}
+      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'survival-kit', 'mirror-trade', 'result-preview', 'reading-prototype', 'member-home', 'research-admin', 'privacy', 'terms', 'refund-policy', 'data-deletion'].includes(view)}
       isLanding={view === 'landing'}
       language={language}
       onToggleLanguage={toggleLanguage}
@@ -814,6 +823,10 @@ const App: React.FC = () => {
         />
       )}
       {view === 'compatibility' && <CompatibilityWheel dna={state.dna} initialCode={new URLSearchParams(window.location.search).get('type')} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
+      {view === 'privacy' && <LegalPage kind="privacy" />}
+      {view === 'terms' && <LegalPage kind="terms" />}
+      {view === 'refund-policy' && <LegalPage kind="refund" />}
+      {view === 'data-deletion' && <LegalPage kind="data-deletion" />}
       {view === 'not-found' && <NotFoundPage onHome={() => navigateTo('landing')} onExploreTypes={() => navigateTo('role-gallery')} onOpenContent={() => navigateTo('content-hub')} />}
     </ZenLayout>
     {isAuthDialogOpen && <AuthDialog onClose={() => setIsAuthDialogOpen(false)} />}

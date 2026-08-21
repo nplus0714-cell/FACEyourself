@@ -68,6 +68,22 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
     title: 'FACE 交易生存指南｜個人交易使用說明書',
     description: '把交易人格轉成風險、部位、紀律與情緒管理的實作方向。正式交付完成前暫不收款。',
   };
+  if (path === '/privacy') return {
+    title: '隱私權政策｜FACE 如鏡／交易解憂 Bar',
+    description: '了解 FACE 如鏡如何收集、使用、保存與保護帳號、測驗、覺察及交易資料。',
+  };
+  if (path === '/terms') return {
+    title: '使用條款｜FACE 如鏡／交易解憂 Bar',
+    description: 'FACE 如鏡網站、交易人格測驗、數位內容與付費服務的使用約定。',
+  };
+  if (path === '/refund-policy') return {
+    title: '退款與取消政策｜FACE 如鏡／交易解憂 Bar',
+    description: 'FACE 數位內容的候補登記、交付、取消、退款條件與申請方式。',
+  };
+  if (path === '/data-deletion') return {
+    title: '帳號與資料刪除說明｜FACE 如鏡／交易解憂 Bar',
+    description: '申請刪除 FACE 帳號、測驗結果與自我覺察資料的方式及處理時間。',
+  };
   if (path === '/test') return {
     title: '24 題 FACE 交易人格測驗｜找到你的決策模式',
     description: '透過 24 題交易情境、直覺、圖像與同意程度題，整理你的四個 FACE 決策偏好。',

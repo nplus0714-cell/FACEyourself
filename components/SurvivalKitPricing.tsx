@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getSupabaseClient } from '../lib/supabase';
+import { EARLY_ACCESS_MAILTO, PRODUCT_PREVIEW_DISCLAIMER, SITE_IDENTITY } from '../data/siteIdentity';
 
 // 正式交付、訂單通知與退款規則完成驗收後，才由環境設定開啟收款。
 const COMMERCE_ENABLED = import.meta.env.VITE_PAYMENTS_ENABLED === 'true';
@@ -135,6 +136,12 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
   const productCarouselRef = useRef<HTMLDivElement>(null);
   const productLoopResetTimerRef = useRef<number | null>(null);
   const isProductLoopingRef = useRef(false);
+  const productDragRef = useRef({
+    isDragging: false,
+    pointerId: -1,
+    startX: 0,
+    startScrollLeft: 0,
+  });
 
   const showProductSlide = (index: number) => {
     const carousel = productCarouselRef.current;
@@ -178,6 +185,44 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
     if (nextIndex >= 0 && nextIndex < productSlides.length) {
       setActiveProductSlide(nextIndex);
     }
+  };
+
+  const startProductDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0) return;
+    const carousel = productCarouselRef.current;
+    if (!carousel) return;
+
+    productDragRef.current = {
+      isDragging: true,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startScrollLeft: carousel.scrollLeft,
+    };
+    carousel.setPointerCapture(event.pointerId);
+    setIsProductCarouselPaused(true);
+  };
+
+  const moveProductDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const carousel = productCarouselRef.current;
+    const drag = productDragRef.current;
+    if (!carousel || !drag.isDragging || drag.pointerId !== event.pointerId) return;
+
+    event.preventDefault();
+    carousel.scrollLeft = drag.startScrollLeft - (event.clientX - drag.startX);
+  };
+
+  const finishProductDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const carousel = productCarouselRef.current;
+    const drag = productDragRef.current;
+    if (!carousel || !drag.isDragging || drag.pointerId !== event.pointerId) return;
+
+    if (carousel.hasPointerCapture(event.pointerId)) {
+      carousel.releasePointerCapture(event.pointerId);
+    }
+    productDragRef.current.isDragging = false;
+    const nextIndex = Math.round(carousel.scrollLeft / carousel.clientWidth);
+    showProductSlide(nextIndex);
+    setIsProductCarouselPaused(false);
   };
 
   useEffect(() => {
@@ -292,36 +337,19 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
           onTouchStart={() => setIsProductCarouselPaused(true)}
           onTouchEnd={() => setIsProductCarouselPaused(false)}
         >
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs tracking-[0.22em] text-white/45">PRODUCT PREVIEW</p>
-              <p className="mt-2 text-sm text-white/70">自動輪播，也可左右滑動</p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => showProductSlide(activeProductSlide - 1)}
-                className="flex h-11 w-11 items-center justify-center border border-white/25 text-xl text-white transition hover:border-[#D9C7A9] hover:text-[#D9C7A9]"
-                aria-label="上一張產品圖片"
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                onClick={() => showProductSlide(activeProductSlide + 1)}
-                className="flex h-11 w-11 items-center justify-center border border-white/25 text-xl text-white transition hover:border-[#D9C7A9] hover:text-[#D9C7A9]"
-                aria-label="下一張產品圖片"
-              >
-                →
-              </button>
-            </div>
+          <div className="mb-5">
+            <p className="text-xs tracking-[0.22em] text-white/45">PRODUCT PREVIEW</p>
           </div>
 
-          <div role="region" aria-roledescription="carousel" aria-label="FACE 產品概念圖">
+          <div role="region" aria-roledescription="carousel" aria-label="FACE 產品照預覽">
             <div
               ref={productCarouselRef}
               onScroll={syncProductSlide}
-              className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              onPointerDown={startProductDrag}
+              onPointerMove={moveProductDrag}
+              onPointerUp={finishProductDrag}
+              onPointerCancel={finishProductDrag}
+              className="flex cursor-grab snap-x snap-mandatory select-none overflow-x-auto active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {productLoopSlides.map((slide, index) => {
                 const isLoopClone = index === productSlides.length;
@@ -340,12 +368,14 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
                       alt={isLoopClone ? '' : slide.alt}
                       loading="lazy"
                       decoding="async"
+                      draggable={false}
                       className="block h-full w-full object-contain object-center"
                     />
                   </div>
                   <figcaption className="border-t border-white/15 bg-[#74584F] px-5 py-4">
                     <p className="serif text-xl leading-[1.5] text-white">{slide.title}</p>
                     <p className="mt-1 text-sm leading-[1.75] text-white/65">{slide.description}</p>
+                    <p className="mt-3 border-t border-white/15 pt-3 text-xs leading-5 text-white/55">{PRODUCT_PREVIEW_DISCLAIMER}</p>
                   </figcaption>
                 </figure>
                 );
@@ -353,7 +383,7 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
             </div>
           </div>
 
-          <div className="mt-5 flex items-center justify-between gap-4">
+          <div className="mt-5">
             <div className="flex gap-2" aria-label="選擇產品圖片">
               {productSlides.map((slide, index) => (
                 <button
@@ -366,7 +396,6 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
                 />
               ))}
             </div>
-            <p className="text-right text-xs leading-5 text-white/45">產品概念示意</p>
           </div>
         </div>
       </div>
@@ -386,6 +415,36 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
               </li>
             ))}
           </ol>
+
+          <a
+            href="/watch/trading-decisions-under-uncertainty"
+            className="group mt-10 grid overflow-hidden border border-[#C8B5A8] bg-[#F7F1EA] transition hover:border-[#9D6B61] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-4 sm:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]"
+            aria-label="免費試閱 FACE 生存指南：交易不是找到正確性，而是學會在不確定中做決定"
+          >
+            <figure className="border-b border-[#D7C9BC] sm:border-b-0 sm:border-r">
+              <div className="aspect-[16/9] overflow-hidden bg-[#EFE5DA] sm:h-full sm:min-h-48 sm:aspect-auto">
+                <img
+                  src="/images/survival-kit/face-detail-survival-chapters.png"
+                  alt="FACE Survival 交易生存指南與四階段章節示意"
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.025]"
+                />
+              </div>
+              <figcaption className="sr-only">{PRODUCT_PREVIEW_DISCLAIMER}</figcaption>
+            </figure>
+            <div className="flex flex-col justify-center p-6 sm:p-7">
+              <p className="text-xs font-medium tracking-[0.2em] text-[#9D665C]">FREE PREVIEW · 序言</p>
+              <h4 className="mt-3 serif text-xl leading-[1.55] text-[#2D2D2D] sm:text-2xl">
+                交易不是找到正確性，而是學會在不確定中做決定
+              </h4>
+              <p className="mt-3 text-sm leading-[1.8] text-[#70665D]">
+                先讀一篇，看看 FACE 如何把交易心理整理成可以帶走的判斷方式。
+              </p>
+              <span className="mt-5 text-sm font-medium text-[#8C635B]">免費試閱交易生存指南 →</span>
+            </div>
+          </a>
+          <p className="mt-3 text-xs leading-5 text-[#8C8178]">{PRODUCT_PREVIEW_DISCLAIMER}</p>
         </div>
 
         <div className="flex flex-col justify-between bg-[#5F4540] p-7 text-white sm:p-10 lg:p-14">
@@ -421,27 +480,40 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
           </div>
 
           <div className="mt-10">
-            <button
-              type="button"
-              onClick={() => void startCheckout()}
-              disabled={!COMMERCE_ENABLED || isStartingCheckout}
-              className="flex w-full items-center justify-center bg-white px-6 py-4 text-center text-sm font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9] disabled:cursor-wait disabled:opacity-65"
-            >
-              {!COMMERCE_ENABLED
-                ? '早鳥方案即將開放'
-                : hasAccess
-                ? '已解鎖，進入我的 FACE →'
-                : isStartingCheckout
-                  ? '正在前往安全付款頁…'
-                  : isLoggedIn
-                    ? '立即解鎖我的生存指南 →'
-                    : '登入後解鎖生存指南 →'}
-            </button>
+            {!COMMERCE_ENABLED ? (
+              <a
+                href={EARLY_ACCESS_MAILTO}
+                className="flex w-full items-center justify-center bg-white px-6 py-4 text-center text-sm font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9]"
+              >
+                加入早鳥候補名單 →
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void startCheckout()}
+                disabled={isStartingCheckout}
+                className="flex w-full items-center justify-center bg-white px-6 py-4 text-center text-sm font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9] disabled:cursor-wait disabled:opacity-65"
+              >
+                {hasAccess
+                  ? '已解鎖，進入我的 FACE →'
+                  : isStartingCheckout
+                    ? '正在前往安全付款頁…'
+                    : isLoggedIn
+                      ? '立即解鎖我的生存指南 →'
+                      : '登入後解鎖生存指南 →'}
+              </button>
+            )}
             {checkoutError && <p role="alert" className="mt-3 text-sm leading-6 text-[#F2B8B5]">{checkoutError}</p>}
-            {!COMMERCE_ENABLED && <p className="mt-3 text-sm leading-6 text-[#D9C7A9]">目前開放產品預覽，完成交付後正式啟售。</p>}
+            {!COMMERCE_ENABLED && <p className="mt-3 text-sm leading-6 text-[#D9C7A9]">以 Email 登記，不會立即收款；正式開放時會寄送方案與交付說明。</p>}
             <p className="mt-4 text-xs leading-6 text-white/45">
               本產品提供交易教育、自我覺察與風險管理工具，不提供個別標的、買賣時點、持倉建議或報酬保證。
             </p>
+            <dl className="mt-5 grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1 border-t border-white/10 pt-4 text-xs leading-6 text-white/50">
+              <dt>品牌</dt><dd>{SITE_IDENTITY.brand}</dd>
+              <dt>服務提供者</dt><dd>{SITE_IDENTITY.provider}</dd>
+              <dt>聯絡信箱</dt><dd><a href={`mailto:${SITE_IDENTITY.email}`} className="underline underline-offset-4">{SITE_IDENTITY.email}</a></dd>
+              <dt>聯絡地址</dt><dd>{SITE_IDENTITY.address}</dd>
+            </dl>
           </div>
         </div>
       </div>
