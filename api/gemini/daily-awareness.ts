@@ -12,6 +12,7 @@ import {
   readJsonBody,
 } from '../_lib/http';
 import { enforceRateLimit } from '../_lib/rateLimit';
+import { createLegacyPostHandler } from '../_lib/vercelAdapter';
 
 interface DailyAwarenessRequest {
   answers?: unknown;
@@ -159,3 +160,5 @@ export async function POST(request: Request): Promise<Response> {
     return handleApiError(error);
   }
 }
+
+export default createLegacyPostHandler(POST);

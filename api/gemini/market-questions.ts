@@ -11,6 +11,7 @@ import {
   readJsonBody,
 } from '../_lib/http';
 import { enforceRateLimit } from '../_lib/rateLimit';
+import { createLegacyPostHandler } from '../_lib/vercelAdapter';
 import { validateQuestions } from '../_lib/validation';
 
 export async function POST(request: Request): Promise<Response> {
@@ -64,3 +65,5 @@ pair 必須分別使用 FOCUS=[A,P]、ANALYSIS=[R,I]、CYCLE=[L,T]、EXPOSURE=[C
     return handleApiError(error);
   }
 }
+
+export default createLegacyPostHandler(POST);

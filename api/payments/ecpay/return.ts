@@ -1,5 +1,6 @@
 import { formDataToRecord, getEcpayConfig, verifyCheckMacValue } from '../../_lib/ecpay';
 import { getPaymentOrder } from '../../_lib/paymentOrders';
+import { createLegacyPostHandler } from '../../_lib/vercelAdapter';
 
 export async function POST(request: Request): Promise<Response> {
   const origin = (process.env.ECPAY_PUBLIC_ORIGIN ?? new URL(request.url).origin).replace(/\/$/, '');
@@ -20,3 +21,5 @@ export async function POST(request: Request): Promise<Response> {
     return Response.redirect(`${origin}/?payment=failed`, 303);
   }
 }
+
+export default createLegacyPostHandler(POST);

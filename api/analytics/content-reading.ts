@@ -1,6 +1,7 @@
 import { ApiError, assertSameOrigin, jsonResponse, readJsonBody } from '../_lib/http';
 import { enforceRateLimit } from '../_lib/rateLimit';
 import { getAdminClient, getOptionalAuthenticatedUser } from '../_lib/supabaseAdmin';
+import { createLegacyPostHandler } from '../_lib/vercelAdapter';
 
 type ReadingPayload = {
   contentId?: string;
@@ -115,3 +116,5 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 }
+
+export default createLegacyPostHandler(POST);
