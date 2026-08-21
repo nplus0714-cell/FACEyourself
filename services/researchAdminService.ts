@@ -106,6 +106,35 @@ export type ResearchSubmission = {
   calibrationComplete: boolean;
 };
 
+export type EarlyAccessWaitlistEntry = {
+  id: string;
+  email: string;
+  emailMasked: string;
+  nickname: string | null;
+  interest: string | null;
+  source: string;
+  status: 'subscribed' | 'unsubscribed';
+  marketingConsent: boolean;
+  consentVersion: string;
+  marketingConsentedAt: string;
+  unsubscribedAt: string | null;
+  userId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EarlyAccessWaitlistData = {
+  summary: {
+    total: number;
+    subscribed: number;
+    unsubscribed: number;
+    linkedMembers: number;
+    byInterest: Record<string, number>;
+    bySource: Record<string, number>;
+  };
+  entries: EarlyAccessWaitlistEntry[];
+};
+
 export type ResearchAdminData = {
   generatedAt: string;
   currentAssessmentVersion: string;
@@ -125,6 +154,7 @@ export type ResearchAdminData = {
   };
   questionAnalysis?: ResearchQuestionAnalysisData;
   submissions: ResearchSubmission[];
+  waitlist: EarlyAccessWaitlistData;
 };
 
 export const loadResearchAdminData = async (): Promise<ResearchAdminData> => {
@@ -132,7 +162,20 @@ export const loadResearchAdminData = async (): Promise<ResearchAdminData> => {
   const { data, error } = await supabase.functions.invoke<ResearchAdminData>('research-admin', { method: 'GET' });
   if (error) throw error;
   if (!data) throw new Error('研究資料尚未回傳。');
-  return data;
+  return {
+    ...data,
+    waitlist: data.waitlist ?? {
+      summary: {
+        total: 0,
+        subscribed: 0,
+        unsubscribed: 0,
+        linkedMembers: 0,
+        byInterest: {},
+        bySource: {},
+      },
+      entries: [],
+    },
+  };
 };
 
 export const saveResearchReview = async (input: {

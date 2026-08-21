@@ -200,6 +200,13 @@ Deno.serve(async (request) => {
     .limit(1000);
   if (submissionError) return Response.json({ error: submissionError.message }, { status: 500, headers: corsHeaders });
 
+  const { data: waitlistEntries, error: waitlistError } = await admin
+    .from('early_access_waitlist')
+    .select('id, email, nickname, interest, source, status, marketing_consent, consent_version, marketing_consented_at, unsubscribed_at, user_id, created_at, updated_at')
+    .order('created_at', { ascending: false })
+    .limit(5000);
+  if (waitlistError) return Response.json({ error: waitlistError.message }, { status: 500, headers: corsHeaders });
+
   const submissionIds = submissions.map((row) => row.id);
   const participantIds = [...new Set(submissions.map((row) => row.participant_id).filter(Boolean))];
   const [{ data: participants, error: participantError }, { data: answers, error: answerError }, { data: reviews, error: reviewError }] = await Promise.all([
@@ -451,6 +458,27 @@ Deno.serve(async (request) => {
       };
     });
 
+  const waitlistRows = (waitlistEntries || []).map((entry) => ({
+    id: entry.id,
+    email: entry.email,
+    emailMasked: maskEmail(entry.email) || entry.email,
+    nickname: entry.nickname,
+    interest: entry.interest,
+    source: entry.source,
+    status: entry.status,
+    marketingConsent: Boolean(entry.marketing_consent),
+    consentVersion: entry.consent_version,
+    marketingConsentedAt: entry.marketing_consented_at,
+    unsubscribedAt: entry.unsubscribed_at,
+    userId: entry.user_id,
+    createdAt: entry.created_at,
+    updatedAt: entry.updated_at,
+  }));
+  const waitlistCountBy = (key: 'interest' | 'source') => Object.fromEntries(
+    [...new Set(waitlistRows.map((entry) => entry[key] || (key === 'interest' ? 'unspecified' : 'unknown')))]
+      .map((value) => [value, waitlistRows.filter((entry) => (entry[key] || (key === 'interest' ? 'unspecified' : 'unknown')) === value).length]),
+  );
+
   return Response.json({
     generatedAt: new Date().toISOString(),
     currentAssessmentVersion: CURRENT_ASSESSMENT_VERSION,
@@ -476,6 +504,17 @@ Deno.serve(async (request) => {
       questions: questionAnalytics,
       dimensions: dimensionAnalytics,
       scenarioGroups,
+    },
+    waitlist: {
+      summary: {
+        total: waitlistRows.length,
+        subscribed: waitlistRows.filter((entry) => entry.status === 'subscribed').length,
+        unsubscribed: waitlistRows.filter((entry) => entry.status === 'unsubscribed').length,
+        linkedMembers: waitlistRows.filter((entry) => Boolean(entry.userId)).length,
+        byInterest: waitlistCountBy('interest'),
+        bySource: waitlistCountBy('source'),
+      },
+      entries: waitlistRows,
     },
     submissions: rows,
   }, { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

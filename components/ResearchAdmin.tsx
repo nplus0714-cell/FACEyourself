@@ -7,11 +7,12 @@ import { FACE_MAP } from '../constants';
 import { FACE_24_REVIEW_QUESTIONS } from '../data/faceQuestions24Review';
 import {
   loadResearchAdminData, saveResearchReview, type FaceScoreKey, type ResearchAdminData,
-  type ResearchQuestionStatus, type ResearchReviewDecision, type ResearchSubmission,
+  type EarlyAccessWaitlistEntry, type ResearchQuestionStatus, type ResearchReviewDecision, type ResearchSubmission,
 } from '../services/researchAdminService';
 
-type AdminTab = 'overview' | 'questions' | 'responses' | 'feedback';
+type AdminTab = 'overview' | 'questions' | 'responses' | 'feedback' | 'waitlist';
 type StatusFilter = 'all' | 'included' | 'excluded' | 'sample_review' | 'duplicate' | 'result' | 'marketing';
+type WaitlistStatusFilter = 'all' | EarlyAccessWaitlistEntry['status'];
 type QuestionDimensionFilter = 'all' | 'FOCUS' | 'ANALYSIS' | 'CYCLE' | 'EXPOSURE';
 type QuestionStatusFilter = 'all' | ResearchQuestionStatus;
 
@@ -31,6 +32,15 @@ const QUESTION_STATUS_LABELS: Record<ResearchQuestionStatus, string> = {
 const ANALYSIS_STAGE_LABELS = {
   collecting: '資料蒐集中', preliminary: '初步題目檢查', screening: '修題候選篩選', stable: '穩定性驗證',
 };
+const WAITLIST_INTEREST_LABELS: Record<string, string> = {
+  full_system: '完整 FACE 系統',
+  survival_guide: '交易生存指南',
+  daily_journal: 'FACE Daily 覺察日記',
+  trading_tools: '交易工具',
+  unsure: '還在了解',
+  unspecified: '未指定',
+};
+const waitlistInterestLabel = (value: string | null) => WAITLIST_INTEREST_LABELS[value || 'unspecified'] ?? value ?? '未指定';
 const QUESTION_BY_CODE = new Map(FACE_24_REVIEW_QUESTIONS.map((question) => [
   `face-v2-${String(question.id).padStart(2, '0')}`,
   question,
@@ -116,6 +126,9 @@ export const ResearchAdmin: React.FC = () => {
   const [reviewError, setReviewError] = useState('');
   const [questionDimension, setQuestionDimension] = useState<QuestionDimensionFilter>('all');
   const [questionStatus, setQuestionStatus] = useState<QuestionStatusFilter>('all');
+  const [waitlistQuery, setWaitlistQuery] = useState('');
+  const [waitlistStatus, setWaitlistStatus] = useState<WaitlistStatusFilter>('all');
+  const [waitlistInterest, setWaitlistInterest] = useState('all');
 
   const refresh = async () => {
     setLoading(true); setError('');
@@ -136,6 +149,23 @@ export const ResearchAdmin: React.FC = () => {
     return [...counts.entries()].map(([code, count]) => ({ code, count })).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
   }, [analysisRows]);
   const qualitativeRows = useMemo(() => currentRows.filter((row) => Object.values(row.feedback).some((value) => value.trim())), [currentRows]);
+  const waitlistRows = data?.waitlist.entries ?? [];
+  const filteredWaitlistRows = useMemo(() => {
+    const normalized = waitlistQuery.trim().toLowerCase();
+    return waitlistRows.filter((row) => {
+      if (waitlistStatus !== 'all' && row.status !== waitlistStatus) return false;
+      if (waitlistInterest !== 'all' && (row.interest || 'unspecified') !== waitlistInterest) return false;
+      if (!normalized) return true;
+      return [row.email, row.nickname, row.source, waitlistInterestLabel(row.interest)]
+        .some((value) => value?.toLowerCase().includes(normalized));
+    });
+  }, [waitlistInterest, waitlistQuery, waitlistRows, waitlistStatus]);
+  const waitlistInterestDistribution = useMemo(() => Object.entries(data?.waitlist.summary.byInterest ?? {})
+    .map(([label, count]) => ({ label: waitlistInterestLabel(label), count }))
+    .sort((a, b) => b.count - a.count), [data]);
+  const waitlistSourceDistribution = useMemo(() => Object.entries(data?.waitlist.summary.bySource ?? {})
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count), [data]);
   const questionAnalysis = data?.questionAnalysis;
   const filteredQuestionAnalysis = useMemo(() => (questionAnalysis?.questions ?? []).filter((question) => {
     if (questionDimension !== 'all' && question.dimension !== questionDimension) return false;
@@ -221,6 +251,31 @@ export const ResearchAdmin: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const exportWaitlistCsv = () => {
+    const headers = ['加入時間', 'Email', '暱稱', '興趣', '來源', '狀態', '行銷同意', '同意版本', '同意時間', '已連結會員', '退訂時間'];
+    const lines = filteredWaitlistRows.map((row) => [
+      row.createdAt,
+      row.email,
+      row.nickname ?? '',
+      waitlistInterestLabel(row.interest),
+      row.source,
+      row.status === 'subscribed' ? '有效' : '已退訂',
+      row.marketingConsent ? '是' : '否',
+      row.consentVersion,
+      row.marketingConsentedAt,
+      row.userId ? '是' : '否',
+      row.unsubscribedAt ?? '',
+    ]);
+    const csv = [headers, ...lines].map((line) => line.map(csvCell).join(',')).join('\r\n');
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `face-early-access-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading && !data) return <div className="py-32 text-center text-sm tracking-widest text-[#746A61]">正在驗證研究資料…</div>;
   if (error && !data) return <div className="mx-auto max-w-xl border border-[#B98A83] bg-[#F8EFED] p-8 text-sm leading-7 text-[#75463F]"><span className="font-medium">無法開啟研究後台</span><br />{error}<br />請確認已使用管理者帳號登入。</div>;
   if (!data) return null;
@@ -236,7 +291,7 @@ export const ResearchAdmin: React.FC = () => {
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[#6F655D]">以 24 題 v2.5 為主要研究樣本；舊版資料保留供版本比較，不混入本期統計。</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={exportCsv} className="inline-flex items-center gap-2 border border-[#BFB5A8] bg-white px-4 py-3 text-sm font-medium text-[#4A382D]"><Download size={16} />匯出目前篩選</button>
+        <button type="button" onClick={tab === 'waitlist' ? exportWaitlistCsv : exportCsv} className="inline-flex items-center gap-2 border border-[#BFB5A8] bg-white px-4 py-3 text-sm font-medium text-[#4A382D]"><Download size={16} />{tab === 'waitlist' ? '匯出候補名單' : '匯出目前篩選'}</button>
         <button type="button" onClick={() => void refresh()} disabled={loading} className="inline-flex items-center gap-2 border border-[#4A382D] bg-[#4A382D] px-4 py-3 text-sm font-medium text-white disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} />重新整理</button>
       </div>
     </div>
@@ -257,6 +312,7 @@ export const ResearchAdmin: React.FC = () => {
     <nav className="mt-8 flex gap-1 overflow-x-auto border-b border-[#CFC6BA]" aria-label="研究後台分頁">
       {([
         ['overview', '研究總覽'], ['questions', '題目分析'], ['responses', '回覆名單'], ['feedback', `質性回饋 ${qualitativeRows.length}`],
+        ['waitlist', `早鳥候補 ${data.waitlist.summary.subscribed}`],
       ] as Array<[AdminTab, string]>).map(([value, label]) => <button key={value} type="button" onClick={() => setTab(value)} className={`shrink-0 border-b-2 px-5 py-3 text-sm font-medium transition ${tab === value ? 'border-[#8C635B] text-[#5E4039]' : 'border-transparent text-[#746A61] hover:text-[#2D2D2D]'}`}>{label}</button>)}
     </nav>
 
@@ -430,6 +486,58 @@ export const ResearchAdmin: React.FC = () => {
           ['difficult', '哪些題目難以選擇？'], ['repetitive', '哪些題目感覺重複？'], ['neither', '哪些選項都不像你？'],
         ].map(([key, label]) => row.feedback[key]?.trim() ? <div key={key}><dt className="text-xs font-medium tracking-wider text-[#9B7268]">{label}</dt><dd className="mt-1.5 whitespace-pre-wrap text-sm leading-7 text-[#4F4741]">{row.feedback[key]}</dd></div> : null)}</dl>
       </article>)}</div> : <div className="border border-[#D6CEC2] bg-white py-16 text-center text-sm text-[#857A70]">目前沒有質性回饋。</div>}
+    </div>}
+
+    {tab === 'waitlist' && <div className="mt-7 space-y-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat label="候補總數" value={data.waitlist.summary.total} note="含已退訂紀錄" icon={<Users size={20} />} />
+        <Stat label="有效候補" value={data.waitlist.summary.subscribed} note="可接收早鳥通知" icon={<Mail size={20} />} />
+        <Stat label="已連結會員" value={data.waitlist.summary.linkedMembers} note="加入時已有登入" icon={<CheckCircle2 size={20} />} />
+        <Stat label="已退訂" value={data.waitlist.summary.unsubscribed} note="不得再寄行銷信" icon={<ShieldCheck size={20} />} />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DistributionList title="最感興趣的內容" items={waitlistInterestDistribution} denominator={data.waitlist.summary.total} />
+        <DistributionList title="加入來源" items={waitlistSourceDistribution} denominator={data.waitlist.summary.total} />
+      </div>
+
+      <section>
+        <div className="grid gap-3 border border-[#D6CEC2] bg-white p-4 md:grid-cols-[minmax(220px,1fr)_190px_220px_auto]">
+          <label className="relative"><span className="sr-only">搜尋候補名單</span><Search size={17} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8C8178]" /><input value={waitlistQuery} onChange={(event) => setWaitlistQuery(event.target.value)} placeholder="搜尋 Email、暱稱或來源" className="h-11 w-full border border-[#CFC6BA] bg-[#FCFBF8] pl-10 pr-3 text-sm outline-none focus:border-[#8C635B]" /></label>
+          <label><span className="sr-only">候補狀態</span><select value={waitlistStatus} onChange={(event) => setWaitlistStatus(event.target.value as WaitlistStatusFilter)} className="h-11 w-full border border-[#CFC6BA] bg-[#FCFBF8] px-3 text-sm"><option value="all">全部狀態</option><option value="subscribed">有效候補</option><option value="unsubscribed">已退訂</option></select></label>
+          <label><span className="sr-only">內容興趣</span><select value={waitlistInterest} onChange={(event) => setWaitlistInterest(event.target.value)} className="h-11 w-full border border-[#CFC6BA] bg-[#FCFBF8] px-3 text-sm"><option value="all">全部興趣</option>{Object.keys(data.waitlist.summary.byInterest).map((interest) => <option key={interest} value={interest}>{waitlistInterestLabel(interest)}</option>)}</select></label>
+          <div className="flex items-center justify-end text-sm text-[#756B62]">顯示 {filteredWaitlistRows.length} 筆</div>
+        </div>
+
+        <div className="mt-4 space-y-3 lg:hidden">{filteredWaitlistRows.map((row) => {
+          const revealed = revealedEmails.has(row.id);
+          return <article key={row.id} className="border border-[#D6CEC2] bg-white p-4">
+            <div className="flex items-start justify-between gap-3"><div><p className="text-xs text-[#81766D]">{formatDateTime(row.createdAt)}</p><h3 className="mt-1.5 text-lg">{row.nickname || '未填暱稱'}</h3></div><span className={`inline-flex px-2.5 py-1 text-xs font-medium ${row.status === 'subscribed' ? 'bg-[#E7F0E8] text-[#426248]' : 'bg-[#F4E4E1] text-[#914D46]'}`}>{row.status === 'subscribed' ? '有效候補' : '已退訂'}</span></div>
+            <div className="mt-4 border-y border-[#E5DED5] py-3 text-sm"><div className="flex items-center justify-between gap-2"><span className="break-all">{revealed ? row.email : row.emailMasked}</span><span className="flex gap-1"><button type="button" aria-label={revealed ? '隱藏 Email' : '顯示 Email'} onClick={() => toggleEmail(row.id)} className="p-2 text-[#756B62]">{revealed ? <EyeOff size={16} /> : <Eye size={16} />}</button><button type="button" aria-label="複製 Email" onClick={() => { void navigator.clipboard.writeText(row.email); setCopyNotice(row.id); window.setTimeout(() => setCopyNotice(''), 1600); }} className="p-2 text-[#756B62]"><ClipboardCopy size={16} /></button></span></div>{copyNotice === row.id && <p className="text-xs text-[#527257]">已複製</p>}</div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs leading-5 text-[#655C55]"><div><dt className="text-[#93877D]">感興趣</dt><dd>{waitlistInterestLabel(row.interest)}</dd></div><div><dt className="text-[#93877D]">來源</dt><dd className="break-all">{row.source}</dd></div><div><dt className="text-[#93877D]">會員連結</dt><dd>{row.userId ? '已連結' : '訪客'}</dd></div><div><dt className="text-[#93877D]">同意版本</dt><dd>{row.consentVersion}</dd></div></dl>
+          </article>;
+        })}</div>
+
+        <div className="mt-4 hidden overflow-x-auto border border-[#D6CEC2] bg-white lg:block">
+          <table className="w-full min-w-[1060px] text-left text-sm">
+            <thead className="bg-[#F1ECE5] text-xs font-medium tracking-wider text-[#665C54]"><tr>{['加入時間', 'Email', '暱稱', '感興趣', '來源', '會員', '狀態'].map((name) => <th key={name} className="px-4 py-4">{name}</th>)}</tr></thead>
+            <tbody>{filteredWaitlistRows.map((row) => {
+              const revealed = revealedEmails.has(row.id);
+              return <tr key={row.id} className="border-t border-[#E2DBD1] align-top">
+                <td className="whitespace-nowrap px-4 py-5 text-xs text-[#6F655D]">{formatDateTime(row.createdAt)}<div className="mt-1 text-[11px] text-[#9A9086]">同意：{formatDateTime(row.marketingConsentedAt)}</div></td>
+                <td className="max-w-[250px] px-4 py-5"><div className="flex items-center gap-1"><span className="min-w-0 break-all">{revealed ? row.email : row.emailMasked}</span><button type="button" aria-label={revealed ? '隱藏 Email' : '顯示 Email'} onClick={() => toggleEmail(row.id)} className="shrink-0 p-1.5 text-[#756B62]">{revealed ? <EyeOff size={15} /> : <Eye size={15} />}</button><button type="button" aria-label="複製 Email" onClick={() => { void navigator.clipboard.writeText(row.email); setCopyNotice(row.id); window.setTimeout(() => setCopyNotice(''), 1600); }} className="shrink-0 p-1.5 text-[#756B62]"><ClipboardCopy size={15} /></button></div><div className="mt-1 text-xs text-[#527257]">{copyNotice === row.id ? '已複製' : '已同意早鳥通知'}</div></td>
+                <td className="px-4 py-5">{row.nickname || '—'}</td>
+                <td className="px-4 py-5">{waitlistInterestLabel(row.interest)}</td>
+                <td className="max-w-[200px] break-all px-4 py-5 text-xs leading-6 text-[#5F5650]">{row.source}</td>
+                <td className="px-4 py-5 text-xs">{row.userId ? '已連結' : '訪客'}</td>
+                <td className="px-4 py-5"><span className={`inline-flex px-2.5 py-1 text-xs font-medium ${row.status === 'subscribed' ? 'bg-[#E7F0E8] text-[#426248]' : 'bg-[#F4E4E1] text-[#914D46]'}`}>{row.status === 'subscribed' ? '有效候補' : '已退訂'}</span>{row.unsubscribedAt && <div className="mt-2 text-xs text-[#8A5B54]">{formatDateTime(row.unsubscribedAt)}</div>}</td>
+              </tr>;
+            })}</tbody>
+          </table>
+        </div>
+        {filteredWaitlistRows.length === 0 && <div className="border-x border-b border-[#D6CEC2] bg-white py-16 text-center text-sm text-[#857A70]">沒有符合條件的候補資料。</div>}
+        <p className="mt-4 text-xs leading-6 text-[#7B7168]">候補名單只供早鳥通知與已同意的產品更新使用。Email 預設遮罩；匯出檔含個資，請勿轉傳或另作未告知用途。</p>
+      </section>
     </div>}
 
     <footer className="mt-10 border-t border-[#D1C8BC] pt-5 text-xs leading-6 text-[#7B7168]">資料更新時間：{formatDateTime(data.generatedAt)}。資料品質與樣本審查分開處理：前者檢查研究同意、24 題完整性、分數與人格代碼；後者決定是否納入統計。原始問卷與排除紀錄都會保留。行銷資格另需 Email 可用、明確同意行銷且尚未退訂。</footer>
