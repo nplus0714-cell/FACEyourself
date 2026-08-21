@@ -739,6 +739,7 @@ const App: React.FC = () => {
         <ContentHub
           hasDna={!!state.dna}
           isLoggedIn={!!state.user}
+          hasSurvivalKitAccess={hasSurvivalKitAccess}
           language={language}
           onStartTest={() => navigateTo('dna-test')}
           onViewResult={() => state.dna ? navigateTo('dashboard') : navigateTo('dna-test')}
@@ -772,13 +773,13 @@ const App: React.FC = () => {
           </div>
         </section>
       )}
-      {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} isLoggedIn={!!state.user} onBack={() => navigateTo('content-hub')} onLoginRequest={handleLogin} onOpenPricing={() => navigateTo('survival-kit')} onOpenContent={openContent} onStartTest={() => navigateTo('dna-test')} />}
+      {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} isLoggedIn={!!state.user} hasSurvivalKitAccess={hasSurvivalKitAccess} onBack={() => navigateTo('content-hub')} onLoginRequest={handleLogin} onOpenPricing={() => navigateTo('survival-kit')} onOpenContent={openContent} onStartTest={() => navigateTo('dna-test')} />}
       {view === 'survival-kit' && <section className="mx-auto max-w-6xl pb-28 pt-4 fade-in md:pt-10">
         <button type="button" onClick={() => navigateTo('content-hub')} className="text-sm font-medium text-[#70665D] transition hover:text-[#2D2D2D]">← 回到內容中心</button>
         <header className="mx-auto max-w-3xl pb-10 pt-12 text-center md:pb-14 md:pt-16">
-          <p className="text-xs font-medium tracking-[0.28em] text-[#8C635B]">FACE PAID PLAN</p>
-          <h1 className="mt-5 serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-6xl">FACE 交易生存指南</h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-[2] text-[#70665D] md:text-lg">從公開文章建立觀念，再把它整理成適合你這一型的交易使用說明書。</p>
+          <p className="text-xs font-medium tracking-[0.28em] text-[#8C635B]">FACE SURVIVAL · EARLY ACCESS</p>
+          <h1 className="mt-5 serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-6xl">把交易，慢慢整理成自己的方法</h1>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-[2] text-[#70665D] md:text-lg">為願意長期留在市場的人，準備一套可以閱讀、覺察、計畫與計算的交易整理系統。</p>
         </header>
         <SurvivalKitPricing
           isLoggedIn={!!state.user}

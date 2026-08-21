@@ -15,7 +15,11 @@ export const recordContentReading = async (
   const { data } = await getSupabaseClient().auth.getSession();
   const isMemberSession = Boolean(data.session?.user && !data.session.user.is_anonymous);
   const token = isMemberSession ? data.session?.access_token : undefined;
-  const accessMode = item.requiresLogin ? 'login_required' : 'public';
+  const accessMode = item.requiresPurchase
+    ? 'paid'
+    : item.requiresLogin
+      ? 'login_required'
+      : 'public';
   const response = await fetch('/api/analytics/content-reading', {
     method: 'POST',
     keepalive: true,

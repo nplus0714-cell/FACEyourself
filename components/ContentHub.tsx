@@ -5,6 +5,7 @@ import { Language } from '../types';
 interface ContentHubProps {
   hasDna: boolean;
   isLoggedIn: boolean;
+  hasSurvivalKitAccess: boolean;
   language: Language;
   onStartTest: () => void;
   onViewResult: () => void;
@@ -29,6 +30,9 @@ const ARTICLE_SERIES: Array<{ id: ContentSeries; english: string; description: s
   { id: '序言', english: 'PROLOGUE', description: '先理解這座市場如何運作，也看見自己如何面對沒有答案的時候。' },
   { id: '破繭篇', english: 'BREAKTHROUGH', description: '鬆開對正確答案的執著，建立屬於自己的判斷、相信與行動。' },
   { id: '生存篇', english: 'SURVIVAL', description: '把風險、學費與停損放回可承擔的範圍，替下一次機會保留選擇。' },
+  { id: '進攻篇・上', english: 'ADVANCE · I', description: '從換檔、期望值、持有與消息開始，把看見的優勢轉成可執行的選擇。' },
+  { id: '進攻篇・下', english: 'ADVANCE · II', description: '讓方向、部位與時間互相配合，在紀律之內逐步放大有效的交易。' },
+  { id: '歸真篇', english: 'RETURN', description: '把市場方法放回自己的個性、生活與承受範圍，形成可以長期重複的節奏。' },
 ];
 
 const ARTICLE_CHANNELS = [
@@ -55,7 +59,7 @@ const ARTICLE_CHANNELS = [
   },
 ] as const;
 
-export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, language, onStartTest, onViewResult, onLoginRequest, onOpenPricing, onOpenContent }) => {
+export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasSurvivalKitAccess, language, onStartTest, onViewResult, onLoginRequest, onOpenPricing, onOpenContent }) => {
   const isZh = language === 'zh';
   const publishedVideos = CONTENT_CATALOG.filter((item) => item.kind === 'video' && item.status === 'published');
   const publishedArticles = CONTENT_CATALOG.filter((item) => item.kind === 'article' && item.status === 'published');
@@ -66,7 +70,23 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
       onLoginRequest();
       return;
     }
+    if (item.requiresPurchase && !hasSurvivalKitAccess) {
+      onOpenPricing();
+      return;
+    }
     onOpenContent(item);
+  };
+
+  const getAccessLabel = (item: ContentItem) => {
+    if (item.requiresPurchase) return 'LOCK · 方案限定';
+    if (item.requiresLogin) return 'LOCK · 登入限定';
+    return item.series;
+  };
+
+  const getActionLabel = (item: ContentItem) => {
+    if (item.requiresLogin && !isLoggedIn) return '登入閱讀 →';
+    if (item.requiresPurchase && !hasSurvivalKitAccess) return '查看方案 →';
+    return '閱讀文章 →';
   };
 
   return (
@@ -145,7 +165,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
             <p className="text-xs font-medium tracking-[0.24em] text-[#A05F54]">FACE GUIDE</p>
             <h4 className="mt-3 serif text-3xl text-[#2D2D2D] md:text-5xl">FACE 生存指南</h4>
           </div>
-          <p className="mt-5 max-w-2xl text-[15px] leading-[1.95] text-[#70665D] md:mt-0 md:text-right md:text-base">從序言開始，依序走過破繭與生存。每一篇都承接上一篇留下的問題，也替下一篇準備一個新的視角。</p>
+          <p className="mt-5 max-w-2xl text-[15px] leading-[1.95] text-[#70665D] md:mt-0 md:text-right md:text-base">從序言開始，依序走過破繭、生存、進攻與歸真。每一篇都承接上一篇留下的問題，也替下一篇準備一個新的視角。</p>
         </div>
 
         <div className="grid overflow-hidden border border-[#B9AA9D] bg-[#F7F4EF] md:grid-cols-[1fr_auto]">
@@ -187,7 +207,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
                       <div className="flex items-center justify-between gap-5">
                         <p className="font-mono text-sm tracking-[0.18em] text-[#A05F54]">{item.articleNumber}</p>
                         <p className={`text-xs tracking-[0.12em] ${item.requiresLogin ? 'border border-[#B9AA9D] bg-[#F7F1EC] px-2.5 py-1 text-[#7A5148]' : 'text-[#8C7E6D]'}`}>
-                          {item.requiresLogin ? 'LOCK · 登入限定' : item.series}
+                          {getAccessLabel(item)}
                         </p>
                       </div>
                       <h5 className={`mt-8 serif leading-[1.55] text-[#2D2D2D] transition group-hover:text-[#8C635B] ${articles.length === 1 ? 'max-w-4xl text-3xl md:text-5xl' : 'text-2xl md:text-3xl'}`}>{item.title}</h5>
@@ -197,7 +217,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, lang
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
                         {item.faceTags.map((tag) => <span key={tag} className="text-xs text-[#8C7E6D]">{tag}</span>)}
                       </div>
-                      <span className="shrink-0 text-sm font-medium text-[#2D2D2D]">{item.requiresLogin && !isLoggedIn ? '登入閱讀 →' : '閱讀文章 →'}</span>
+                      <span className="shrink-0 text-sm font-medium text-[#2D2D2D]">{getActionLabel(item)}</span>
                     </div>
                   </a>
                 ))}

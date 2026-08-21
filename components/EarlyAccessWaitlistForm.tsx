@@ -1,28 +1,15 @@
 import React, { useState } from 'react';
 import { SITE_IDENTITY } from '../data/siteIdentity';
-import {
-  joinEarlyAccessWaitlist,
-  type EarlyAccessInterest,
-} from '../services/earlyAccessWaitlist';
+import { joinEarlyAccessWaitlist } from '../services/earlyAccessWaitlist';
 
 interface EarlyAccessWaitlistFormProps {
   source?: string;
 }
 
-const interestOptions: Array<{ value: EarlyAccessInterest; label: string }> = [
-  { value: 'full_system', label: '完整 FACE 系統' },
-  { value: 'survival_guide', label: '交易生存指南' },
-  { value: 'daily_journal', label: 'FACE Daily 覺察日誌' },
-  { value: 'trading_tools', label: '交易工具' },
-  { value: 'unsure', label: '還不確定，想先了解' },
-];
-
 export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = ({
   source = 'survival-kit-pricing',
 }) => {
   const [email, setEmail] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [interest, setInterest] = useState<EarlyAccessInterest | ''>('');
   const [website, setWebsite] = useState('');
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,8 +24,7 @@ export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = (
     try {
       await joinEarlyAccessWaitlist({
         email,
-        nickname,
-        interest,
+        interest: 'survival_guide',
         source,
         marketingConsent,
         website,
@@ -54,11 +40,11 @@ export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = (
   if (isComplete) {
     return (
       <div role="status" className="border border-white/20 bg-white/10 p-6">
-        <p className="serif text-2xl leading-[1.5] text-white">已加入早鳥候補名單</p>
+        <p className="serif text-2xl leading-[1.5] text-white">已為你保留早鳥通知</p>
         <p className="mt-3 text-sm leading-7 text-white/75">
-          產品開放、早鳥方案與交付資訊會寄到 <span className="text-[#E6D5B8]">{email.trim()}</span>。
+          正式開放時，NT$590 早鳥方案、四項數位內容與購買方式會寄到 <span className="text-[#E6D5B8]">{email.trim()}</span>。
         </p>
-        <p className="mt-4 text-xs leading-6 text-white/50">加入不代表購買，也不會自動扣款。</p>
+        <p className="mt-4 text-xs leading-6 text-white/50">這只是提前卡位，不代表購買，也不會自動扣款。</p>
       </div>
     );
   }
@@ -80,39 +66,6 @@ export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = (
           placeholder="you@example.com"
           className="w-full border border-white/20 bg-white/10 px-4 py-3 text-base text-white outline-none placeholder:text-white/35 focus:border-[#E6D5B8]"
         />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="early-access-nickname" className="mb-2 block text-xs tracking-[0.12em] text-[#E6D5B8]">
-            暱稱 <span className="text-white/45">選填</span>
-          </label>
-          <input
-            id="early-access-nickname"
-            type="text"
-            autoComplete="nickname"
-            maxLength={30}
-            value={nickname}
-            onChange={(event) => setNickname(event.target.value)}
-            className="w-full border border-white/20 bg-white/10 px-4 py-3 text-base text-white outline-none placeholder:text-white/35 focus:border-[#E6D5B8]"
-          />
-        </div>
-        <div>
-          <label htmlFor="early-access-interest" className="mb-2 block text-xs tracking-[0.12em] text-[#E6D5B8]">
-            最想使用 <span className="text-white/45">選填</span>
-          </label>
-          <select
-            id="early-access-interest"
-            value={interest}
-            onChange={(event) => setInterest(event.target.value as EarlyAccessInterest | '')}
-            className="w-full border border-white/20 bg-[#5F4540] px-4 py-3 text-base text-white outline-none focus:border-[#E6D5B8]"
-          >
-            <option value="">請選擇</option>
-            {interestOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </div>
       </div>
 
       <div className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
@@ -148,10 +101,10 @@ export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = (
         disabled={isSubmitting || !email.trim() || !marketingConsent}
         className="flex w-full items-center justify-center bg-white px-6 py-4 text-center text-sm font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9] disabled:cursor-wait disabled:opacity-65"
       >
-        {isSubmitting ? '正在登記…' : '加入早鳥候補名單 →'}
+        {isSubmitting ? '正在登記…' : '輸入 Email，提前卡位早鳥優惠 →'}
       </button>
       <p className="text-xs leading-6 text-white/50">
-        加入不代表購買，也不會自動扣款；可隨時寄信至 {SITE_IDENTITY.email} 要求停止通知。
+        填寫 Email 並非購買，不會產生訂單或扣款；可隨時寄信至 {SITE_IDENTITY.email} 要求停止通知。
       </p>
     </form>
   );

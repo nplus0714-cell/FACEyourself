@@ -1,11 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { CONTENT_CATALOG, ContentItem } from '../data/contentCatalog';
 import { createReadingSessionId, recordContentReading } from '../services/contentReading';
+import { getPaidArticleMarkdown } from '../services/paidContent';
 
 interface ContentDetailProps {
   item: ContentItem;
   isLoggedIn: boolean;
+  hasSurvivalKitAccess: boolean;
   onBack: () => void;
   onLoginRequest: () => void;
   onOpenPricing: () => void;
@@ -13,19 +15,48 @@ interface ContentDetailProps {
   onStartTest: () => void;
 }
 
-export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, onBack, onLoginRequest, onOpenPricing, onOpenContent, onStartTest }) => {
+export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, hasSurvivalKitAccess, onBack, onLoginRequest, onOpenPricing, onOpenContent, onStartTest }) => {
   const articleRef = useRef<HTMLElement>(null);
   const readingSessionRef = useRef(createReadingSessionId());
+  const [paidArticleMarkdown, setPaidArticleMarkdown] = useState<string | null>(null);
+  const [paidArticleStatus, setPaidArticleStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+  const [paidArticleReloadKey, setPaidArticleReloadKey] = useState(0);
   const embedUrl = item.youtubeId
     ? `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`
     : undefined;
-  const isLocked = item.kind === 'article' && item.requiresLogin && !isLoggedIn;
+  const isLoginLocked = item.kind === 'article' && item.requiresLogin && !isLoggedIn;
+  const isPurchaseLocked = item.kind === 'article' && item.requiresPurchase && !hasSurvivalKitAccess;
+  const isLocked = isLoginLocked || isPurchaseLocked;
+  const renderedMarkdown = item.requiresPurchase ? paidArticleMarkdown : item.bodyMarkdown;
   const orderedArticles = CONTENT_CATALOG
     .filter((entry) => entry.kind === 'article' && entry.status === 'published')
     .sort((a, b) => Number(a.articleNumber ?? 0) - Number(b.articleNumber ?? 0));
   const articleIndex = orderedArticles.findIndex((entry) => entry.id === item.id);
   const previousArticle = articleIndex > 0 ? orderedArticles[articleIndex - 1] : null;
   const nextArticle = articleIndex >= 0 && articleIndex < orderedArticles.length - 1 ? orderedArticles[articleIndex + 1] : null;
+
+  useEffect(() => {
+    setPaidArticleMarkdown(null);
+    if (item.kind !== 'article' || !item.requiresPurchase || isLocked) {
+      setPaidArticleStatus('idle');
+      return undefined;
+    }
+
+    let active = true;
+    setPaidArticleStatus('loading');
+    void getPaidArticleMarkdown(item.slug)
+      .then((markdown) => {
+        if (!active) return;
+        setPaidArticleMarkdown(markdown);
+        setPaidArticleStatus('idle');
+      })
+      .catch((error) => {
+        console.warn('Unable to load paid article content', error);
+        if (active) setPaidArticleStatus('error');
+      });
+
+    return () => { active = false; };
+  }, [isLocked, item.kind, item.requiresPurchase, item.slug, paidArticleReloadKey]);
 
   useEffect(() => {
     if (isLocked) return undefined;
@@ -75,7 +106,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
         </p>
         <h1 className="mx-auto mt-5 max-w-3xl serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">{item.title}</h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-[2] text-[#70665D] md:text-lg">{item.summary}</p>
-        {item.requiresLogin && <p className="mx-auto mt-6 w-fit border border-[#B9AA9D] bg-[#F7F1EC] px-4 py-2 text-xs font-medium tracking-[0.12em] text-[#7A5148]">LOCK · 登入限定文章</p>}
+        {item.requiresLogin && <p className="mx-auto mt-6 w-fit border border-[#B9AA9D] bg-[#F7F1EC] px-4 py-2 text-xs font-medium tracking-[0.12em] text-[#7A5148]">{item.requiresPurchase ? 'PLAN · 登入與方案限定' : 'LOCK · 登入限定文章'}</p>}
       </header>
 
       {item.kind === 'video' ? <>
@@ -85,15 +116,32 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
         {item.isDemo && <p className="mt-3 text-center text-xs leading-[1.7] text-[#8C7E6D]">這是播放版面示範。正式發布時會換成你的 YouTube 影片，不會改變頁面網址或流程。</p>}
       </> : isLocked ? (
         <section className="mx-auto mt-10 max-w-2xl border border-[#B9AA9D] bg-[#F7F1EC] p-7 text-center md:mt-14 md:p-12">
-          <p className="text-xs font-medium tracking-[0.22em] text-[#8C635B]">MEMBER READING</p>
-          <h2 className="mt-4 serif text-3xl leading-[1.55] text-[#2D2D2D]">登入後閱讀完整文章</h2>
-          <p className="mx-auto mt-5 max-w-lg text-[16px] leading-[1.95] text-[#70665D]">這篇文章屬於 FACE 生存指南的會員內容。登入不需要付費，完成登入後即可繼續閱讀。</p>
+          <p className="text-xs font-medium tracking-[0.22em] text-[#8C635B]">{item.requiresPurchase ? 'FACE SURVIVAL · PLAN ACCESS' : 'MEMBER READING'}</p>
+          <h2 className="mt-4 serif text-3xl leading-[1.55] text-[#2D2D2D]">{isLoginLocked ? '先登入，再繼續這段閱讀' : '取得 FACE Survival 後閱讀'}</h2>
+          <p className="mx-auto mt-5 max-w-lg text-[16px] leading-[1.95] text-[#70665D]">
+            {item.requiresPurchase
+              ? isLoginLocked
+                ? '這篇屬於 FACE Survival 文字版內容。先登入確認帳號；已有方案權限可直接閱讀，尚未取得則可查看早鳥資訊。'
+                : '這篇屬於 FACE Survival 文字版內容。取得方案後，會以同一個會員帳號開放完整閱讀。'
+              : '這篇文章屬於 FACE 生存指南的會員內容。登入不需要付費，完成登入後即可繼續閱讀。'}
+          </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <button type="button" onClick={onLoginRequest} className="bg-[#2D2D2D] px-7 py-4 text-sm font-medium text-white transition hover:bg-[#3A302B]">登入並繼續閱讀 →</button>
-            <a href="/survival-kit" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">查看完整方案</a>
+            {isLoginLocked && <button type="button" onClick={onLoginRequest} className="bg-[#2D2D2D] px-7 py-4 text-sm font-medium text-white transition hover:bg-[#3A302B]">登入並繼續 →</button>}
+            {(item.requiresPurchase || !isLoginLocked) && <a href="/survival-kit" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">查看方案與早鳥資訊</a>}
           </div>
         </section>
-      ) : item.bodyMarkdown ? (
+      ) : item.requiresPurchase && paidArticleStatus === 'loading' ? (
+        <section className="mx-auto mt-14 max-w-xl py-16 text-center" role="status" aria-live="polite">
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border border-[#CFC6B8] border-t-[#8C635B]" aria-hidden="true" />
+          <p className="mt-5 text-sm leading-7 text-[#70665D]">正在確認權限並載入文章…</p>
+        </section>
+      ) : item.requiresPurchase && paidArticleStatus === 'error' ? (
+        <section className="mx-auto mt-14 max-w-xl border border-[#B9AA9D] bg-[#F7F1EC] p-8 text-center">
+          <h2 className="serif text-2xl text-[#2D2D2D]">文章暫時無法載入</h2>
+          <p className="mt-4 text-sm leading-7 text-[#70665D]">你的方案權限仍然保留。請稍後重試，或重新整理頁面。</p>
+          <button type="button" onClick={() => setPaidArticleReloadKey((value) => value + 1)} className="mt-6 bg-[#2D2D2D] px-7 py-3 text-sm font-medium text-white">重新載入</button>
+        </section>
+      ) : renderedMarkdown ? (
         <section className="mx-auto mt-10 max-w-[44rem] md:mt-14">
           <ReactMarkdown
             components={{
@@ -107,7 +155,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
               blockquote: ({ children }) => <blockquote className="my-10 border-l-2 border-[#A05F54] bg-[#F7F1EC] px-6 py-4 text-[#594A43]">{children}</blockquote>,
             }}
           >
-            {item.bodyMarkdown}
+            {renderedMarkdown}
           </ReactMarkdown>
         </section>
       ) : (

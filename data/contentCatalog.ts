@@ -9,7 +9,7 @@ import article008Source from '../docs/content/articles/008-stop-loss-is-an-entry
 import article009Source from '../docs/content/articles/009-three-dimensions-for-surviving-the-trading-jungle.md?raw';
 
 export type ContentKind = 'video' | 'article';
-export type ContentSeries = '序言' | '破繭篇' | '生存篇';
+export type ContentSeries = '序言' | '破繭篇' | '生存篇' | '進攻篇・上' | '進攻篇・下' | '歸真篇';
 export type ContentChannel = 'face-survival-guide' | 'topic-articles' | 'market-notes';
 
 export interface ContentItem {
@@ -30,6 +30,7 @@ export interface ContentItem {
   series?: ContentSeries;
   seriesOrder?: number;
   requiresLogin?: boolean;
+  requiresPurchase?: boolean;
   status: 'draft' | 'published';
 }
 
@@ -205,6 +206,50 @@ export const CONTENT_CATALOG: ContentItem[] = [
     faceTags: ['Exposure｜資金管理', 'Focus｜獲利動機'],
     bodyMarkdown: getArticleBody(article009Source),
     status: 'published',
+  },
+  {
+    id: 'article-010', slug: 'attack-is-changing-gears', kind: 'article', articleNumber: '010', channel: 'face-survival-guide', series: '進攻篇・上', seriesOrder: 1, requiresLogin: true, requiresPurchase: true,
+    title: '進攻不是一個階段，而是換檔', summary: '進攻不是把膽子放大，而是在不同市場裡，持續調整願意承擔的風險。', faceTags: ['Exposure｜資金管理', 'Focus｜獲利動機'], status: 'published',
+  },
+  {
+    id: 'article-011', slug: 'probability-payoff-and-expectancy', kind: 'article', articleNumber: '011', channel: 'face-survival-guide', series: '進攻篇・上', seriesOrder: 2, requiresLogin: true, requiresPurchase: true,
+    title: '勝率、賠率與期望值：選股，其實是在選機會成本', summary: '有限的資金該放在哪裡，不只看勝率，更要比較看錯的代價與看對的空間。', faceTags: ['Analysis｜決策邏輯', 'Exposure｜資金管理'], status: 'published',
+  },
+  {
+    id: 'article-012', slug: 'let-time-make-money', kind: 'article', articleNumber: '012', channel: 'face-survival-guide', series: '進攻篇・上', seriesOrder: 3, requiresLogin: true, requiresPurchase: true,
+    title: '讓時間替你賺錢：看對就抱，看錯就走', summary: '真正阻止你賺大錢的，常常不是市場，而是沒有能力持有一筆正在獲利的交易。', faceTags: ['Cycle｜交易週期', 'Focus｜獲利動機'], status: 'published',
+  },
+  {
+    id: 'article-013', slug: 'how-far-behind-the-market-is-your-news', kind: 'article', articleNumber: '013', channel: 'face-survival-guide', series: '進攻篇・上', seriesOrder: 4, requiresLogin: true, requiresPurchase: true,
+    title: '你的消息，落後市場多久了？', summary: '消息本身不夠；你還要知道市場反映了多少，以及資金正往哪裡移動。', faceTags: ['Analysis｜決策邏輯', 'Focus｜獲利動機'], status: 'published',
+  },
+  {
+    id: 'article-014', slug: 'direction-position-and-time', kind: 'article', articleNumber: '014', channel: 'face-survival-guide', series: '進攻篇・下', seriesOrder: 1, requiresLogin: true, requiresPurchase: true,
+    title: '看對方向、買好買滿、讓獲利奔跑', summary: '放大獲利不必先靠槓桿；方向、部位與時間同時站在你這邊，才是真正的槓桿。', faceTags: ['Exposure｜資金管理', 'Cycle｜交易週期'], status: 'published',
+  },
+  {
+    id: 'article-015', slug: 'let-resources-stay-with-winners', kind: 'article', articleNumber: '015', channel: 'face-survival-guide', series: '進攻篇・下', seriesOrder: 2, requiresLogin: true, requiresPurchase: true,
+    title: '投資飲料店的故事：讓資源留在會賺錢的地方', summary: '別一直替虧錢的店續命，卻急著把正在賺錢的店關掉。', faceTags: ['Exposure｜資金管理', 'Focus｜獲利動機'], status: 'published',
+  },
+  {
+    id: 'article-016', slug: 'good-stocks-are-amulets', kind: 'article', articleNumber: '016', channel: 'face-survival-guide', series: '進攻篇・下', seriesOrder: 3, requiresLogin: true, requiresPurchase: true,
+    title: '好股票是護身符：錢生錢、錢生膽、膽再生錢', summary: '真正的好股票，是已替你產生獲利、成本與現價逐漸拉開的部位。', faceTags: ['Exposure｜資金管理', 'Focus｜獲利動機'], status: 'published',
+  },
+  {
+    id: 'article-017', slug: 'leverage-requires-discipline', kind: 'article', articleNumber: '017', channel: 'face-survival-guide', series: '進攻篇・下', seriesOrder: 4, requiresLogin: true, requiresPurchase: true,
+    title: '槓桿是給守紀律、有獲利的人用的', summary: '槓桿沒有善惡；它只會把你原本的能力、紀律、獲利與錯誤一起放大。', faceTags: ['Exposure｜資金管理', 'Analysis｜決策邏輯'], status: 'published',
+  },
+  {
+    id: 'article-018', slug: 'follow-the-trend-and-your-nature', kind: 'article', articleNumber: '018', channel: 'face-survival-guide', series: '歸真篇', seriesOrder: 1, requiresLogin: true, requiresPurchase: true,
+    title: '順勢，更要順性', summary: '真正走得久的，不是硬逼自己追上市場，而是讓市場方向與自己的節奏能一起往前。', faceTags: ['Focus｜獲利動機', 'Analysis｜決策邏輯', 'Cycle｜交易週期', 'Exposure｜資金管理'], status: 'published',
+  },
+  {
+    id: 'article-019', slug: 'trading-should-be-sustainable', kind: 'article', articleNumber: '019', channel: 'face-survival-guide', series: '歸真篇', seriesOrder: 2, requiresLogin: true, requiresPurchase: true,
+    title: '交易是一輩子的事，所以要做得舒服', summary: '舒服不是沒有壓力，而是在市場波動時，你仍做得出原本會做的事。', faceTags: ['Exposure｜資金管理', 'Cycle｜交易週期'], status: 'published',
+  },
+  {
+    id: 'article-020', slug: 'from-holy-grail-to-self-knowledge', kind: 'article', articleNumber: '020', channel: 'face-survival-guide', series: '歸真篇', seriesOrder: 3, requiresLogin: true, requiresPurchase: true,
+    title: '從找聖杯，到看懂自己', summary: '真正的問題不只是方法好不好，而是哪一個方法放在你身上，你做不做得出來。', faceTags: ['Analysis｜決策邏輯', 'Focus｜獲利動機'], status: 'published',
   },
 ];
 

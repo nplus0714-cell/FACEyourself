@@ -17,6 +17,8 @@ const boundaries = [
   ['不保證獲利', '市場沒有保證。目標是減少「明明知道卻做不到」帶來的反覆焦慮。'],
 ];
 
+const LINE_CONSULTATION_URL = 'https://line.me/ti/p/@227bctxh';
+
 export const CoachProfile: React.FC<CoachProfileProps> = ({ onStartTest, onBackToAbout }) => (
   <div className="mx-auto max-w-6xl space-y-16 pb-28 pt-2 fade-in md:space-y-24 md:pt-8">
     <button type="button" onClick={onBackToAbout} className="text-sm text-[#70665D] transition hover:text-[#2D2D2D]">← 回到關於 FACE</button>
@@ -27,25 +29,44 @@ export const CoachProfile: React.FC<CoachProfileProps> = ({ onStartTest, onBackT
         <h1 className="mt-6 serif text-[2.35rem] leading-[1.48] text-[#2D2D2D] sm:text-5xl md:text-6xl">不替你選股票<br />陪你建立自己的<br />交易方式。</h1>
         <p className="mt-8 max-w-xl text-base leading-[2.05] text-[#70665D] md:text-lg">我相信，投資的關鍵不只在於看懂市場，也在於你是否能在波動來臨時，持續做出自己理解、也承受得起的選擇。</p>
       </div>
-      <div className="relative flex min-h-[25rem] items-center justify-center overflow-hidden bg-[#2D2D2D] p-8 text-white sm:p-12">
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.22) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.22) 1px, transparent 1px)', backgroundSize: '3.25rem 3.25rem' }} />
-        <span className="absolute -right-7 -top-12 serif text-[16rem] leading-none text-white/[0.05]">F</span>
-        <div className="relative w-full max-w-sm border border-white/30 p-7 sm:p-9">
-          <p className="text-[11px] font-bold tracking-[0.24em] text-white/55">A SIMPLE METHOD</p>
-          <div className="mt-10 grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-center"><div><p className="serif text-4xl">FACE</p><p className="mt-2 text-xs leading-6 text-white/65">看見你的<br />交易習慣</p></div><span className="text-white/45">＋</span><div><p className="serif text-4xl">RATE</p><p className="mt-2 text-xs leading-6 text-white/65">檢查持股與<br />行為是否一致</p></div></div>
-          <div className="mt-10 border-t border-white/20 pt-6 text-center text-sm leading-7 text-white/75">把市場裡模糊的焦慮，整理成能執行的下一步。</div>
+      <div className="relative min-h-[25rem] overflow-hidden bg-[#2D2D2D] text-white">
+        <img src="/images/NPC Bartender.jpg" alt="FACE 內容設計者張恩嘉" className="absolute inset-0 h-full w-full object-cover object-center grayscale-[0.12]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#251D19]/95 via-[#251D19]/20 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-7 sm:p-10">
+          <p className="text-[11px] font-medium tracking-[0.24em] text-white/60">FACE CONTENT DESIGNER</p>
+          <p className="mt-3 serif text-3xl leading-[1.4] text-white">張恩嘉</p>
+          <p className="mt-2 text-sm leading-7 text-white/75">FACE 如鏡內容設計者／交易解憂 Bar 主理人</p>
         </div>
       </div>
     </header>
 
-    <section className="mx-auto max-w-3xl text-center"><p className="text-xs font-bold tracking-[0.26em] text-[#8C635B]">WHY I BUILT FACE</p><h2 className="mt-5 serif text-3xl leading-[1.65] text-[#2D2D2D] md:text-5xl">資訊很多，<br />但真正困住人的，常常是壓力下的那個選擇。</h2><p className="mt-7 text-base leading-[2.05] text-[#70665D] md:text-lg">看過市場研究與金融產品的兩端後，我越來越確定：許多人不是不知道該怎麼做，而是在追高、虧損、空手或創新高時，暫時失去了原本相信的規則。</p></section>
+    <section className="mx-auto max-w-3xl text-center"><p className="text-xs font-bold tracking-[0.26em] text-[#8C635B]">WHY I BUILT FACE</p><h2 className="mt-5 serif text-3xl leading-[1.65] text-[#2D2D2D] md:text-5xl">資訊很多，<br />但真正困住人的，常常是壓力下的那個選擇。</h2><p className="mt-7 text-base leading-[2.05] text-[#70665D] md:text-lg">我是張恩嘉。過去在投顧研究與量化金融產品設計的工作裡，我長期站在資訊、工具與使用者決策之間，也越來越確定：許多人不是不知道該怎麼做，而是在追高、虧損、空手或創新高時，暫時失去了原本相信的規則。FACE 因此不是用來替你預測市場，而是幫你把模糊的感受整理成看得懂、做得到、可以反覆檢查的下一步。</p></section>
 
     <section className="grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] md:grid-cols-3">{journey.map(([title, copy], index) => <article key={title} className="bg-white p-8 md:p-10"><p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">0{index + 1}</p><h2 className="mt-8 serif text-3xl text-[#2D2D2D]">{title}</h2><p className="mt-5 text-base leading-[2] text-[#70665D]">{copy}</p></article>)}</section>
 
-    <section className="grid items-start gap-10 border-y border-[#D1D1C7] py-12 md:grid-cols-[0.82fr_1.18fr] md:gap-16 md:py-20"><div><p className="text-xs font-bold tracking-[0.26em] text-[#8C635B]">WHAT WE CAN WORK ON</p><h2 className="mt-5 serif text-3xl leading-[1.6] text-[#2D2D2D] md:text-5xl">當你的交易<br />開始讓你不安。</h2></div><div className="grid gap-4 sm:grid-cols-2">{['總是在追高後後悔，卻不知道下一次怎麼避免。', '持股讓你睡不好，但又捨不得調整。', '策略換了很多次，始終無法長期執行。', '想把選股、部位、進出規則整理成一套自己的系統。'].map((item, index) => <div key={item} className="border border-[#D1D1C7] bg-[#F7F4EF] p-6"><p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">0{index + 1}</p><p className="mt-4 text-base leading-[1.9] text-[#4F4943]">{item}</p></div>)}</div></section>
+    <section className="grid items-start gap-10 border-y border-[#D1D1C7] py-12 md:grid-cols-[0.82fr_1.18fr] md:gap-16 md:py-20"><div><p className="text-xs font-bold tracking-[0.26em] text-[#8C635B]">WHAT WE CAN WORK ON</p><h2 className="mt-5 serif text-3xl leading-[1.6] text-[#2D2D2D] md:text-5xl">當你的交易<br />開始讓你不安。</h2></div><div className="grid gap-4 sm:grid-cols-2">{['總是在追高後悔，卻不知道下一次怎麼避免。', '持股讓你睡不好，但又捨不得調整。', '策略換了很多次，始終無法長期執行。', '想把選股、部位、進出規則整理成一套自己的系統。'].map((item, index) => <div key={item} className="border border-[#D1D1C7] bg-[#F7F4EF] p-6"><p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">0{index + 1}</p><p className="mt-4 text-base leading-[1.9] text-[#4F4943]">{item}</p></div>)}</div></section>
 
     <section><div className="max-w-2xl"><p className="text-xs font-bold tracking-[0.26em] text-[#8C635B]">MY WORKING BOUNDARY</p><h2 className="mt-5 serif text-3xl leading-[1.6] text-[#2D2D2D] md:text-5xl">我可以陪你整理，<br />但不替你做決定。</h2></div><div className="mt-10 grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] md:grid-cols-3">{boundaries.map(([title, copy]) => <article key={title} className="bg-white p-8 md:p-10"><h3 className="serif text-2xl text-[#2D2D2D]">{title}</h3><p className="mt-5 text-base leading-[2] text-[#70665D]">{copy}</p></article>)}</div><p className="mt-5 text-sm leading-7 text-[#8C7E6D]">FACE 與諮詢內容屬於交易行為探索與教育性討論，不構成個別投資建議、買賣推薦或獲利保證。</p></section>
 
-    <section className="mx-auto max-w-3xl border border-[#D1D1C7] bg-[#F7F4EF] px-7 py-12 text-center md:px-14 md:py-16"><p className="text-xs font-bold tracking-[0.26em] text-[#8C635B]">START HERE</p><h2 className="mt-5 serif text-3xl leading-[1.65] text-[#2D2D2D] md:text-5xl">諮詢前，先讓 FACE<br />幫你把問題說清楚。</h2><p className="mx-auto mt-6 max-w-xl text-base leading-[2] text-[#70665D]">先完成 24 題交易人格測驗。當你知道自己的慣性，後續對話才會更具體，也更有幫助。</p><button type="button" onClick={onStartTest} className="mt-8 border border-[#2D2D2D] bg-[#2D2D2D] px-8 py-4 text-sm font-bold tracking-[0.12em] text-white transition hover:bg-transparent hover:text-[#2D2D2D]">開始交易人格測驗</button><p className="mt-5 text-sm text-[#8C7E6D]">首次免費諮詢的預約系統準備中。</p></section>
+    <section className="overflow-hidden border border-[#BFAFA3] bg-[#F7F4EF] md:grid md:grid-cols-[0.9fr_1.1fr]">
+      <div className="bg-[#5F4540] px-7 py-11 text-white sm:px-10 md:px-12 md:py-14">
+        <p className="text-xs font-medium tracking-[0.26em] text-[#D9C7A9]">START A CONVERSATION</p>
+        <h2 className="mt-5 serif text-3xl leading-[1.6] md:text-4xl">需要時，我們可以把問題慢慢說清楚。</h2>
+        <p className="mt-6 text-sm leading-[1.95] text-white/75">如果你已經知道自己卡在哪裡，可以直接從 LINE@ 留下目前的交易困擾。我會先理解你的情境，再確認這場對話是否適合幫助你。</p>
+      </div>
+      <div className="px-7 py-11 sm:px-10 md:px-12 md:py-14">
+        <p className="text-sm font-medium tracking-[0.12em] text-[#8C635B]">第一次對話，可以從這些問題開始</p>
+        <ul className="mt-6 space-y-3 text-base leading-8 text-[#4F4943]">
+          <li className="border-b border-[#D8CDBD] pb-3">目前最困擾你的交易情境</li>
+          <li className="border-b border-[#D8CDBD] pb-3">明明有方法，卻總是做不到的地方</li>
+          <li>想重新整理的決策、風險與複查流程</li>
+        </ul>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <a href={LINE_CONSULTATION_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-14 flex-1 items-center justify-center bg-[#2D2D2D] px-6 py-4 text-sm font-medium tracking-[0.08em] text-white transition hover:bg-[#4A382D]">前往 LINE@ 諮詢 →</a>
+          <button type="button" onClick={onStartTest} className="min-h-14 flex-1 border border-[#8C7E6D] bg-transparent px-6 py-4 text-sm font-medium tracking-[0.08em] text-[#4F4943] transition hover:bg-white">先完成 FACE 測驗</button>
+        </div>
+        <p className="mt-5 text-xs leading-6 text-[#8C7E6D]">諮詢聚焦交易行為、決策流程與自我覺察，不提供個別股票買賣建議、進出場時點、目標價或報酬保證。</p>
+      </div>
+    </section>
   </div>
 );

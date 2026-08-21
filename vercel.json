@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/content/[slug].ts": {
+      "includeFiles": "docs/content/articles/*.md"
+    }
+  },
   "rewrites": [
     {
       "source": "/share/:code",
