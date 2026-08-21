@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { ApiError, jsonResponse } from '../_lib/http';
-import { getAdminClient, requireAuthenticatedUser } from '../_lib/supabaseAdmin';
+import { ApiError, jsonResponse } from './_lib/http';
+import { getAdminClient, requireAuthenticatedUser } from './_lib/supabaseAdmin';
 
 const PAID_ARTICLE_FILES: Record<string, string> = {
   'attack-is-changing-gears': '010-attack-is-changing-gears.md',
@@ -26,9 +26,9 @@ const stripDocumentHeading = (source: string) => source
 const handlePaidArticleRequest = async (request: Request): Promise<Response> => {
   try {
     const user = await requireAuthenticatedUser(request);
-    const slug = new URL(request.url).pathname.split('/').pop()?.trim();
+    const slug = new URL(request.url).searchParams.get('slug')?.trim();
     const fileName = slug ? PAID_ARTICLE_FILES[slug] : undefined;
-    if (!fileName) throw new ApiError(404, 'CONTENT_NOT_FOUND', '找不到這篇文章。');
+    if (!fileName) throw new ApiError(404, 'CONTENT_NOT_FOUND', '找不到這篇內容。');
 
     const { data: entitlement, error } = await getAdminClient()
       .from('member_entitlements')
@@ -39,7 +39,7 @@ const handlePaidArticleRequest = async (request: Request): Promise<Response> => 
       .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
       .maybeSingle();
     if (error) throw error;
-    if (!entitlement) throw new ApiError(403, 'PAYMENT_REQUIRED', '這篇內容屬於 FACE Survival 方案。');
+    if (!entitlement) throw new ApiError(403, 'PAYMENT_REQUIRED', '此內容需要 FACE Survival 方案權限。');
 
     const articlePath = path.join(process.cwd(), 'docs', 'content', 'articles', fileName);
     const markdown = stripDocumentHeading(await readFile(articlePath, 'utf8'));
@@ -50,7 +50,7 @@ const handlePaidArticleRequest = async (request: Request): Promise<Response> => 
     }
     console.error('[paid-content] failed to load article', error);
     return jsonResponse(
-      { error: { code: 'CONTENT_UNAVAILABLE', message: '文章暫時無法載入，請稍後再試。' } },
+      { error: { code: 'CONTENT_UNAVAILABLE', message: '內容暫時無法載入，請稍後再試。' } },
       503,
     );
   }

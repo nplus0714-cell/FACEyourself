@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/content/[slug].ts": {
+    "api/paid-content.ts": {
       "includeFiles": "docs/content/articles/*.md"
     }
   },
@@ -11,7 +11,7 @@
     },
     {
       "source": "/api/content/:slug",
-      "destination": "/api/content/[slug]"
+      "destination": "/api/paid-content?slug=:slug"
     },
     {
       "source": "/types/compatibility",
