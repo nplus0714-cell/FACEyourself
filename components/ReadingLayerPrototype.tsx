@@ -5,6 +5,7 @@ import { FACE_MAP } from '../constants';
 import { FACE_2_PROTOTYPES, type FaceProfilePrototype } from '../data/faceProfilePrototype';
 import { PERSONALITY_EDITORIAL_V2 } from '../data/personalityEditorialV2';
 import { MASTER_PORTRAIT_BY_CODE } from '../data/masterPortraits';
+import { FEATURE_FLAGS } from '../config/featureFlags';
 
 const PROFILE_CODES = [
   'ARLC', 'ARLD', 'ARTC', 'ARTD',
@@ -1142,8 +1143,8 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
               <h2 className="editorial-chapter-title editorial-on-dark serif mt-3 text-[2rem] font-normal leading-[1.45] tracking-[0.01em] text-white md:text-[2.4rem]">{chapterMeta[6].title}</h2>
               <p className="editorial-lead editorial-on-dark serif mt-5 text-[1.45rem] font-normal leading-[1.75] text-white/95 md:text-[1.75rem]">看看今天盤勢，正在放大你哪一種情緒</p>
               <p className="editorial-body-m editorial-supporting editorial-dark-copy serif mt-5 max-w-xl text-[1.05rem] font-normal leading-9 text-white/75">用8題確認你在焦慮什麼、注意力被什麼帶走，以及此刻是否適合做決策。</p>
-              <a href="/daily-awareness" className="editorial-button editorial-action mt-8 inline-flex min-h-14 items-center justify-center border border-white/45 bg-white/90 px-8 py-4 text-[14px] tracking-[0.08em] text-[#3B312C] transition-colors hover:bg-white">
-                開始今日深度覺察 →
+              <a href={FEATURE_FLAGS.dailyAwareness ? '/daily-awareness' : '/me'} className="editorial-button editorial-action mt-8 inline-flex min-h-14 items-center justify-center border border-white/45 bg-white/90 px-8 py-4 text-[14px] tracking-[0.08em] text-[#3B312C] transition-colors hover:bg-white">
+                {FEATURE_FLAGS.dailyAwareness ? '開始今日深度覺察 →' : '覺察日記 · 尚未開放 →'}
               </a>
             </div>
           </div>

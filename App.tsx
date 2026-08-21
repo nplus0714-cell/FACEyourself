@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ZenLayout } from './components/ZenLayout';
 import { FaceAssessment } from './components/FaceAssessment';
 import { FaceSequentialMockup } from './components/FaceSequentialMockup';
@@ -19,7 +19,7 @@ import { MemberHome } from './components/MemberHome';
 import { LastAssessmentCard } from './components/LastAssessmentCard';
 import { ResearchAdmin } from './components/ResearchAdmin';
 import { DailyAwarenessCheckIn } from './components/DailyAwarenessCheckIn';
-import { DailyAwarenessResultPreview } from './components/DailyAwarenessResultPreview';
+import { AwarenessUnavailable } from './components/AwarenessUnavailable';
 import { ReadingLayerPrototype } from './components/ReadingLayerPrototype';
 import { NotFoundPage } from './components/NotFoundPage';
 import { LegalPage } from './components/LegalPage';
@@ -39,10 +39,14 @@ import { recordMemberActivity } from './services/memberActivity';
 import { getMemberAssessmentHistory } from './services/memberAssessmentHistory';
 import { getBrowserPendingAssessment, isFaceScores } from './services/localAssessmentResult';
 import { applyPageMetadata } from './lib/pageMetadata';
+import { FEATURE_FLAGS } from './config/featureFlags';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
+const DAILY_ANSWERS_KEY = 'face-daily-v1-answers';
+const DAILY_RESULT_KEY = 'face-daily-v1-result';
+const DAILY_AWAITING_LOGIN_KEY = 'face-daily-v1-awaiting-login';
 
-type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'daily-result' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'privacy' | 'terms' | 'refund-policy' | 'data-deletion' | 'not-found';
+type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'privacy' | 'terms' | 'refund-policy' | 'data-deletion' | 'not-found';
 
 const roleCodeFromPath = (path: string): string | null => {
   const prefix = path.startsWith('/types/')
@@ -71,8 +75,8 @@ const viewFromPath = (path: string): AppView => {
   if (path === '/journal/history') return 'history';
   if (path === '/preview-results') return 'result-preview';
   if (path === '/reading-prototype') return 'reading-prototype';
-  if (path === '/daily-awareness-result') return 'daily-result';
-  if (path === '/deep-dive') return 'daily-test';
+  if (path === '/daily-awareness-result') return 'member-home';
+  if (path === '/deep-dive') return FEATURE_FLAGS.dailyAwareness ? 'daily-test' : 'member-home';
   if (path === '/research-admin') return 'research-admin';
   if (path === '/me') return 'member-home';
   if (path === '/mirror-trade') return 'mirror-trade';
@@ -89,7 +93,7 @@ const viewFromPath = (path: string): AppView => {
   if (path === '/survival-kit') return 'survival-kit';
   if (path === '/test') return 'dna-test';
   if (path === '/test-mockup') return 'sequential-test-mockup';
-  if (path === '/daily-awareness') return 'daily-test';
+  if (path === '/daily-awareness') return FEATURE_FLAGS.dailyAwareness ? 'daily-test' : 'member-home';
   if (path === '/about') return 'about-face';
   if (path === '/coach') return 'coach-profile';
   if (path === '/') return 'landing';
@@ -101,7 +105,6 @@ const pathForView = (view: AppView) => ({
   'dna-test': '/test',
   'sequential-test-mockup': '/test-mockup',
   'daily-test': '/daily-awareness',
-  'daily-result': '/daily-awareness-result',
   'about-face': '/about',
   'coach-profile': '/coach',
   'role-gallery': '/types',
@@ -136,12 +139,15 @@ const App: React.FC = () => {
     return roleCodeFromPath(window.location.pathname);
   });
   const [previewResultCode, setPreviewResultCode] = useState<string | null>(() => new URLSearchParams(window.location.search).get('type'));
-  const [pendingDailyAwareness, setPendingDailyAwareness] = useState<DailyAwarenessAnswers | null>(null);
-  const [pendingDailyResult, setPendingDailyResult] = useState<DailyAwarenessResult | null>(() => {
-    try { return JSON.parse(sessionStorage.getItem('face-daily-v1-result') ?? 'null') as DailyAwarenessResult | null; }
+  const [pendingDailyAwareness, setPendingDailyAwareness] = useState<DailyAwarenessAnswers | null>(() => {
+    try { return JSON.parse(sessionStorage.getItem(DAILY_ANSWERS_KEY) ?? 'null') as DailyAwarenessAnswers | null; }
     catch { return null; }
   });
-  const [showDailyResultAfterLogin, setShowDailyResultAfterLogin] = useState(false);
+  const [pendingDailyResult, setPendingDailyResult] = useState<DailyAwarenessResult | null>(() => {
+    try { return JSON.parse(sessionStorage.getItem(DAILY_RESULT_KEY) ?? 'null') as DailyAwarenessResult | null; }
+    catch { return null; }
+  });
+  const [showDailyResultAfterLogin, setShowDailyResultAfterLogin] = useState(() => sessionStorage.getItem(DAILY_AWAITING_LOGIN_KEY) === '1');
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [hasSurvivalKitAccess, setHasSurvivalKitAccess] = useState(false);
   const [isLocalStateHydrated, setIsLocalStateHydrated] = useState(false);
@@ -155,6 +161,49 @@ const App: React.FC = () => {
     const path = pathForView(nextView);
     if (path && window.location.pathname !== path) window.history.pushState({}, '', path);
     setView(nextView);
+  };
+
+  const restoreBaselineScores = useCallback(async (): Promise<FaceScores | null> => {
+    if (state.dna) return state.dna;
+
+    const browserResult = getBrowserPendingAssessment();
+    if (browserResult) {
+      setState((previous) => ({ ...previous, dna: browserResult.scores }));
+      return browserResult.scores;
+    }
+
+    try {
+      const records = await getMemberAssessmentHistory();
+      const latest = records[0];
+      if (!latest) return null;
+      const baseline: DiaryEntry = {
+        id: latest.id,
+        date: latest.completedAt,
+        scores: latest.scores,
+        marketScenario: '24 題基準測驗',
+        isBaseline: true,
+      };
+      setState((previous) => ({
+        ...previous,
+        dna: latest.scores,
+        history: previous.history.some((entry) => entry.id === latest.id)
+          ? previous.history
+          : [baseline, ...previous.history],
+      }));
+      return latest.scores;
+    } catch (error) {
+      console.warn('Unable to restore the baseline assessment for FACE Daily', error);
+      return null;
+    }
+  }, [state.dna]);
+
+  const clearPendingDailyAwareness = () => {
+    setPendingDailyAwareness(null);
+    setPendingDailyResult(null);
+    setShowDailyResultAfterLogin(false);
+    sessionStorage.removeItem(DAILY_ANSWERS_KEY);
+    sessionStorage.removeItem(DAILY_RESULT_KEY);
+    sessionStorage.removeItem(DAILY_AWAITING_LOGIN_KEY);
   };
 
   const openContent = (item: ContentItem) => {
@@ -184,8 +233,16 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    if (window.location.pathname === '/deep-dive') {
-      window.history.replaceState({}, '', '/daily-awareness');
+    if (['/deep-dive', '/daily-awareness-result'].includes(window.location.pathname)) {
+      const destination = FEATURE_FLAGS.dailyAwareness && window.location.pathname === '/deep-dive'
+        ? '/daily-awareness'
+        : '/me';
+      window.history.replaceState({}, '', destination);
+      setView(FEATURE_FLAGS.dailyAwareness && destination === '/daily-awareness' ? 'daily-test' : 'member-home');
+    }
+    if (!FEATURE_FLAGS.dailyAwareness && window.location.pathname === '/daily-awareness') {
+      window.history.replaceState({}, '', '/me');
+      setView('member-home');
     }
     if (window.location.pathname === '/reading-prototype') {
       const requestedCode = new URLSearchParams(window.location.search).get('type');
@@ -293,7 +350,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     let active = true;
-    if (!isLocalStateHydrated || !state.user || state.dna || view !== 'dashboard') return () => { active = false; };
+    const needsBaseline = ['dashboard', 'daily-test', 'member-home'].includes(view);
+    if (!isLocalStateHydrated || !state.user || state.dna || !needsBaseline) return () => { active = false; };
 
     setIsMemberResultLoading(true);
     void getMemberAssessmentHistory()
@@ -359,13 +417,14 @@ const App: React.FC = () => {
         ));
         if (authUser) {
           setIsAuthDialogOpen(false);
-          if (showDailyResultAfterLogin && pendingDailyAwareness) {
-            const dailyResult = pendingDailyResult ?? scoreDailyAwareness(pendingDailyAwareness, state.dna ? getFaceCode(state.dna) : 'ARTC');
+          if (showDailyResultAfterLogin && pendingDailyAwareness && pendingDailyResult) {
             const today = new Date().toLocaleDateString('en-CA');
-            void saveDailyAwarenessResult(today, dailyResult, pendingDailyAwareness)
-              .then(() => navigateTo('daily-result'))
+            void saveDailyAwarenessResult(today, pendingDailyResult, pendingDailyAwareness)
+              .then(() => {
+                clearPendingDailyAwareness();
+                navigateTo('member-home');
+              })
               .catch((error) => console.warn('Unable to save daily awareness result', error));
-            setShowDailyResultAfterLogin(false);
           }
           if (!claimedGuestResultRef.current) {
             claimedGuestResultRef.current = true;
@@ -392,7 +451,7 @@ const App: React.FC = () => {
     }
 
     return () => unsubscribe?.();
-  }, [showDailyResultAfterLogin, pendingDailyAwareness, pendingDailyResult, state.dna]);
+  }, [showDailyResultAfterLogin, pendingDailyAwareness, pendingDailyResult]);
 
   const handleLogin = () => setIsAuthDialogOpen(true);
 
@@ -450,43 +509,55 @@ const App: React.FC = () => {
   }, [state.user]);
 
   const completeDailyAwareness = async (answers: DailyAwarenessAnswers) => {
+    const baselineScores = await restoreBaselineScores();
+    if (!baselineScores) {
+      alert('找不到你的 24 題 FACE 人格結果。請先完成 FACE 測驗，再進行每日覺察。');
+      navigateTo('dna-test');
+      return;
+    }
+
     setPendingDailyAwareness(answers);
-    const scoredResult = scoreDailyAwareness(answers, state.dna ? getFaceCode(state.dna) : 'ARTC');
+    sessionStorage.setItem(DAILY_ANSWERS_KEY, JSON.stringify(answers));
+    const scoredResult = scoreDailyAwareness(answers, getFaceCode(baselineScores));
     const generatedReflection = await generateDailyAwarenessReflection(answers);
     const dailyResult: DailyAwarenessResult = {
       ...scoredResult,
       reflectionText: generatedReflection ?? scoredResult.inferredMindset,
     };
     setPendingDailyResult(dailyResult);
-    sessionStorage.setItem('face-daily-v1-result', JSON.stringify(dailyResult));
+    sessionStorage.setItem(DAILY_RESULT_KEY, JSON.stringify(dailyResult));
     if (!state.user) {
       setShowDailyResultAfterLogin(true);
+      sessionStorage.setItem(DAILY_AWAITING_LOGIN_KEY, '1');
       setIsAuthDialogOpen(true);
       return;
     }
     try {
       await saveDailyAwarenessResult(new Date().toLocaleDateString('en-CA'), dailyResult, answers);
-      navigateTo('daily-result');
+      clearPendingDailyAwareness();
+      navigateTo('member-home');
     } catch (error) {
       console.warn('Unable to save daily awareness result', error);
       alert('今日覺察暫時無法儲存，請稍後再試。');
     }
   };
 
-  const openDailyAwareness = () => {
+  const openDailyAwareness = async () => {
+    if (!FEATURE_FLAGS.dailyAwareness) {
+      navigateTo('member-home');
+      return;
+    }
+    const baselineScores = await restoreBaselineScores();
+    if (!baselineScores) {
+      alert(language === 'zh' ? '你還沒有完成基準測驗。\n請先完成 24 題交易人格測驗。' : 'You have not completed the baseline test yet.\nPlease finish the 24-question trading style test first.');
+      navigateTo('dna-test');
+      return;
+    }
     window.history.pushState({}, '', '/daily-awareness');
     setView('daily-test');
   };
 
-  const startDailyAwareness = () => {
-    if (!state.dna) {
-      alert(language === 'zh' ? '你還沒有完成基準測驗。\n請先完成 24 題交易人格測驗。' : 'You have not completed the baseline test yet.\nPlease finish the 24-question trading style test first.');
-      navigateTo('landing');
-      return;
-    }
-    
-    setView('daily-test');
-  };
+  const startDailyAwareness = () => void openDailyAwareness();
 
   const handleRetestDna = () => {
     const confirmMsg = language === 'zh' 
@@ -598,7 +669,7 @@ const App: React.FC = () => {
                       onClick={startDailyAwareness}
                       className="min-h-14 w-full border border-[#8C635B] bg-[#8C635B] px-6 py-4 text-base font-bold tracking-[0.1em] text-white transition hover:bg-[#754F48]"
                     >
-                      {t.landing.todayAwareness}
+                      {FEATURE_FLAGS.dailyAwareness ? t.landing.todayAwareness : (language === 'zh' ? '覺察日記 · 尚未開放' : 'Awareness Journal · Coming Soon')}
                     </button>
                     <button
                       type="button"
@@ -641,31 +712,20 @@ const App: React.FC = () => {
       {view === 'dna-test' && <FaceAssessment onComplete={handleDnaComplete} />}
       {view === 'sequential-test-mockup' && <FaceSequentialMockup onExit={() => navigateTo('landing')} />}
       
-      {view === 'daily-test' && (
+      {FEATURE_FLAGS.dailyAwareness && view === 'daily-test' && (
         <DailyAwarenessCheckIn
           onComplete={completeDailyAwareness}
           onExit={() => state.user ? navigateTo('member-home') : state.dna ? navigateTo('dashboard') : navigateTo('landing')}
         />
       )}
 
-      {view === 'daily-result' && pendingDailyResult && (
-        <DailyAwarenessResultPreview
-          result={pendingDailyResult}
-          faceCode={state.dna ? getFaceCode(state.dna) : pendingDailyResult.faceCode}
-          onBack={() => navigateTo('daily-test')}
-          onOpenJournal={() => navigateTo('member-home')}
-        />
-      )}
-
-      {view === 'daily-result' && !pendingDailyResult && (
-        <div className="mx-auto max-w-2xl py-28 text-center fade-in"><h1 className="serif text-4xl text-[#2D2D2D]">今天還沒有完成每日照鏡</h1><p className="mt-5 leading-8 text-[#70665D]">完成八題後，這裡才會出現今天的覺察結果。</p><button type="button" onClick={() => navigateTo('daily-test')} className="mt-8 bg-[#8C635B] px-7 py-4 text-sm font-bold text-white">開始今日照鏡</button></div>
-      )}
-
       {view === 'dashboard' && state.dna && (
         <div className="space-y-6">
           <div className="flex justify-end mb-4">
              <button onClick={startDailyAwareness} className="px-8 py-3 bg-[#8C635B] text-white text-[12px] tracking-[0.4em] uppercase font-black rounded-sm shadow-lg hover:bg-[#7D5A50] transition-all">
-                {language === 'zh' ? '進行今日覺察 Today Check-in' : 'Today Check-in'}
+                {FEATURE_FLAGS.dailyAwareness
+                  ? (language === 'zh' ? '進行今日覺察 Today Check-in' : 'Today Check-in')
+                  : (language === 'zh' ? '覺察日記 · 尚未開放' : 'Awareness Journal · Coming Soon')}
              </button>
           </div>
           <Dashboard 
@@ -729,8 +789,9 @@ const App: React.FC = () => {
       {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} onOpenCoach={() => navigateTo('coach-profile')} />}
       {view === 'coach-profile' && <CoachProfile onStartTest={() => navigateTo('dna-test')} onBackToAbout={() => navigateTo('about-face')} />}
       {view === 'mirror-trade' && <MirrorTrade user={state.user} onLogin={handleLogin} />}
-      {view === 'member-home' && state.user && <MemberHome user={state.user} dna={state.dna} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onStartAwareness={openDailyAwareness} onOpenContent={() => navigateTo('content-hub')} onNicknameChange={(nickname) => setState((previous) => previous.user ? { ...previous, user: { ...previous.user, name: nickname } } : previous)} hasSurvivalKitAccess={hasSurvivalKitAccess} />}
-      {view === 'member-home' && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">登入後可以保存測驗結果、回看變化，並使用 RATE 鏡相診股。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">登入並保存結果</button></div>}
+      {view === 'member-home' && !FEATURE_FLAGS.dailyAwareness && <AwarenessUnavailable hasAssessmentResult={!!state.dna} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onBackHome={() => navigateTo('landing')} />}
+      {view === 'member-home' && FEATURE_FLAGS.dailyAwareness && state.user && <MemberHome user={state.user} dna={state.dna} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onStartAwareness={() => void openDailyAwareness()} onOpenContent={() => navigateTo('content-hub')} onNicknameChange={(nickname) => setState((previous) => previous.user ? { ...previous, user: { ...previous.user, name: nickname } } : previous)} hasSurvivalKitAccess={hasSurvivalKitAccess} />}
+      {view === 'member-home' && FEATURE_FLAGS.dailyAwareness && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">登入後可以保存測驗結果、回看變化，並使用 RATE 鏡相診股。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">登入並保存結果</button></div>}
       {view === 'result-preview' && <ResultPreview selectedCode={previewResultCode} onSelectCode={openResultPreview} onBackToList={backToResultPreviewList} language={language} onOpenDeepDive={() => openDailyAwareness()} onStartAwareness={openDailyAwareness} onRetest={() => navigateTo('dna-test')} />}
       {view === 'reading-prototype' && <ReadingLayerPrototype />}
       {view === 'research-admin' && state.user && <ResearchAdmin />}

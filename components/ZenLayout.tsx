@@ -3,6 +3,7 @@ import { AuthUser, Language } from '../types';
 import { translations } from '../i18n';
 import { FaceWordmark } from './FaceWordmark';
 import { SiteFooter } from './SiteFooter';
+import { FEATURE_FLAGS } from '../config/featureFlags';
 
 interface ZenLayoutProps {
   children: React.ReactNode;
@@ -163,11 +164,11 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                   {t.nav.watch}
                 </a>
                 <button
-                  onClick={() => user ? onViewChange('member-home') : onLogin?.()}
+                  onClick={() => FEATURE_FLAGS.dailyAwareness ? (user ? onViewChange('member-home') : onLogin?.()) : onViewChange('member-home')}
                   className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'member-home' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
-                  aria-label={user ? '進入 FACE 自我覺察日記' : '登入後使用 FACE 自我覺察日記'}
+                  aria-label={FEATURE_FLAGS.dailyAwareness ? (user ? '進入 FACE 自我覺察日記' : '登入後使用 FACE 自我覺察日記') : 'FACE 自我覺察日記尚未開放'}
                 >
-                  覺察日記
+                  覺察日記{!FEATURE_FLAGS.dailyAwareness && <span className="ml-1 text-[10px] tracking-normal text-[#A28A7D]">尚未開放</span>}
                 </button>
             </nav>
           )}
