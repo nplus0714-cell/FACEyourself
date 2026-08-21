@@ -1,6 +1,5 @@
 import { formDataToRecord, getEcpayConfig, verifyCheckMacValue } from '../../_lib/ecpay';
 import { grantEntitlementForOrder, getPaymentOrder, updatePaymentOrderFromCallback } from '../../_lib/paymentOrders';
-import { createLegacyPostHandler } from '../../_lib/vercelAdapter';
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -39,5 +38,3 @@ export async function POST(request: Request): Promise<Response> {
     return new Response('0|Server error', { status: 500 });
   }
 }
-
-export default createLegacyPostHandler(POST);

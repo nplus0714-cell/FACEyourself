@@ -9,7 +9,6 @@ import { ApiError, assertSameOrigin, jsonResponse, readJsonBody } from '../../_l
 import { createPaymentOrder, getLatestFaceCodeForUser } from '../../_lib/paymentOrders';
 import { enforceRateLimit } from '../../_lib/rateLimit';
 import { requireAuthenticatedUser } from '../../_lib/supabaseAdmin';
-import { createLegacyPostHandler } from '../../_lib/vercelAdapter';
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -70,5 +69,3 @@ export async function POST(request: Request): Promise<Response> {
     }, 503);
   }
 }
-
-export default createLegacyPostHandler(POST);
