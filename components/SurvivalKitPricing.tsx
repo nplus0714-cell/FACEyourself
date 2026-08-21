@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getSupabaseClient } from '../lib/supabase';
-import { EARLY_ACCESS_MAILTO, PRODUCT_PREVIEW_DISCLAIMER, SITE_IDENTITY } from '../data/siteIdentity';
+import { PRODUCT_PREVIEW_DISCLAIMER, SITE_IDENTITY } from '../data/siteIdentity';
+import { EarlyAccessWaitlistForm } from './EarlyAccessWaitlistForm';
 
 // 正式交付、訂單通知與退款規則完成驗收後，才由環境設定開啟收款。
 const COMMERCE_ENABLED = import.meta.env.VITE_PAYMENTS_ENABLED === 'true';
@@ -481,12 +482,7 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
 
           <div className="mt-10">
             {!COMMERCE_ENABLED ? (
-              <a
-                href={EARLY_ACCESS_MAILTO}
-                className="flex w-full items-center justify-center bg-white px-6 py-4 text-center text-sm font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9]"
-              >
-                加入早鳥候補名單 →
-              </a>
+              <EarlyAccessWaitlistForm />
             ) : (
               <button
                 type="button"
@@ -504,7 +500,6 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
               </button>
             )}
             {checkoutError && <p role="alert" className="mt-3 text-sm leading-6 text-[#F2B8B5]">{checkoutError}</p>}
-            {!COMMERCE_ENABLED && <p className="mt-3 text-sm leading-6 text-[#D9C7A9]">以 Email 登記，不會立即收款；正式開放時會寄送方案與交付說明。</p>}
             <p className="mt-4 text-xs leading-6 text-white/45">
               本產品提供交易教育、自我覺察與風險管理工具，不提供個別標的、買賣時點、持倉建議或報酬保證。
             </p>

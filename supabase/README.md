@@ -54,3 +54,14 @@ migrations. V2.5 keeps the following sources of truth:
 New V2.5 tables use explicit Data API grants together with RLS. Payment and
 reading writes that affect commercial or analytics truth are server-only and
 require `SUPABASE_SERVICE_ROLE_KEY`; never expose that key to Vite/browser code.
+
+## Early-access waitlist v1
+
+Apply `migrations/20260821005923_create_early_access_waitlist.sql` to enable the
+public early-access form. The browser can call only
+`join_early_access_waitlist`; direct reads and writes to
+`early_access_waitlist` are revoked from `anon` and `authenticated`.
+
+The RPC normalizes Email addresses, validates consent and optional interest,
+silently handles duplicate registrations, and records the consent version and
+acquisition source. Never expose the waitlist through a public select policy.

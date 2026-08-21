@@ -203,6 +203,26 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      early_access_waitlist: {
+        Row: {
+          id: string;
+          email: string;
+          nickname: string | null;
+          interest: 'full_system' | 'survival_guide' | 'daily_journal' | 'trading_tools' | 'unsure' | null;
+          source: string;
+          status: 'subscribed' | 'unsubscribed';
+          marketing_consent: boolean;
+          consent_version: string;
+          marketing_consented_at: string;
+          unsubscribed_at: string | null;
+          user_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -214,6 +234,18 @@ export type Database = {
           p_answers: Json;
         };
         Returns: string;
+      };
+      join_early_access_waitlist: {
+        Args: {
+          p_email: string;
+          p_nickname?: string | null;
+          p_interest?: string | null;
+          p_source?: string;
+          p_marketing_consent?: boolean;
+          p_consent_version?: string;
+          p_website?: string | null;
+        };
+        Returns: { ok: boolean; status: string };
       };
     };
     Enums: Record<string, never>;

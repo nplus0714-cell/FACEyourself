@@ -32,6 +32,7 @@ const PrivacyPolicy = () => (
   <>
     <Section title="我們會收集哪些資料">
       <p>依您使用的功能，可能包含帳號 Email、登入狀態、FACE 測驗結果、每日覺察答案與日記、內容閱讀紀錄、付款與權益狀態、客服往來，以及瀏覽器產生的基本技術資訊。</p>
+      <p>加入早鳥候補名單時，我們會收集 Email、通知同意與登記時間；您也可以選填暱稱及最想使用的內容。我們另會記錄登記來源，以了解使用者從哪個頁面加入。</p>
       <p>未登入的公開文章閱讀紀錄，可能以匿名工作階段或裝置端識別碼記錄；我們不會把匿名瀏覽紀錄直接當成您的真實身分。</p>
     </Section>
     <Section title="資料使用目的">
@@ -48,6 +49,7 @@ const PrivacyPolicy = () => (
     </Section>
     <Section title="保存、安全與您的權利">
       <p>我們只在提供服務、處理交易、遵守法令或處理爭議所需期間保存資料，並採取合理的存取控制與安全措施。您可來信要求查詢、更正、停止利用或刪除個人資料；依法必須保留的交易、會計或爭議紀錄不在此限。</p>
+      <p>早鳥通知可隨時取消；請寄信至 <a className="underline underline-offset-4" href={`mailto:${SITE_IDENTITY.email}?subject=${encodeURIComponent('停止 FACE 早鳥通知')}`}>{SITE_IDENTITY.email}</a>，主旨註明「停止早鳥通知」。</p>
       <p>網站可能使用登入必要的 Cookie、localStorage 或匿名 session id。若未來導入非必要的第三方行銷分析工具，將先更新告知與同意機制。</p>
     </Section>
   </>
