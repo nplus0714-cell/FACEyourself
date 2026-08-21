@@ -23,10 +23,10 @@ const stripDocumentHeading = (source: string) => source
   .replace(/^#\s+.+\r?\n+/, '')
   .trim();
 
-export async function GET(request: Request, context: { params?: { slug?: string } }): Promise<Response> {
+const handlePaidArticleRequest = async (request: Request): Promise<Response> => {
   try {
     const user = await requireAuthenticatedUser(request);
-    const slug = context.params?.slug?.trim() ?? new URL(request.url).pathname.split('/').pop()?.trim();
+    const slug = new URL(request.url).pathname.split('/').pop()?.trim();
     const fileName = slug ? PAID_ARTICLE_FILES[slug] : undefined;
     if (!fileName) throw new ApiError(404, 'CONTENT_NOT_FOUND', '找不到這篇文章。');
 
@@ -54,4 +54,8 @@ export async function GET(request: Request, context: { params?: { slug?: string 
       503,
     );
   }
-}
+};
+
+export default {
+  fetch: handlePaidArticleRequest,
+};

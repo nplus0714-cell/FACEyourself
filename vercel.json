@@ -10,6 +10,10 @@
       "destination": "/api/share?code=:code"
     },
     {
+      "source": "/api/content/:slug",
+      "destination": "/api/content/[slug]"
+    },
+    {
       "source": "/types/compatibility",
       "destination": "/index.html"
     },
