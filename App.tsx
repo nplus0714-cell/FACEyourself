@@ -586,6 +586,8 @@ const App: React.FC = () => {
     setLanguage(prev => prev === 'zh' ? 'en' : 'zh');
   };
 
+  const paymentStatus = new URLSearchParams(window.location.search).get('payment');
+
   return (
     <>
     <ZenLayout 
@@ -608,13 +610,13 @@ const App: React.FC = () => {
       onToggleLanguage={toggleLanguage}
     >
       {view === 'landing' && <>
-        {new URLSearchParams(window.location.search).get('payment') && (
-          <div className={`mb-8 border px-5 py-4 text-sm leading-7 ${new URLSearchParams(window.location.search).get('payment') === 'success' ? 'border-[#78947A] bg-[#EEF4EE] text-[#314D35]' : 'border-[#B98A83] bg-[#F8EFED] text-[#75463F]'}`} role="status">
-            {new URLSearchParams(window.location.search).get('payment') === 'success'
+        {paymentStatus && (
+          <div className={`mb-8 border px-5 py-4 text-sm leading-7 ${paymentStatus === 'success' ? 'border-[#78947A] bg-[#EEF4EE] text-[#314D35]' : 'border-[#B98A83] bg-[#F8EFED] text-[#75463F]'}`} role="status">
+            {paymentStatus === 'success'
               ? hasSurvivalKitAccess
                 ? '付款已完成，FACE 交易生存指南與付費工具權益已綁定到你的會員帳號。'
                 : '付款已完成，系統正在核對並開通你的會員權益。'
-              : new URLSearchParams(window.location.search).get('payment') === 'cancelled'
+              : paymentStatus === 'cancelled'
                 ? '你已返回 FACE，這筆付款尚未完成。'
                 : '付款未完成或驗證失敗，請重新操作；若已扣款請先聯絡我們確認。'}
           </div>
@@ -837,6 +839,17 @@ const App: React.FC = () => {
       {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} isLoggedIn={!!state.user} hasSurvivalKitAccess={hasSurvivalKitAccess} onBack={() => navigateTo('content-hub')} onLoginRequest={handleLogin} onOpenPricing={() => navigateTo('survival-kit')} onOpenContent={openContent} onStartTest={() => navigateTo('dna-test')} />}
       {view === 'survival-kit' && <section className="mx-auto max-w-6xl pb-28 pt-4 fade-in md:pt-10">
         <button type="button" onClick={() => navigateTo('content-hub')} className="text-sm font-medium text-[#70665D] transition hover:text-[#2D2D2D]">← 回到內容中心</button>
+        {paymentStatus && (
+          <div className={`mt-7 border px-5 py-4 text-sm leading-7 ${paymentStatus === 'success' ? 'border-[#78947A] bg-[#EEF4EE] text-[#314D35]' : 'border-[#B98A83] bg-[#F8EFED] text-[#75463F]'}`} role="status">
+            {paymentStatus === 'success'
+              ? hasSurvivalKitAccess
+                ? '付款已完成，FACE 交易生存指南的內容權限已綁定到你的會員帳號。'
+                : '付款已完成，系統正在核對並開通你的會員權限。若稍後仍未更新，請保留訂單編號並聯絡我們。'
+              : paymentStatus === 'cancelled'
+                ? '你已返回 FACE，這筆付款尚未完成。'
+                : '付款未完成或驗證失敗，請重新操作；若已扣款請先聯絡我們確認。'}
+          </div>
+        )}
         <header className="mx-auto max-w-3xl pb-10 pt-12 text-center md:pb-14 md:pt-16">
           <p className="text-xs font-medium tracking-[0.28em] text-[#8C635B]">FACE SURVIVAL · EARLY ACCESS</p>
           <h1 className="mt-5 serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-6xl">把交易，慢慢整理成自己的方法</h1>

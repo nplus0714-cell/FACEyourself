@@ -25,6 +25,7 @@ export async function POST(request: Request): Promise<Response> {
     const faceCode = await getLatestFaceCodeForUser(user.id);
 
     const config = getEcpayConfig();
+    const checkoutMode = config.isProduction ? '' : 'checkout=stage&';
     const merchantTradeNo = createMerchantTradeNo();
     const origin = new URL(request.url).origin;
     const publicOrigin = (process.env.ECPAY_PUBLIC_ORIGIN ?? origin).replace(/\/$/, '');
@@ -48,7 +49,7 @@ export async function POST(request: Request): Promise<Response> {
       ItemName: `${ECPAY_PRODUCT.name} NT$${ECPAY_PRODUCT.amount}`,
       ReturnURL: `${publicOrigin}/api/payments/ecpay/notify`,
       OrderResultURL: `${publicOrigin}/api/payments/ecpay/return`,
-      ClientBackURL: `${publicOrigin}/?payment=cancelled`,
+      ClientBackURL: `${publicOrigin}/survival-kit?${checkoutMode}payment=cancelled`,
       ChoosePayment: 'Credit',
       EncryptType: '1',
       NeedExtraPaidInfo: 'N',

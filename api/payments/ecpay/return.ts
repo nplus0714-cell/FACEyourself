@@ -14,9 +14,11 @@ export async function POST(request: Request): Promise<Response> {
       && parameters.RtnCode === '1';
     const status = successful ? 'success' : 'failed';
     const orderReference = encodeURIComponent(parameters.MerchantTradeNo ?? '');
-    return Response.redirect(`${origin}/?payment=${status}&order=${orderReference}`, 303);
+    const checkoutMode = config.isProduction ? '' : 'checkout=stage&';
+    return Response.redirect(`${origin}/survival-kit?${checkoutMode}payment=${status}&order=${orderReference}`, 303);
   } catch (error) {
     console.error('ECPay browser return failed', error instanceof Error ? error.message : error);
-    return Response.redirect(`${origin}/?payment=failed`, 303);
+    const checkoutMode = process.env.ECPAY_ENV === 'production' ? '' : 'checkout=stage&';
+    return Response.redirect(`${origin}/survival-kit?${checkoutMode}payment=failed`, 303);
   }
 }

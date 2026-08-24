@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PRODUCT_PREVIEW_DISCLAIMER, SITE_IDENTITY } from '../data/siteIdentity';
+import { CheckoutError, startEcpayCheckout } from '../services/ecpayCheckout';
 import { EarlyAccessWaitlistForm } from './EarlyAccessWaitlistForm';
 
 const painPoints = [
@@ -81,9 +82,16 @@ interface SurvivalKitPricingProps {
   onOpenMemberAccess?: () => void;
 }
 
-export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = () => {
+export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
+  isLoggedIn = false,
+  hasAccess = false,
+  onRequireLogin,
+  onOpenMemberAccess,
+}) => {
   const [activeProductSlide, setActiveProductSlide] = useState(0);
   const [isProductCarouselPaused, setIsProductCarouselPaused] = useState(false);
+  const [isCheckoutStarting, setIsCheckoutStarting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const productCarouselRef = useRef<HTMLDivElement>(null);
   const productLoopResetTimerRef = useRef<number | null>(null);
   const isProductLoopingRef = useRef(false);
@@ -162,6 +170,23 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = () => {
   useEffect(() => () => {
     if (productLoopResetTimerRef.current !== null) window.clearTimeout(productLoopResetTimerRef.current);
   }, []);
+
+  const showStageCheckout = new URLSearchParams(window.location.search).get('checkout') === 'stage';
+
+  const handleCheckout = async () => {
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
+    setCheckoutError(null);
+    setIsCheckoutStarting(true);
+    try {
+      await startEcpayCheckout();
+    } catch (error) {
+      setCheckoutError(error instanceof CheckoutError ? error.message : '目前無法前往付款頁，請稍後再試。');
+      setIsCheckoutStarting(false);
+    }
+  };
 
   return (
     <section id="survival-kit" className="flex min-w-0 scroll-mt-8 flex-col overflow-hidden border border-[#C8B5A8] bg-[#F3ECE5] [overflow-wrap:anywhere]" aria-labelledby="survival-kit-title">
@@ -341,6 +366,22 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = () => {
 
           <div className="flex flex-col justify-center lg:border-l lg:border-white/15 lg:pl-16">
             <EarlyAccessWaitlistForm source="survival-guide-early-access" />
+            {showStageCheckout && (
+              <div className="mt-7 border border-[#D9C7A9]/45 bg-black/10 p-5" aria-label="綠界 Stage 付款驗收">
+                <p className="text-xs font-medium tracking-[0.16em] text-[#D9C7A9]">INTERNAL CHECKOUT · STAGE</p>
+                <p className="mt-3 text-sm leading-7 text-white/75">測試環境，不會產生正式商品訂單；此入口僅供登入、付款返回與會員權限驗收。</p>
+                {checkoutError && <p className="mt-3 border border-[#E8B4AA]/50 bg-[#5B302B]/50 px-4 py-3 text-sm leading-6 text-[#FFE6DF]" role="alert">{checkoutError}</p>}
+                {hasAccess ? (
+                  <button type="button" onClick={onOpenMemberAccess} className="mt-5 min-h-12 w-full bg-[#F7F2EC] px-5 py-3 text-sm font-medium text-[#654943] transition hover:bg-white">
+                    已取得內容權限，前往會員中心 →
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => void handleCheckout()} disabled={isCheckoutStarting} className="mt-5 min-h-12 w-full bg-[#F7F2EC] px-5 py-3 text-sm font-medium text-[#654943] transition hover:bg-white disabled:cursor-wait disabled:opacity-60">
+                    {isCheckoutStarting ? '正在建立測試訂單…' : isLoggedIn ? '前往綠界 Stage 測試付款 NT$590 →' : '登入後進行測試付款 →'}
+                  </button>
+                )}
+              </div>
+            )}
             <p className="mt-5 text-xs leading-6 text-white/45">本產品提供交易教育與自我覺察內容，不提供個別標的、買賣時點、持倉建議或報酬保證。</p>
             <dl className="mt-5 grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1 border-t border-white/10 pt-4 text-xs leading-6 text-white/50">
               <dt>品牌</dt><dd>{SITE_IDENTITY.brand}</dd>
