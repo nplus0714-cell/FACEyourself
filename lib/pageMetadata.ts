@@ -124,12 +124,12 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
     description: content.summary,
   };
   if (path === '/') return {
-    title: 'FACE 交易人格測驗｜看懂你的交易心理與決策模式',
-    description: '用 24 題看懂你的獲利動機、決策邏輯、交易週期與資金管理偏好，找到屬於你的 16 型交易人格。',
+    title: 'FACE 交易心理測驗｜交易人格測驗，看懂你的交易心態與決策模式',
+    description: 'FACE 交易心理測驗（交易人格測驗）：用 24 題看懂你的交易心態、決策邏輯與資金管理偏好，找到屬於你的 16 型交易人格。',
   };
   if (path === '/types') return {
-    title: 'FACE 16 型交易人格圖鑑｜找到你的決策模式',
-    description: '瀏覽 FACE 16 型交易人格，理解不同交易者的天賦、盲點與互補思考方式。',
+    title: 'FACE 16 型交易人格圖鑑｜交易人格測驗的 16 種結果',
+    description: '瀏覽 FACE 交易人格測驗的 16 型結果，理解不同交易者的交易心理、天賦、盲點與互補思考方式。',
   };
   if (path === '/watch') return {
     title: 'FACE 生存指南｜交易心理、紀律與風險管理',

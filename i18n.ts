@@ -13,7 +13,7 @@ export const translations: Record<Language, any> = {
     landing: {
       title: '交易像一面鏡子\n心態決定你能走多遠',
       motto: '只要 5 分鐘，',
-      supportingLine: '看懂自己的交易性格、情緒反應與決策模式，\n找到真正適合你的交易方式。',
+      supportingLine: '透過 FACE 交易心理測驗，看懂自己的交易人格、情緒反應與決策模式，\n找到真正適合你的交易方式。',
       startTest: '開始測驗',
       dnaTest: '約 5 分鐘',
       todayAwareness: '今日交易回顧',
