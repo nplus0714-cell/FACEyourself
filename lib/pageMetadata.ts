@@ -31,6 +31,85 @@ const upsertCanonical = (href: string) => {
   element.href = href;
 };
 
+// 每頁的 JSON-LD（結構化資料）。人格頁與文章頁輸出 Article + 麵包屑，
+// 其他頁面則移除，避免殘留上一頁的資料。全站層級的 Organization / WebSite
+// 已靜態寫在 index.html，這裡只負責「當前頁」的結構化資料。
+const PAGE_LD_ID = 'ld-page';
+
+const upsertPageJsonLd = (graph: unknown[] | null) => {
+  const existing = document.getElementById(PAGE_LD_ID);
+  if (!graph || graph.length === 0) {
+    existing?.remove();
+    return;
+  }
+  const payload = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
+  if (existing) {
+    existing.textContent = payload;
+    return;
+  }
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = PAGE_LD_ID;
+  script.textContent = payload;
+  document.head.appendChild(script);
+};
+
+const buildPageGraph = (input: PageMetadataInput, meta: { title: string; description: string; canonicalUrl: string; imageUrl: string }) => {
+  const { profile, content } = input;
+  const breadcrumb = (items: Array<{ name: string; url: string }>) => ({
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  });
+
+  if (profile) {
+    return [
+      {
+        '@type': 'Article',
+        headline: meta.title,
+        description: meta.description,
+        image: meta.imageUrl,
+        inLanguage: 'zh-TW',
+        about: `FACE 交易人格 ${profile.code}`,
+        mainEntityOfPage: meta.canonicalUrl,
+        isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+        publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+      },
+      breadcrumb([
+        { name: '首頁', url: `${SITE_ORIGIN}/` },
+        { name: '交易人格圖鑑', url: `${SITE_ORIGIN}/types` },
+        { name: profile.name, url: meta.canonicalUrl },
+      ]),
+    ];
+  }
+
+  if (content) {
+    return [
+      {
+        '@type': 'Article',
+        headline: content.title,
+        description: content.summary,
+        image: meta.imageUrl,
+        inLanguage: 'zh-TW',
+        mainEntityOfPage: meta.canonicalUrl,
+        isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+        publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+      },
+      breadcrumb([
+        { name: '首頁', url: `${SITE_ORIGIN}/` },
+        { name: '生存指南', url: `${SITE_ORIGIN}/watch` },
+        { name: content.title, url: meta.canonicalUrl },
+      ]),
+    ];
+  }
+
+  return null;
+};
+
 const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) => {
   if (isNotFound) return {
     title: '找不到頁面｜FACE 交易人格測驗',
@@ -146,4 +225,10 @@ export const applyPageMetadata = (input: PageMetadataInput) => {
   upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description' }, description);
   upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image' }, imageUrl);
   upsertCanonical(canonicalUrl);
+
+  // 被 noindex 的頁面不輸出結構化資料，公開內容頁才輸出。
+  const pageGraph = shouldNoIndex(path, content, isNotFound)
+    ? null
+    : buildPageGraph(input, { title, description, canonicalUrl, imageUrl });
+  upsertPageJsonLd(pageGraph);
 };
