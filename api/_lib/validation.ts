@@ -1,4 +1,4 @@
-import { ApiError } from './http';
+import { ApiError } from './http.js';
 
 const FACE_KEYS = ['A', 'P', 'R', 'I', 'L', 'T', 'C', 'D'] as const;
 const VALID_PAIRS = ['AP', 'RI', 'LT', 'CD'] as const;

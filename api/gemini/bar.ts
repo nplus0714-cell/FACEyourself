@@ -2,15 +2,15 @@ import {
   GEMINI_HTTP_OPTIONS,
   GEMINI_TEXT_MODEL,
   getGeminiClient,
-} from '../_lib/gemini';
+} from '../_lib/gemini.js';
 import {
   assertSameOrigin,
   handleApiError,
   jsonResponse,
   readJsonBody,
-} from '../_lib/http';
-import { enforceRateLimit } from '../_lib/rateLimit';
-import { parseDrinkId } from '../_lib/validation';
+} from '../_lib/http.js';
+import { enforceRateLimit } from '../_lib/rateLimit.js';
+import { parseDrinkId } from '../_lib/validation.js';
 
 const DRINKS = {
   fomo: {

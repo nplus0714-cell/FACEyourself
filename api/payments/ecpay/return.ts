@@ -1,5 +1,5 @@
-import { formDataToRecord, getEcpayConfig, verifyCheckMacValue } from '../../_lib/ecpay';
-import { getPaymentOrder } from '../../_lib/paymentOrders';
+import { formDataToRecord, getEcpayConfig, verifyCheckMacValue } from '../../_lib/ecpay.js';
+import { getPaymentOrder } from '../../_lib/paymentOrders.js';
 
 export async function POST(request: Request): Promise<Response> {
   const origin = (process.env.ECPAY_PUBLIC_ORIGIN ?? new URL(request.url).origin).replace(/\/$/, '');

@@ -4,11 +4,11 @@ import {
   ECPAY_PRODUCT,
   formatEcpayTradeDate,
   getEcpayConfig,
-} from '../../_lib/ecpay';
-import { ApiError, assertSameOrigin, jsonResponse, readJsonBody } from '../../_lib/http';
-import { createPaymentOrder, getLatestFaceCodeForUser } from '../../_lib/paymentOrders';
-import { enforceRateLimit } from '../../_lib/rateLimit';
-import { requireAuthenticatedUser } from '../../_lib/supabaseAdmin';
+} from '../../_lib/ecpay.js';
+import { ApiError, assertSameOrigin, jsonResponse, readJsonBody } from '../../_lib/http.js';
+import { createPaymentOrder, getLatestFaceCodeForUser } from '../../_lib/paymentOrders.js';
+import { enforceRateLimit } from '../../_lib/rateLimit.js';
+import { requireAuthenticatedUser } from '../../_lib/supabaseAdmin.js';
 
 export async function POST(request: Request): Promise<Response> {
   try {

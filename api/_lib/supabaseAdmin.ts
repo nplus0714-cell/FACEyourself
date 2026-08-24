@@ -1,5 +1,5 @@
 import { createClient, type User } from '@supabase/supabase-js';
-import { ApiError } from './http';
+import { ApiError } from './http.js';
 
 export const getAdminClient = () => {
   const url = (process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL)?.trim();

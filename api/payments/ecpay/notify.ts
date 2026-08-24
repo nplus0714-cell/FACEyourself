@@ -1,5 +1,5 @@
-import { formDataToRecord, getEcpayConfig, verifyCheckMacValue } from '../../_lib/ecpay';
-import { grantEntitlementForOrder, getPaymentOrder, updatePaymentOrderFromCallback } from '../../_lib/paymentOrders';
+import { formDataToRecord, getEcpayConfig, verifyCheckMacValue } from '../../_lib/ecpay.js';
+import { grantEntitlementForOrder, getPaymentOrder, updatePaymentOrderFromCallback } from '../../_lib/paymentOrders.js';
 
 export async function POST(request: Request): Promise<Response> {
   try {
