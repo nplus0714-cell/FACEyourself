@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --face-ink: #2D2D2D;
   --face-muted: #70665D;
