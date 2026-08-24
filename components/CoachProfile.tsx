@@ -30,17 +30,17 @@ export const CoachProfile: React.FC<CoachProfileProps> = ({ onStartTest, onBackT
         <p className="mt-8 max-w-xl text-base leading-[2.05] text-[#70665D] md:text-lg">我相信，投資的關鍵不只在於看懂市場，也在於你是否能在波動來臨時，持續做出自己理解、也承受得起的選擇。</p>
       </div>
       <div className="relative min-h-[25rem] overflow-hidden bg-[#2D2D2D] text-white">
-        <img src="/images/NPC Bartender.jpg" alt="FACE 內容設計者張恩嘉" className="absolute inset-0 h-full w-full object-cover object-center grayscale-[0.12]" />
+        <img src="/images/NPC Bartender.jpg" alt="FACE 內容設計者 NPC" className="absolute inset-0 h-full w-full object-cover object-center grayscale-[0.12]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#251D19]/95 via-[#251D19]/20 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-7 sm:p-10">
           <p className="text-[11px] font-medium tracking-[0.24em] text-white/60">FACE CONTENT DESIGNER</p>
-          <p className="mt-3 serif text-3xl leading-[1.4] text-white">張恩嘉</p>
+          <p className="mt-3 serif text-3xl leading-[1.4] text-white">NPC</p>
           <p className="mt-2 text-sm leading-7 text-white/75">FACE 如鏡內容設計者／交易解憂 Bar 主理人</p>
         </div>
       </div>
     </header>
 
-    <section className="mx-auto max-w-3xl text-center"><p className="text-xs font-bold tracking-[0.26em] text-[#8C635B]">WHY I BUILT FACE</p><h2 className="mt-5 serif text-3xl leading-[1.65] text-[#2D2D2D] md:text-5xl">資訊很多，<br />但真正困住人的，常常是壓力下的那個選擇。</h2><p className="mt-7 text-base leading-[2.05] text-[#70665D] md:text-lg">我是張恩嘉。過去在投顧研究與量化金融產品設計的工作裡，我長期站在資訊、工具與使用者決策之間，也越來越確定：許多人不是不知道該怎麼做，而是在追高、虧損、空手或創新高時，暫時失去了原本相信的規則。FACE 因此不是用來替你預測市場，而是幫你把模糊的感受整理成看得懂、做得到、可以反覆檢查的下一步。</p></section>
+    <section className="mx-auto max-w-3xl text-center"><p className="text-xs font-bold tracking-[0.26em] text-[#8C635B]">WHY I BUILT FACE</p><h2 className="mt-5 serif text-3xl leading-[1.65] text-[#2D2D2D] md:text-5xl">資訊很多，<br />但真正困住人的，常常是壓力下的那個選擇。</h2><p className="mt-7 text-base leading-[2.05] text-[#70665D] md:text-lg">我是 NPC。過去在投顧研究與量化金融產品設計的工作裡，我長期站在資訊、工具與使用者決策之間，也越來越確定：許多人不是不知道該怎麼做，而是在追高、虧損、空手或創新高時，暫時失去了原本相信的規則。FACE 因此不是用來替你預測市場，而是幫你把模糊的感受整理成看得懂、做得到、可以反覆檢查的下一步。</p></section>
 
     <section className="grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] md:grid-cols-3">{journey.map(([title, copy], index) => <article key={title} className="bg-white p-8 md:p-10"><p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">0{index + 1}</p><h2 className="mt-8 serif text-3xl text-[#2D2D2D]">{title}</h2><p className="mt-5 text-base leading-[2] text-[#70665D]">{copy}</p></article>)}</section>
 

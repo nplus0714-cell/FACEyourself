@@ -29,7 +29,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
   const isLocked = isLoginLocked || isPurchaseLocked;
   const renderedMarkdown = item.requiresPurchase ? paidArticleMarkdown : item.bodyMarkdown;
   const orderedArticles = CONTENT_CATALOG
-    .filter((entry) => entry.kind === 'article' && entry.status === 'published')
+    .filter((entry) => entry.kind === 'article' && entry.status === 'published' && entry.channel === item.channel)
     .sort((a, b) => Number(a.articleNumber ?? 0) - Number(b.articleNumber ?? 0));
   const articleIndex = orderedArticles.findIndex((entry) => entry.id === item.id);
   const previousArticle = articleIndex > 0 ? orderedArticles[articleIndex - 1] : null;
@@ -102,7 +102,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
       <a href="/watch" onClick={(event) => { event.preventDefault(); onBack(); }} className="text-sm font-bold text-[#70665D] transition hover:text-[#2D2D2D]">← 回到內容中心</a>
       <header className="mt-10 border-b border-[#D1D1C7] pb-9 text-center md:mt-14 md:pb-12">
         <p className="text-xs font-bold tracking-[0.28em] text-[#8C635B]">
-          FACE {item.kind === 'video' ? 'VIDEO' : 'COLUMN'} {item.series ? `· ${item.articleNumber} · ${item.series}` : item.isDemo ? '· DEMO' : ''}
+          FACE {item.kind === 'video' ? 'VIDEO' : item.channel === 'topic-articles' ? 'TOPIC · 交易解憂 Bar' : 'COLUMN'} {item.series ? `· ${item.articleNumber} · ${item.series}` : item.isDemo ? '· DEMO' : ''}
         </p>
         <h1 className="mx-auto mt-5 max-w-3xl serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">{item.title}</h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-[2] text-[#70665D] md:text-lg">{item.summary}</p>
@@ -149,6 +149,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
               h3: ({ children }) => <h3 className="mb-5 mt-12 serif text-2xl leading-[1.6] text-[#2D2D2D]">{children}</h3>,
               p: ({ children }) => <p className="my-5 text-[17px] font-normal leading-[2] text-[#413C38] md:text-lg">{children}</p>,
               strong: ({ children }) => <strong className="font-medium text-[#A05F54]">{children}</strong>,
+              a: ({ children, href }) => <a href={href} className="font-medium text-[#A05F54] underline decoration-[#C9A39A] decoration-1 underline-offset-4 transition-colors hover:text-[#6F3E36] hover:decoration-2 focus:outline-none focus:ring-2 focus:ring-[#A05F54] focus:ring-offset-2">{children}</a>,
               hr: () => <hr className="my-12 border-0 border-t border-[#D8D0C6]" />,
               ul: ({ children }) => <ul className="my-6 list-disc space-y-3 pl-6 text-[17px] leading-[1.9] text-[#413C38] md:text-lg">{children}</ul>,
               ol: ({ children }) => <ol className="my-6 list-decimal space-y-3 pl-6 text-[17px] leading-[1.9] text-[#413C38] md:text-lg">{children}</ol>,

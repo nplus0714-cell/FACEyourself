@@ -154,12 +154,27 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
       </section>
       </div>
 
-      <section className="mt-14 overflow-hidden rounded-[0.7rem] bg-[#344A38] px-7 pb-7 pt-14 text-center text-[#F5F0E5] md:px-14 md:pb-10 md:pt-20">
-        <p className="text-xs font-bold tracking-[0.34em] text-[#E7DFCE]/75">FACE · TRADING PERSONA</p>
-        <h2 className="mt-7 serif text-4xl leading-[1.4] md:text-5xl">認識自己，是交易的第一課</h2>
-        <div className="mt-10 flex justify-stretch md:mt-12 md:justify-end">
-          <a href="/test" onClick={(event) => { event.preventDefault(); onStartTest(); }} className="w-full border border-[#F5F0E5]/65 bg-transparent px-7 py-4 text-sm font-medium tracking-[0.04em] text-[#F5F0E5] transition hover:border-[#F5F0E5] hover:bg-[#F5F0E5] hover:text-[#344A38] md:w-auto">開始 FACE 測驗 →</a>
-        </div>
+      <section className="mt-14 overflow-hidden border border-[#D1D1C7] bg-[#F7F4EF]">
+        <a
+          href="/test"
+          onClick={(event) => { event.preventDefault(); onStartTest(); }}
+          className="group grid text-left transition-colors hover:bg-[#F4F0E9] md:grid-cols-[.95fr_1.05fr]"
+        >
+          <div className="relative min-h-56 overflow-hidden md:min-h-72">
+            <img
+              src="/images/face-og-v25.jpg"
+              alt="FACE 動物交易人格的交易場景"
+              className="absolute inset-0 h-full w-full object-cover object-[42%_center] transition duration-700 group-hover:scale-[1.03]"
+            />
+            <div className="absolute inset-0 bg-[#3A302B]/20" />
+          </div>
+          <div className="flex min-h-56 flex-col items-start justify-center px-7 py-8 md:min-h-72 md:px-12">
+            <p className="text-[11px] font-bold tracking-[0.2em] text-[#8C635B]">FACE TEST</p>
+            <h2 className="serif mt-3 text-2xl leading-[1.35] text-[#2D2D2D] md:text-3xl">認識自己，是交易的第一課</h2>
+            <p className="mt-4 max-w-md text-sm leading-[1.8] text-[#70665D]">用一組問題，整理你面對機會、波動與風險時，最常出現的第一反應。</p>
+            <span className="mt-6 border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] transition-colors group-hover:border-[#8C635B] group-hover:text-[#8C635B]">開始 FACE 測驗 →</span>
+          </div>
+        </a>
       </section>
     </div>
   );

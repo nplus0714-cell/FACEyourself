@@ -790,7 +790,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} onOpenCoach={() => navigateTo('coach-profile')} />}
+      {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} onOpenCoach={() => navigateTo('coach-profile')} onStartTest={() => navigateTo('dna-test')} onExploreTypes={() => navigateTo('role-gallery')} onOpenContent={() => navigateTo('content-hub')} />}
       {view === 'coach-profile' && <CoachProfile onStartTest={() => navigateTo('dna-test')} onBackToAbout={() => navigateTo('about-face')} />}
       {view === 'mirror-trade' && <MirrorTrade user={state.user} onLogin={handleLogin} />}
       {view === 'member-home' && !FEATURE_FLAGS.dailyAwareness && <AwarenessUnavailable hasAssessmentResult={!!state.dna} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onBackHome={() => navigateTo('landing')} />}

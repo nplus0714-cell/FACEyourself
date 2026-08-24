@@ -7,6 +7,14 @@ import article006Source from '../docs/content/articles/006-survival-stay-alive-t
 import article007Source from '../docs/content/articles/007-what-is-your-tuition-budget.md?raw';
 import article008Source from '../docs/content/articles/008-stop-loss-is-an-entry-fee.md?raw';
 import article009Source from '../docs/content/articles/009-three-dimensions-for-surviving-the-trading-jungle.md?raw';
+import topicFomoSource from '../docs/content/topic-articles/fomo-chasing-price/article.md?raw';
+import topicStopLossSource from '../docs/content/topic-articles/stop-loss/article.md?raw';
+import topicTrappedSource from '../docs/content/topic-articles/trapped-position/article.md?raw';
+import topicWinnersSource from '../docs/content/topic-articles/selling-winners/article.md?raw';
+import topicPositionSource from '../docs/content/topic-articles/position-sizing/article.md?raw';
+import topicDiversificationSource from '../docs/content/topic-articles/over-diversification/article.md?raw';
+import topicAnxietySource from '../docs/content/topic-articles/decision-anxiety/article.md?raw';
+import topicReviewSource from '../docs/content/topic-articles/trading-review/article.md?raw';
 
 export type ContentKind = 'video' | 'article';
 export type ContentSeries = '序言' | '破繭篇' | '生存篇' | '進攻篇・上' | '進攻篇・下' | '歸真篇';
@@ -250,6 +258,38 @@ export const CONTENT_CATALOG: ContentItem[] = [
   {
     id: 'article-020', slug: 'from-holy-grail-to-self-knowledge', kind: 'article', articleNumber: '020', channel: 'face-survival-guide', series: '歸真篇', seriesOrder: 3, requiresLogin: true, requiresPurchase: true,
     title: '從找聖杯，到看懂自己', summary: '真正的問題不只是方法好不好，而是哪一個方法放在你身上，你做不做得出來。', faceTags: ['Analysis｜決策邏輯', 'Focus｜獲利動機'], status: 'published',
+  },
+  {
+    id: 'topic-fomo-chasing-price', slug: 'fomo-chasing-price', kind: 'article', articleNumber: '101', channel: 'topic-articles',
+    title: '為什麼明知追高危險，還是忍不住進場？', summary: 'FOMO 不一定是貪心；有時候，是你賣掉後仍沒放下原本相信的未來。', faceTags: ['FOMO', '機會與風險', '交易心理'], bodyMarkdown: getArticleBody(topicFomoSource), status: 'published',
+  },
+  {
+    id: 'topic-stop-loss', slug: 'stop-loss', kind: 'article', articleNumber: '102', channel: 'topic-articles',
+    title: '停損怎麼設，才不會一跌就被洗掉？', summary: '停損不是一個數字。先分清楚你在保護本金、保護判斷，還是只想逃離不舒服的波動。', faceTags: ['停損', '生存', '決策邏輯'], bodyMarkdown: getArticleBody(topicStopLossSource), status: 'published',
+  },
+  {
+    id: 'topic-trapped-position', slug: 'trapped-position', kind: 'article', articleNumber: '103', channel: 'topic-articles',
+    title: '股票套牢該停損還是續抱？先問自己這 4 個問題', summary: '股票套牢時，最危險的不是虧損，而是你逐漸說不清楚自己為什麼還留著。', faceTags: ['套牢', '信念', '交易心理'], bodyMarkdown: getArticleBody(topicTrappedSource), status: 'published',
+  },
+  {
+    id: 'topic-selling-winners', slug: 'selling-winners', kind: 'article', articleNumber: '104', channel: 'topic-articles',
+    title: '股票一賺就想賣，怎麼改善？', summary: '股票一賺就想賣，不一定是沒有耐心。你可能還不相信自己能把一筆看對的交易抱下去。', faceTags: ['賣飛', '持有', '交易心理'], bodyMarkdown: getArticleBody(topicWinnersSource), status: 'published',
+  },
+  {
+    id: 'topic-position-sizing', slug: 'position-sizing', kind: 'article', articleNumber: '105', channel: 'topic-articles',
+    title: '單一持股比例多少才合理？先看你能承受多少', summary: '部位一旦大到改變你的睡眠與判斷，就該重新看它是否仍適合你。', faceTags: ['部位管理', '風險承受', '交易心理'], bodyMarkdown: getArticleBody(topicPositionSource), status: 'published',
+  },
+  {
+    id: 'topic-over-diversification', slug: 'over-diversification', kind: 'article', articleNumber: '106', channel: 'topic-articles',
+    title: '股票持有太多檔怎麼整理？', summary: '持有很多檔股票不一定更安全。當每一檔都說得出一點理由，卻沒有一檔真的看得懂，該開始整理了。', faceTags: ['過度分散', '持股整理', '決策負擔'], bodyMarkdown: getArticleBody(topicDiversificationSource), status: 'published',
+  },
+  {
+    id: 'topic-decision-anxiety', slug: 'decision-anxiety', kind: 'article', articleNumber: '107', channel: 'topic-articles',
+    title: '看了很多消息，反而更不敢下單怎麼辦？', summary: '看越多消息越焦慮，不一定是資訊不夠。你可能是在等一個能替你承擔結果的答案。', faceTags: ['決策焦慮', '消息', '判斷'], bodyMarkdown: getArticleBody(topicAnxietySource), status: 'published',
+  },
+  {
+    id: 'topic-trading-review', slug: 'trading-review', kind: 'article', articleNumber: '108', channel: 'topic-articles',
+    title: '交易日誌要記什麼，才真的能改善決策？', summary: '交易日誌不只記買賣價格。留下當時相信什麼、害怕什麼，下一次才看得見真正需要調整的地方。', faceTags: ['交易復盤', '自我覺察', '決策'], bodyMarkdown: getArticleBody(topicReviewSource), status: 'published',
   },
 ];
 
