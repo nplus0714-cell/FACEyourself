@@ -4,7 +4,7 @@ import { FACE_MAP, getFaceCode } from '../constants';
 import { generateDynamicReport } from '../services/geminiService';
 import { ShareModal } from './ShareModal';
 import { ReadingLayerPrototype } from './ReadingLayerPrototype';
-import { BookOpen, RotateCcw, Share2 } from 'lucide-react';
+import { BookOpen, Compass, FileText, MessageCircle, PlayCircle, RotateCcw, Share2 } from 'lucide-react';
 import { translations } from '../i18n';
 
 interface DashboardProps {
@@ -18,6 +18,8 @@ interface DashboardProps {
   onGoToGallery?: () => void;
   onGoToMirrorTrade?: () => void;
   onOpenContent?: () => void;
+  onOpenPricing?: () => void;
+  onOpenCoach?: () => void;
   onOpenMemberHome?: () => void;
   onOpenCompatibility?: () => void;
   onOpenDeepDive?: (code: string) => void;
@@ -32,7 +34,7 @@ const calcRatio = (v1: number, v2: number) => {
   return total === 0 ? 50 : Math.round((v1 / total) * 100);
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenMemberHome, onOpenCompatibility, onOpenDeepDive, onRetest, isSharedView, language }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenPricing, onOpenCoach, onOpenMemberHome, onOpenCompatibility, onOpenDeepDive, onRetest, isSharedView, language }) => {
   const code = getFaceCode(dna);
   const profile = FACE_MAP[code] || FACE_MAP['ARLC'];
   const [report, setReport] = useState<ReportContent | null>(staticReport || null);
@@ -161,6 +163,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
               showCurrent: Boolean(daily),
             }}
           />
+
+          {!isSharedView && onOpenPricing && onOpenCoach && (
+            <section className="mx-auto max-w-5xl border border-stone-200 bg-[#FCFBF8] p-6 sm:p-8 md:p-10" aria-labelledby="result-next-steps-heading">
+              <div className="max-w-2xl">
+                <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">NEXT STEPS · {profile.code}</p>
+                <h2 id="result-next-steps-heading" className="mt-3 serif text-3xl leading-[1.5] text-[#2D2D2D] md:text-4xl">從看見自己，走到下一個適合你的動作</h2>
+                <p className="mt-4 text-sm leading-7 text-[#70665D] md:text-base">不需要一次做完。你可以先從內容開始；想把觀察變成方法時，再回來使用 FACE Survival 或申請一對一初談。</p>
+              </div>
+
+              <div className="mt-8 grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] md:grid-cols-2">
+                <article className="bg-[#F7F4EF] p-6 md:p-7">
+                  <PlayCircle size={24} strokeWidth={1.5} className="text-[#8C635B]" aria-hidden="true" />
+                  <p className="mt-6 text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">FOR {profile.name.toUpperCase()} · VIDEO</p>
+                  <h3 className="mt-3 serif text-2xl text-[#2D2D2D]">你的交易人格影片</h3>
+                  <p className="mt-3 text-sm leading-7 text-[#70665D]">針對你的優勢、壓力反應與常見盲點的短片解讀，正在製作中。</p>
+                  <span className="mt-6 inline-flex border border-[#B9AA9D] px-3 py-2 text-xs font-bold tracking-[0.08em] text-[#8C7E6D]">即將推出</span>
+                </article>
+
+                <article className="bg-white p-6 md:p-7">
+                  <FileText size={24} strokeWidth={1.5} className="text-[#8C635B]" aria-hidden="true" />
+                  <p className="mt-6 text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">FOR {profile.name.toUpperCase()} · READING</p>
+                  <h3 className="mt-3 serif text-2xl text-[#2D2D2D]">最適合你的延伸文章</h3>
+                  <p className="mt-3 text-sm leading-7 text-[#70665D]">依人格整理的專屬閱讀路徑正在編輯；完成後，會從你的結果直接帶你進入最相關的主題。</p>
+                  <span className="mt-6 inline-flex border border-[#B9AA9D] px-3 py-2 text-xs font-bold tracking-[0.08em] text-[#8C7E6D]">即將推出</span>
+                </article>
+
+                <button type="button" onClick={onOpenPricing} className="group bg-white p-6 text-left transition hover:bg-[#F7F4EF] md:p-7">
+                  <Compass size={24} strokeWidth={1.5} className="text-[#8C635B]" aria-hidden="true" />
+                  <p className="mt-6 text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">FACE SURVIVAL</p>
+                  <h3 className="mt-3 serif text-2xl text-[#2D2D2D]">把觀察整理成可持續的方法</h3>
+                  <p className="mt-3 text-sm leading-7 text-[#70665D]">從生存、計畫到覺察，先用一套通用框架，替每一次決定留下一個可以回看的依據。</p>
+                  <span className="mt-6 inline-flex text-sm font-bold text-[#2D2D2D] transition group-hover:text-[#8C635B]">查看 FACE 生存指南 →</span>
+                </button>
+
+                <button type="button" onClick={onOpenCoach} className="group bg-[#2D2D2D] p-6 text-left text-white transition hover:bg-[#3A302B] md:p-7">
+                  <MessageCircle size={24} strokeWidth={1.5} className="text-[#D9C7A9]" aria-hidden="true" />
+                  <p className="mt-6 text-[11px] font-bold tracking-[0.18em] text-white/55">1V1 FIRST CONVERSATION</p>
+                  <h3 className="mt-3 serif text-2xl">想把困擾說得更清楚？</h3>
+                  <p className="mt-3 text-sm leading-7 text-white/75">可聊交易壓力、決策流程與 FACE 的使用方式；不提供個別標的、買賣時點或報酬預估。</p>
+                  <span className="mt-6 inline-flex text-sm font-bold text-white transition group-hover:text-[#D9C7A9]">了解 1V1 初談 →</span>
+                </button>
+              </div>
+            </section>
+          )}
 
           {!isSharedView && (
             <div className="mx-auto flex max-w-xl flex-wrap justify-center gap-3 border-t border-stone-200 pt-8">

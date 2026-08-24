@@ -751,6 +751,8 @@ const App: React.FC = () => {
             onGoToGallery={() => navigateTo('role-gallery')}
             onGoToMirrorTrade={() => navigateTo('mirror-trade')}
             onOpenContent={() => navigateTo('content-hub')}
+            onOpenPricing={() => navigateTo('survival-kit')}
+            onOpenCoach={() => navigateTo('coach-profile')}
             onOpenMemberHome={() => navigateTo('member-home')}
             onOpenCompatibility={() => navigateTo('compatibility')}
             onOpenDeepDive={() => openDailyAwareness()}
