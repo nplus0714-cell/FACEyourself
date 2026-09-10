@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FACE_BASELINE_V2_QUESTION_COUNT,
   FACE_BASELINE_V2_QUESTIONS,
@@ -11,6 +11,7 @@ import {
   startAssessmentRun,
 } from '../services/assessmentPersistence';
 import { getSupabaseClient } from '../lib/supabase';
+import { trackTestFunnelEvent } from '../services/funnelAnalytics';
 import type {
   AssessmentAnswer,
   FaceAssessmentMeta,
@@ -235,6 +236,10 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
   const runPromiseRef = useRef<Promise<string> | null>(null);
   const question = FACE_BASELINE_V2_QUESTIONS[step];
 
+  useEffect(() => {
+    trackTestFunnelEvent('test_started');
+  }, []);
+
   const getOrStartRun = (): Promise<string> => {
     if (runIdRef.current) return Promise.resolve(runIdRef.current);
 
@@ -270,6 +275,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
     try {
       const runId = await getOrStartRun();
       await completeFaceAssessmentRun(runId, FACE_BASELINE_V2_QUESTIONS, completedAnswers, scores, scoreValues);
+      trackTestFunnelEvent('test_completed');
       const { data: { session } } = await getSupabaseClient().auth.getSession();
       if (session?.user && !session.user.is_anonymous) {
         localStorage.removeItem(LOCAL_PENDING_ASSESSMENT_KEY);
@@ -281,6 +287,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
       // Do not make an anonymous visitor lose a completed result because a
       // cloud write is unavailable. The browser copy remains available until
       // a future signed-in account can merge it.
+      trackTestFunnelEvent('test_completed');
       onComplete(scores);
       return;
 

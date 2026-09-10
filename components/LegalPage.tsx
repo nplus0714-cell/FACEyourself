@@ -7,7 +7,7 @@ interface LegalPageProps {
   kind: LegalPageKind;
 }
 
-const updatedAt = '2026 年 8 月 21 日';
+const updatedAt = '2026 年 9 月 10 日';
 
 const ProviderCard = () => (
   <aside className="border border-[#CFC6B8] bg-[#F4EEE7] p-6 text-sm leading-7 text-[#5F574F] sm:p-8">
@@ -34,12 +34,16 @@ const PrivacyPolicy = () => (
       <p>依您使用的功能，可能包含帳號 Email、登入狀態、FACE 測驗結果、每日覺察答案與日記、內容閱讀紀錄、付款與權益狀態、客服往來，以及瀏覽器產生的基本技術資訊。</p>
       <p>加入早鳥候補名單時，我們會收集 Email、通知同意與登記時間；您也可以選填暱稱及最想使用的內容。我們另會記錄登記來源，以了解使用者從哪個頁面加入。</p>
       <p>未登入的公開文章閱讀紀錄，可能以匿名工作階段或裝置端識別碼記錄；我們不會把匿名瀏覽紀錄直接當成您的真實身分。</p>
+      <p>當您透過帶有來源標記的連結進入 FACE 測驗時，我們會以瀏覽器產生的匿名識別碼記錄首次及最近一次來源（例如 YouTube、Facebook、Instagram 或 Threads）、活動標記，以及進入、開始與完成測驗的時間。此紀錄不包含您的測驗答案、Email、姓名、IP 位址或完整來源網址。</p>
+      <p>使用「問問 NPC」時，我們會依您的明確同意收集 Email、留言內容、FACE 人格代碼、送出時間與必要的帳號識別資訊，用於處理提問與必要聯絡；留言不會公開，也不會用於行銷通知。</p>
     </Section>
     <Section title="資料使用目的">
       <ul className="list-disc space-y-2 pl-6">
         <li>提供登入、保存測驗結果、會員權益與內容存取。</li>
         <li>產生交易人格與自我覺察結果，改善題目與使用體驗。</li>
+        <li>以匿名來源與漏斗資料了解哪些公開內容與平台帶來測驗使用，改善內容與網站流程。</li>
         <li>處理付款、訂單、退款、客服與安全事件。</li>
+        <li>在您同意後，處理「問問 NPC」留言並視需要以 Email 聯絡您。</li>
         <li>在取得您同意後，寄送研究結果、產品開放與行銷通知。</li>
       </ul>
     </Section>

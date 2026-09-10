@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowDown, BookOpen, ChevronDown, Eye, EyeClosed, Lightbulb, Share2 } from 'lucide-react';
+import { ArrowDown, BookOpen, ChevronDown, Eye, EyeClosed, Lightbulb, RotateCcw, Share2 } from 'lucide-react';
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from 'recharts';
 import { FACE_MAP } from '../constants';
 import { FACE_2_PROTOTYPES, type FaceProfilePrototype } from '../data/faceProfilePrototype';
@@ -514,6 +514,7 @@ interface ReadingLayerPrototypeProps {
   isUserType?: boolean;
   onBack?: () => void;
   onShareResult?: () => void;
+  onRetest?: () => void;
   onViewGallery?: () => void;
   compact?: boolean;
   resultVisualization?: {
@@ -539,6 +540,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
   isUserType = false,
   onBack,
   onShareResult,
+  onRetest,
   onViewGallery,
   compact = false,
   resultVisualization,
@@ -642,16 +644,6 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
 
           {resultVisualization ? (
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              {onShareResult && (
-                <button
-                  type="button"
-                  onClick={onShareResult}
-                  className="editorial-button inline-flex min-h-12 items-center justify-center gap-2 bg-[#8C635B] px-6 py-3 text-[14px] tracking-[0.06em] text-white transition-colors hover:bg-[#754F48]"
-                >
-                  <Share2 size={17} strokeWidth={1.7} aria-hidden="true" />
-                  分享結果
-                </button>
-              )}
               <button
                 type="button"
                 onClick={() => document.getElementById('face-core')?.scrollIntoView({ behavior: 'smooth' })}
@@ -659,16 +651,6 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
               >
                 繼續閱讀 <ArrowDown size={16} aria-hidden="true" />
               </button>
-              {onViewGallery && (
-                <button
-                  type="button"
-                  onClick={onViewGallery}
-                  className="editorial-button inline-flex min-h-12 items-center justify-center gap-2 px-5 py-3 text-[14px] tracking-[0.06em] text-[#6E625A] transition-colors hover:text-[#2D2D2D]"
-                >
-                  <BookOpen size={17} strokeWidth={1.7} aria-hidden="true" />
-                  查看圖鑑
-                </button>
-              )}
             </div>
           ) : (
             <button type="button" onClick={() => document.getElementById('face-core')?.scrollIntoView({ behavior: 'smooth' })} className="editorial-button editorial-action mt-8 inline-flex items-center gap-2 text-sm text-[#79584D]">
@@ -1147,6 +1129,39 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
                 {FEATURE_FLAGS.dailyAwareness ? '開始今日深度覺察 →' : '覺察日記 · 尚未開放 →'}
               </a>
             </div>
+
+            {!compact && isUserType && onShareResult && (
+              <div className="relative z-10 mt-12 flex flex-col items-stretch gap-3 border-t border-white/20 pt-6 sm:mt-16 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-2 sm:pt-5">
+                <button
+                  type="button"
+                  onClick={onShareResult}
+                  className="editorial-button inline-flex min-h-14 items-center justify-center gap-2 bg-white px-7 py-4 text-[15px] font-bold tracking-[0.08em] text-[#3B312C] shadow-lg transition-colors hover:bg-[#F4E6D9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <Share2 size={18} strokeWidth={1.9} aria-hidden="true" />
+                  分享結果
+                </button>
+                {onRetest && (
+                  <button
+                    type="button"
+                    onClick={onRetest}
+                    className="editorial-button inline-flex min-h-12 items-center justify-center gap-2 border border-white/35 px-5 py-3 text-[14px] tracking-[0.06em] text-white/85 transition-colors hover:border-white hover:bg-white/10 hover:text-white"
+                  >
+                    <RotateCcw size={16} strokeWidth={1.7} aria-hidden="true" />
+                    重新測驗
+                  </button>
+                )}
+                {onViewGallery && (
+                  <button
+                    type="button"
+                    onClick={onViewGallery}
+                    className="editorial-button inline-flex min-h-12 items-center justify-center gap-2 border border-white/35 px-5 py-3 text-[14px] tracking-[0.06em] text-white/85 transition-colors hover:border-white hover:bg-white/10 hover:text-white"
+                  >
+                    <BookOpen size={17} strokeWidth={1.7} aria-hidden="true" />
+                    查看圖鑑
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </section>
       </main>

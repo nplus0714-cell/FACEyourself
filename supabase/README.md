@@ -65,3 +65,22 @@ public early-access form. The browser can call only
 The RPC normalizes Email addresses, validates consent and optional interest,
 silently handles duplicate registrations, and records the consent version and
 acquisition source. Never expose the waitlist through a public select policy.
+
+## First-party test funnel attribution
+
+Apply `migrations/202609040001_create_funnel_attribution.sql` after the prior
+migrations. It creates server-only anonymous attribution and event tables plus
+the admin-only `funnel_source_summary` view. The browser sends events to
+`/api/analytics/funnel`; this route requires the existing server-only
+`SUPABASE_SERVICE_ROLE_KEY` and must be deployed with the Vercel app.
+
+See [`../docs/funnel-attribution.md`](../docs/funnel-attribution.md) for the
+approved UTM link convention and the Supabase report query.
+
+## Ask NPC inbox
+
+Apply `migrations/202609090001_create_npc_questions.sql` after the prior
+migrations. The `npc_questions` table is server-only: the Vercel endpoint
+`/api/npc/questions` validates consent and input, applies an IP rate limit, and
+writes with `SUPABASE_SERVICE_ROLE_KEY`. Do not grant browser roles direct
+access to this table.

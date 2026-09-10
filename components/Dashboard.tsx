@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { FaceScores, ReportContent, AuthUser, DiaryEntry, Language, FaceDimension, FaceTrait } from '../types';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { generateDynamicReport } from '../services/geminiService';
 import { ShareModal } from './ShareModal';
 import { ReadingLayerPrototype } from './ReadingLayerPrototype';
-import { BookOpen, Compass, FileText, MessageCircle, PlayCircle, RotateCcw, Share2 } from 'lucide-react';
+import { Compass, FileText, MessageCircle, PlayCircle } from 'lucide-react';
 import { translations } from '../i18n';
+import { submitNpcQuestion } from '../services/npcQuestionService';
 
 interface DashboardProps {
   dna: FaceScores;
@@ -32,6 +33,209 @@ interface DashboardProps {
 const calcRatio = (v1: number, v2: number) => {
   const total = v1 + v2;
   return total === 0 ? 50 : Math.round((v1 / total) * 100);
+};
+
+const NPC_PROMPTS = [
+  '這個結果真的像我嗎？',
+  '有些地方我覺得不太像',
+  '看完了，但不知道怎麼用在交易上',
+  '我最近有一筆交易一直過不去',
+  '我知道該怎麼做，但就是做不到',
+  '我想找到更適合自己的交易方式',
+];
+
+interface NpcQuestionSectionProps {
+  faceCode: string;
+  initialEmail?: string;
+}
+
+const NpcQuestionSection: React.FC<NpcQuestionSectionProps> = ({ faceCode, initialEmail = '' }) => {
+  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState(initialEmail);
+  const [website, setWebsite] = useState('');
+  const [hasConsent, setHasConsent] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [feedback, setFeedback] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (initialEmail) setEmail((currentEmail) => currentEmail || initialEmail);
+  }, [initialEmail]);
+
+  const appendPrompt = (prompt: string) => {
+    const nextMessage = message.trimEnd() ? `${message.trimEnd()}\n${prompt}` : prompt;
+    setMessage(nextMessage);
+    setStatus('idle');
+    setFeedback('');
+    window.requestAnimationFrame(() => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      textarea.focus();
+      textarea.setSelectionRange(nextMessage.length, nextMessage.length);
+    });
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFeedback('');
+
+    if (!message.trim()) {
+      setStatus('error');
+      setFeedback('請先寫下想和 NPC 說的話。');
+      textareaRef.current?.focus();
+      return;
+    }
+
+    const normalizedEmail = email.trim();
+    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+      setStatus('error');
+      setFeedback('請填寫可收信的 Email。');
+      return;
+    }
+    if (!hasConsent) {
+      setStatus('error');
+      setFeedback('請先同意依隱私權政策處理你的留言。');
+      return;
+    }
+
+    setStatus('submitting');
+    try {
+      await submitNpcQuestion({
+        email: normalizedEmail,
+        message,
+        faceCode,
+        website,
+        consent: hasConsent,
+      });
+      setStatus('success');
+      setFeedback('已收到你的留言。若需要進一步回覆，我們會使用你留下的 Email 聯絡你。');
+      setMessage('');
+    } catch (error) {
+      setStatus('error');
+      setFeedback(error instanceof Error ? error.message : '目前無法送出，請稍後再試。');
+    }
+  };
+
+  return (
+    <section
+      className="relative mx-auto w-full max-w-5xl overflow-hidden bg-[#241916] bg-cover bg-center text-[#F7F0E7]"
+      aria-labelledby="ask-npc-heading"
+      style={{ backgroundImage: "url('/images/npc/ask-npc-bar-background.jpg')" }}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,rgba(22,14,12,0.94)_0%,rgba(35,23,20,0.86)_48%,rgba(22,14,12,0.91)_100%)]" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_74%_18%,rgba(180,112,61,0.18),transparent_35%)]" aria-hidden="true" />
+      <div className="relative grid gap-10 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16 lg:px-16 lg:py-20">
+        <div>
+          <p className="text-[11px] font-bold tracking-[0.28em] text-[#D2B8A2]">TRADING WORRY-FREE BAR</p>
+          <h2 id="ask-npc-heading" className="mt-4 serif text-4xl leading-tight sm:text-5xl">問問 NPC</h2>
+          <p className="mt-7 max-w-md serif text-xl font-medium leading-9 text-[#F5E9DC]">
+            交易解憂 Bar，是一個聊交易，也聊交易裡的自己的地方。
+          </p>
+          <div className="mt-6 max-w-md space-y-4 text-sm leading-7 text-[#DCCFC5] sm:text-base sm:leading-8">
+            <p>我是 NPC。我想陪你看懂那些反覆卡住你的交易問題，慢慢找到更適合自己的交易方式。</p>
+            <p>看完這次 FACE，如果有哪裡很像你、哪裡不像，或最近剛好有一筆交易讓你很困擾，都可以留給我。</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="min-w-0" noValidate>
+          <fieldset disabled={status === 'submitting'}>
+            <legend className="text-sm font-bold tracking-[0.08em] text-[#F5E9DC]">不知道怎麼開始？點一句聊聊</legend>
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              {NPC_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => appendPrompt(prompt)}
+                  className="rounded-[1.25rem_1.25rem_1.25rem_0.35rem] border border-[#A98A7B]/70 bg-[#59433E]/80 px-4 py-2.5 text-left text-sm leading-6 text-[#F7F0E7] transition hover:border-[#D4BAA4] hover:bg-[#674D46] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E3C9B2]"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+
+            <label htmlFor="npc-message" className="mt-8 block text-sm font-bold tracking-[0.08em] text-[#F5E9DC]">
+              想跟 NPC 說什麼？
+            </label>
+            <textarea
+              ref={textareaRef}
+              id="npc-message"
+              value={message}
+              onChange={(event) => {
+                setMessage(event.target.value);
+                if (status !== 'submitting') {
+                  setStatus('idle');
+                  setFeedback('');
+                }
+              }}
+              maxLength={4000}
+              required
+              placeholder="輸入你的問題或想法……"
+              className="mt-3 min-h-44 w-full resize-y rounded-sm border border-[#8F756A] bg-[#F9F4ED] px-4 py-4 text-base leading-7 text-[#342B28] placeholder:text-[#9B8E84] focus:border-[#D2B8A2] focus:outline-none focus:ring-2 focus:ring-[#D2B8A2]/35"
+            />
+
+            <label htmlFor="npc-email" className="mt-6 block text-sm font-bold tracking-[0.08em] text-[#F5E9DC]">
+              留下 Email，方便我們需要時回覆你
+            </label>
+            <input
+              id="npc-email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (status !== 'submitting') {
+                  setStatus('idle');
+                  setFeedback('');
+                }
+              }}
+              required
+              placeholder="你的 Email"
+              className="mt-3 w-full rounded-sm border border-[#8F756A] bg-[#F9F4ED] px-4 py-3.5 text-base text-[#342B28] placeholder:text-[#9B8E84] focus:border-[#D2B8A2] focus:outline-none focus:ring-2 focus:ring-[#D2B8A2]/35"
+            />
+
+            <div className="absolute -left-[9999px]" aria-hidden="true">
+              <label htmlFor="npc-website">Website</label>
+              <input id="npc-website" name="website" tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} />
+            </div>
+
+            <label className="mt-5 flex cursor-pointer items-start gap-3 text-xs leading-6 text-[#DCCFC5]">
+              <input
+                type="checkbox"
+                checked={hasConsent}
+                onChange={(event) => {
+                  setHasConsent(event.target.checked);
+                  if (status !== 'submitting') {
+                    setStatus('idle');
+                    setFeedback('');
+                  }
+                }}
+                className="mt-1 h-4 w-4 shrink-0 accent-[#E8D6C3]"
+              />
+              <span>我同意 FACE 依<a href="/privacy" className="underline underline-offset-2 hover:text-white">隱私權政策</a>處理我的 Email、留言與測驗人格代碼，以處理這次提問與必要聯絡。</span>
+            </label>
+
+            <button
+              type="submit"
+              className="mt-6 inline-flex w-full items-center justify-center bg-[#E8D6C3] px-6 py-4 text-sm font-bold tracking-[0.08em] text-[#3E302D] transition hover:bg-[#F4E8DC] disabled:cursor-wait disabled:opacity-65 sm:w-auto sm:min-w-64"
+              disabled={status === 'submitting'}
+            >
+              {status === 'submitting' ? '正在送出…' : '我想聽聽 NPC 怎麼看 →'}
+            </button>
+
+            <p className="mt-4 text-xs leading-6 text-[#CDBDB2]">🔒 你留下的內容不會公開。</p>
+            <p
+              className={`mt-3 min-h-6 text-sm leading-6 ${status === 'error' ? 'text-[#FFD0C7]' : 'text-[#E7D2BB]'}`}
+              role="status"
+              aria-live="polite"
+            >
+              {feedback}
+            </p>
+          </fieldset>
+        </form>
+      </div>
+    </section>
+  );
 };
 
 export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, onSave, user, onLoginRequest, onGoToGallery, onGoToMirrorTrade, onOpenContent, onOpenPricing, onOpenCoach, onOpenMemberHome, onOpenCompatibility, onOpenDeepDive, onRetest, isSharedView, language }) => {
@@ -156,6 +360,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             showPrototypeControls={false}
             isUserType={!isSharedView}
             onShareResult={() => setIsShareModalOpen(true)}
+            onRetest={onRetest}
             onViewGallery={onGoToGallery}
             resultVisualization={{
               pairs: faceData,
@@ -206,34 +411,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
                 </button>
               </div>
             </section>
-          )}
-
-          {!isSharedView && (
-            <div className="mx-auto flex max-w-xl flex-wrap justify-center gap-3 border-t border-stone-200 pt-8">
-              <button
-                onClick={() => setIsShareModalOpen(true)}
-                className="inline-flex items-center gap-2 border border-stone-900 px-6 py-3 text-sm font-bold tracking-[0.08em] text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
-              >
-                <Share2 size={16} strokeWidth={1.7} aria-hidden="true" />
-                分享結果
-              </button>
-              <button
-                onClick={onRetest}
-                className="inline-flex items-center gap-2 border border-stone-300 px-6 py-3 text-sm font-bold tracking-[0.08em] text-stone-600 transition-colors hover:border-stone-900 hover:text-stone-900"
-              >
-                <RotateCcw size={16} strokeWidth={1.7} aria-hidden="true" />
-                重新測驗
-              </button>
-              {onGoToGallery && (
-                <button
-                  onClick={onGoToGallery}
-                  className="inline-flex items-center gap-2 border border-stone-300 px-6 py-3 text-sm font-bold tracking-[0.08em] text-stone-600 transition-colors hover:border-stone-900 hover:text-stone-900"
-                >
-                  <BookOpen size={16} strokeWidth={1.7} aria-hidden="true" />
-                  查看圖鑑
-                </button>
-              )}
-            </div>
           )}
 
           {false && <>
@@ -352,6 +529,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             )}
           </div>
         </div>
+      )}
+
+      {!isSharedView && !daily && (
+        <NpcQuestionSection faceCode={code} initialEmail={user?.email} />
       )}
 
       {isShareModalOpen && (

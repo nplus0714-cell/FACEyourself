@@ -223,6 +223,25 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      npc_questions: {
+        Row: {
+          id: string;
+          email: string;
+          message: string;
+          face_code: string;
+          source: string;
+          status: 'new' | 'in_progress' | 'replied' | 'archived';
+          user_id: string | null;
+          consent_version: string;
+          consented_at: string;
+          replied_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

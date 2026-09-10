@@ -40,6 +40,7 @@ import { getMemberAssessmentHistory } from './services/memberAssessmentHistory';
 import { getBrowserPendingAssessment, isFaceScores } from './services/localAssessmentResult';
 import { applyPageMetadata } from './lib/pageMetadata';
 import { FEATURE_FLAGS } from './config/featureFlags';
+import { trackTestFunnelEvent } from './services/funnelAnalytics';
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 const DAILY_ANSWERS_KEY = 'face-daily-v1-answers';
@@ -290,6 +291,10 @@ const App: React.FC = () => {
   // scroll position by default. Every view transition should begin at the top.
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [view]);
+
+  useEffect(() => {
+    if (view === 'dna-test') trackTestFunnelEvent('test_landing');
   }, [view]);
 
   useEffect(() => {
