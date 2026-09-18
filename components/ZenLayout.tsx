@@ -76,7 +76,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
               title="返回首頁"
               aria-label="FACE 首頁"
             >
-               <FaceWordmark className="h-auto w-[8.25rem] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 sm:w-[9.75rem]" />
+               <FaceWordmark className="h-[3.25rem] w-[8.25rem] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 sm:h-[3.875rem] sm:w-[9.75rem]" />
             </a>
 
             <div className="flex shrink-0 items-center gap-2 sm:gap-6">
