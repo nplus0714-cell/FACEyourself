@@ -1,9 +1,14 @@
 import React from 'react';
 
 const socials = [
-  { label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61585260510757&locale=zh_TW' },
-  { label: 'Instagram', href: 'https://www.instagram.com/the_trading_post234/' },
-  { label: 'Threads', href: 'https://www.threads.com/@the_trading_post234?xmt=AQF0L-LuDhBrr-ph13qsPUU4fAPWhMiGrETCyAWw6c6fOHk' },
+  { label: 'YouTube', href: 'https://www.youtube.com/@FACETrader-k1h' },
+  { label: 'Instagram', href: 'https://www.instagram.com/face_tradernpc' },
+  { label: 'Facebook', href: 'https://www.facebook.com/61594374326311' },
+  { label: 'Threads', href: 'https://www.threads.com/@face_trader' },
+  { label: 'X', href: 'https://x.com/face_tradernpc' },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@face_tradernpc' },
+  { label: 'Medium', href: 'https://medium.com/@face.trader.npc' },
+  { label: '方格子', href: 'https://vocus.cc/user/6aa79b30aa9271464248ecf8' },
 ];
 
 const dimensions = [
