@@ -193,7 +193,6 @@ export const CONTENT_CATALOG: ContentItem[] = [
     channel: 'face-survival-guide',
     series: '生存篇',
     seriesOrder: 3,
-    requiresLogin: true,
     title: '停損不是失敗，是入場費',
     summary: '停損不是證明你錯了，而是讓你在看錯時，只付一開始願意付的價格。',
     faceTags: ['Exposure｜資金管理', 'Analysis｜決策邏輯'],

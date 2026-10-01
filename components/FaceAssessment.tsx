@@ -11,7 +11,12 @@ import {
   startAssessmentRun,
 } from '../services/assessmentPersistence';
 import { getSupabaseClient } from '../lib/supabase';
-import { trackTestFunnelEvent } from '../services/funnelAnalytics';
+import { trackFunnelEvent } from '../services/funnelAnalytics';
+import {
+  clearLocalAssessmentProgress,
+  getLocalAssessmentProgress,
+  saveLocalAssessmentProgress,
+} from '../services/localAssessmentProgress';
 import type {
   AssessmentAnswer,
   FaceAssessmentMeta,
@@ -227,8 +232,9 @@ interface FaceAssessmentProps {
 }
 
 export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) => {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, FaceResponse>>({});
+  const [initialProgress] = useState(getLocalAssessmentProgress);
+  const [step, setStep] = useState(initialProgress?.step ?? 0);
+  const [answers, setAnswers] = useState<Record<string, FaceResponse>>(initialProgress?.answers ?? {});
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const clientRunIdRef = useRef<string | null>(null);
@@ -237,7 +243,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
   const question = FACE_BASELINE_V2_QUESTIONS[step];
 
   useEffect(() => {
-    trackTestFunnelEvent('test_started');
+    trackFunnelEvent('quiz_start');
   }, []);
 
   const getOrStartRun = (): Promise<string> => {
@@ -271,11 +277,12 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
     // Keep an anonymous browser copy before attempting the cloud write.
     // App also saves the final result card into its persisted local state.
     cacheCompletedAssessment(completedAnswers, scores);
+    clearLocalAssessmentProgress();
 
     try {
       const runId = await getOrStartRun();
       await completeFaceAssessmentRun(runId, FACE_BASELINE_V2_QUESTIONS, completedAnswers, scores, scoreValues);
-      trackTestFunnelEvent('test_completed');
+      trackFunnelEvent('quiz_complete');
       const { data: { session } } = await getSupabaseClient().auth.getSession();
       if (session?.user && !session.user.is_anonymous) {
         localStorage.removeItem(LOCAL_PENDING_ASSESSMENT_KEY);
@@ -287,7 +294,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
       // Do not make an anonymous visitor lose a completed result because a
       // cloud write is unavailable. The browser copy remains available until
       // a future signed-in account can merge it.
-      trackTestFunnelEvent('test_completed');
+      trackFunnelEvent('quiz_complete');
       onComplete(scores);
       return;
 
@@ -306,6 +313,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
 
     const updated = { ...answers, [question.id]: response };
     setAnswers(updated);
+    trackFunnelEvent('quiz_question_progress', { step: step + 1 });
     if (!runIdRef.current && !runPromiseRef.current) void getOrStartRun().catch(() => undefined);
 
     if (step === FACE_BASELINE_V2_QUESTIONS.length - 1) {
@@ -313,7 +321,15 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
       return;
     }
 
-    setStep((current) => current + 1);
+    const nextStep = step + 1;
+    saveLocalAssessmentProgress({ step: nextStep, answers: updated });
+    setStep(nextStep);
+  };
+
+  const goBack = () => {
+    const previousStep = Math.max(0, step - 1);
+    saveLocalAssessmentProgress({ step: previousStep, answers });
+    setStep(previousStep);
   };
 
   const renderChoice = (item: FaceQuestion['options'][number]) => {
@@ -401,7 +417,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
         )}
 
         {question.type === 'image' && !question.compositeImage && question.images && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
             {question.images.map((item, index) => (
               <button
                 key={item.assetKey}
@@ -503,7 +519,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
         )}
 
         {step > 0 && !isSaving && (
-          <button type="button" onClick={() => setStep((current) => current - 1)} className="mx-auto block border-b border-[#2D2D2D]/40 pb-1 text-xs tracking-[0.2em] text-[#2D2D2D] hover:opacity-60">
+          <button type="button" onClick={goBack} className="mx-auto block border-b border-[#2D2D2D]/40 pb-1 text-xs tracking-[0.2em] text-[#2D2D2D] hover:opacity-60">
             回上一題
           </button>
         )}

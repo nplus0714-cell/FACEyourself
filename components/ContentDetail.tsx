@@ -116,18 +116,18 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
         {item.isDemo && <p className="mt-3 text-center text-xs leading-[1.7] text-[#8C7E6D]">這是播放版面示範。正式發布時會換成你的 YouTube 影片，不會改變頁面網址或流程。</p>}
       </> : isLocked ? (
         <section className="mx-auto mt-10 max-w-2xl border border-[#B9AA9D] bg-[#F7F1EC] p-7 text-center md:mt-14 md:p-12">
-          <p className="text-xs font-medium tracking-[0.22em] text-[#8C635B]">{item.requiresPurchase ? 'FACE SURVIVAL · PLAN ACCESS' : 'MEMBER READING'}</p>
-          <h2 className="mt-4 serif text-3xl leading-[1.55] text-[#2D2D2D]">{isLoginLocked ? '先登入，再繼續這段閱讀' : '取得 FACE Survival 後閱讀'}</h2>
+          <p className="text-xs font-medium tracking-[0.22em] text-[#8C635B]">{item.requiresPurchase ? '個人交易使用說明書 · 完整版' : 'MEMBER READING'}</p>
+          <h2 className="mt-4 serif text-3xl leading-[1.55] text-[#2D2D2D]">{isLoginLocked ? '先登入，再繼續這段閱讀' : '取得完整版權限後閱讀'}</h2>
           <p className="mx-auto mt-5 max-w-lg text-[16px] leading-[1.95] text-[#70665D]">
             {item.requiresPurchase
               ? isLoginLocked
-                ? '這篇屬於 FACE Survival 文字版內容。先登入確認帳號；已有方案權限可直接閱讀，尚未取得則可查看早鳥資訊。'
-                : '這篇屬於 FACE Survival 文字版內容。取得方案後，會以同一個會員帳號開放完整閱讀。'
+                ? '這篇屬於《個人交易使用說明書》規劃中的付費篇章。先登入確認帳號；目前方案尚未開賣。'
+                : '這篇屬於《個人交易使用說明書》規劃中的付費篇章，目前方案尚未開賣。'
               : '這篇文章屬於 FACE 生存指南的會員內容。登入不需要付費，完成登入後即可繼續閱讀。'}
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             {isLoginLocked && <button type="button" onClick={onLoginRequest} className="bg-[#2D2D2D] px-7 py-4 text-sm font-medium text-white transition hover:bg-[#3A302B]">登入並繼續 →</button>}
-            {(item.requiresPurchase || !isLoginLocked) && <a href="/survival-kit" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">查看方案與早鳥資訊</a>}
+            {(item.requiresPurchase || !isLoginLocked) && <a href="/manual" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">了解個人交易使用說明書</a>}
           </div>
         </section>
       ) : item.requiresPurchase && paidArticleStatus === 'loading' ? (

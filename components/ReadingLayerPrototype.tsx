@@ -3,9 +3,12 @@ import { ArrowDown, BookOpen, ChevronDown, Eye, EyeClosed, Lightbulb, RotateCcw,
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from 'recharts';
 import { FACE_MAP } from '../constants';
 import { FACE_2_PROTOTYPES, type FaceProfilePrototype } from '../data/faceProfilePrototype';
+import { getDecisionAction, getTalentPsychology } from '../lib/faceProfileCopy';
 import { PERSONALITY_EDITORIAL_V2 } from '../data/personalityEditorialV2';
 import { MASTER_PORTRAIT_BY_CODE } from '../data/masterPortraits';
 import { FEATURE_FLAGS } from '../config/featureFlags';
+import { FACE_READING_CHAPTERS } from '../data/faceReadingChapters';
+import { GUEST_PROFILE_HOOKS } from '../data/guestProfileHooks';
 
 const PROFILE_CODES = [
   'ARLC', 'ARLD', 'ARTC', 'ARTD',
@@ -278,29 +281,6 @@ const dimensionCopy: Record<string, string> = {
   D: '你會把風險分散在多個來源，避免單一判斷決定全局。',
 };
 
-const getDecisionAction = (profile: FaceProfilePrototype) => {
-  const evidence = profile.code[1] === 'R'
-    ? '把進場證據與失效條件各寫成一句話'
-    : '把盤感翻成一個能被觀察與否證的條件';
-  const timing = profile.code[2] === 'L'
-    ? '設定下一次複查時間，不在盤中反覆重寫長期假設'
-    : '進場前先寫下這一段行情的離場與失效位置';
-  const exposure = profile.code[3] === 'C'
-    ? '確認單一判斷失效時的最大損失仍在上限內'
-    : '檢查不同部位是否其實承受同一種風險';
-  return `${evidence}；${timing}；${exposure}。`;
-};
-
-const getTalentPsychology = (profile: FaceProfilePrototype) => {
-  const evidence = profile.code[1] === 'R'
-    ? '你的優勢來自把資訊轉成可核對的條件；但資料超過決策容量後，更多分析可能降低辨識力。'
-    : '你的優勢來自快速整合分散訊號；但情緒提高時，最近、最鮮明的訊號容易被不成比例地放大。';
-  const exposure = profile.code[3] === 'C'
-    ? '集中能提高注意力，也會讓單一判斷更容易牽動自我認同。'
-    : '分散能降低單點風險，標的過多時卻可能形成分散錯覺與注意力稀釋。';
-  return `${evidence}${exposure}`;
-};
-
 const getInterruptAction = (profile: FaceProfilePrototype, text: string) => {
   if (/虧損|停損|賺回|追回|回本|成本/.test(text)) return '把上一筆視為已結束；下一筆必須重新寫出進場理由、失效點與風險上限。';
   if (/錯過|踏空|追高|追進|熱門|落後|上車|噴/.test(text)) return '錯過原位置後重新計算風險報酬；不能沿用行情發動前的判斷。';
@@ -372,15 +352,7 @@ const getTriggerResolution = (
   return `${getInterruptAction(profile, `${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}`)} ${trigger.watchFor}`;
 };
 
-const chapterMeta = [
-  { id: 'face-core', number: '01', title: '你的 FACE', description: '先看懂，你在市場裡習慣怎麼做決定。' },
-  { id: 'two-mirrors', number: '02', title: '以銅為鏡，可以正衣冠', description: '別人看見的表現，和你心裡真正重視的東西。' },
-  { id: 'talent', number: '03', title: '你的交易天賦', description: '你不必勉強，就比較容易做好的事情。' },
-  { id: 'talent-shadow', number: '04', title: '以人為鏡，可以明得失', description: '優勢沒有消失，只是在壓力下被使用過頭。' },
-  { id: 'triggers', number: '05', title: '你的失控觸發器', description: '市場如何從情緒開始，一步步改變你的行為。' },
-  { id: 'reflection', number: '06', title: '以史為鏡，可以知興替', description: '回看走過的交易，理解自己真正被什麼推動。' },
-  { id: 'daily', number: '07', title: '深度自我覺察', description: '看見情緒正在發生，才不會讓它替你下決策。' },
-] as const;
+const chapterMeta = FACE_READING_CHAPTERS;
 
 const reflectionPrompts = [
   '過去的哪一筆交易令你最印象深刻？',
@@ -406,6 +378,22 @@ const SectionShell: React.FC<{
     {children}
   </section>
 );
+
+const GuestUnlockSummary: React.FC<{ onUnlock: () => void; profileCode: ProfileCode }> = ({ onUnlock, profileCode }) => {
+  const questions = GUEST_PROFILE_HOOKS[profileCode];
+
+  return <section className="mx-auto mt-10 max-w-3xl border border-[#D1D1C7] bg-white px-6 py-7 sm:px-9" aria-label="登入後接續閱讀這份交易人格結果">
+    <p className="serif text-xl leading-9 text-[#2D2D2D] sm:text-2xl">如果你也有這些困擾：</p>
+    <ol className="mt-6 space-y-3">
+      {questions.map((question, index) => <li key={question} className="flex gap-4 border-t border-[#E2DDD5] pt-3">
+        <span className="font-mono text-sm text-[#9A6D62]">{String(index + 1).padStart(2, '0')}</span>
+        <p className="serif text-base leading-7 text-[#554C45]">{question}</p>
+      </li>)}
+    </ol>
+    <p className="mt-7 text-sm leading-7 text-[#70665D]">登入即可免費接續這份結果，更進一步了解自己的交易個性；不需要重新測驗。</p>
+    <button type="button" onClick={onUnlock} className="mt-5 border-b border-[#4A382D] pb-1 text-sm font-bold text-[#4A382D]">登入接續這份結果 →</button>
+  </section>;
+};
 
 const BodyText: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
   <div className={`editorial-body editorial-body-m serif space-y-5 text-[1.05rem] font-normal leading-[2.1] tracking-[0.01em] text-[#554C45] md:text-[1.1rem] ${className}`}>{children}</div>
@@ -517,6 +505,8 @@ interface ReadingLayerPrototypeProps {
   onRetest?: () => void;
   onViewGallery?: () => void;
   compact?: boolean;
+  previewOnly?: boolean;
+  onUnlock?: () => void;
   resultVisualization?: {
     pairs: ReadonlyArray<{
       label: string;
@@ -543,6 +533,8 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
   onRetest,
   onViewGallery,
   compact = false,
+  previewOnly = false,
+  onUnlock,
   resultVisualization,
 }) => {
   const [selectedCode, setSelectedCode] = React.useState<ProfileCode>(() => resolveProfileCode(profileCode));
@@ -621,11 +613,6 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
 
       <article className={`reading-editorial reading-editorial--pilot reading-editorial--approved-body mx-auto max-w-4xl fade-in ${compact ? 'pb-12' : 'pb-28'}`} key={selectedCode}>
       {!compact && <header className="relative overflow-hidden border border-[#CFC6B8] bg-[#F4EEE7]">
-        {isUserType && (
-          <p className="editorial-button absolute left-4 top-4 z-10 border border-white/55 bg-[#79584D]/90 px-3 py-2 text-white shadow-sm backdrop-blur-sm md:left-6 md:top-6">
-            這是你的交易人格
-          </p>
-        )}
         <img
           src={coverByCode[selectedCode]}
           alt={`${profile.name} ${profile.code}：${profile.traits.join('、')}。`}
@@ -633,6 +620,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
         />
 
         <div className="px-5 py-10 sm:px-9 md:px-14 md:py-14">
+          {isUserType && <p className="editorial-kicker text-[13px] tracking-[0.12em] text-[#9A655C] md:text-sm">這是你的交易人格</p>}
           <p className="editorial-lead serif mt-5 text-[1.4rem] font-normal leading-[1.9] tracking-[0.01em] text-[#3B312C] md:text-[1.75rem]">
             {coreCopy.lead}<Highlight>{coreCopy.highlight}</Highlight>
           </p>
@@ -833,7 +821,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
               </summary>
               <div className="editorial-master-divider grid gap-0 border-t border-[#D8CDBD] sm:grid-cols-[11rem_1fr]">
                 <figure className="overflow-hidden bg-[#F4EEE7]">
-                  <img src={masterPortrait} alt={editorialProfile.master.name} className="aspect-[16/9] h-full w-full object-cover sm:aspect-square" />
+                  <img src={masterPortrait} alt={editorialProfile.master.name} className="block h-auto w-full object-contain object-top" />
                 </figure>
                 <div className="editorial-master-divider border-t border-[#D8CDBD] px-5 py-6 sm:border-l sm:border-t-0 md:px-7 md:py-7">
                   <p className="editorial-master-name editorial-subhead serif text-[1.35rem] font-normal leading-[1.6] text-[#3C332E]">{editorialProfile.master.name}</p>
@@ -844,7 +832,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           )}
         </SectionShell>
 
-        <SectionShell chapter={chapterMeta[1]} tinted>
+        {!previewOnly && <SectionShell chapter={chapterMeta[1]} tinted>
           <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${mirrorLayout.grid}`}>
             <EditorialFigure
               src={editorialImages.mirrors}
@@ -869,7 +857,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           <Takeaway>
             外在表現與內在動機不是矛盾。你真正想守住的是：<Highlight>{firstSentence(profile.insideVoice)}</Highlight>
           </Takeaway>
-        </SectionShell>
+        </SectionShell>}
 
         <SectionShell chapter={chapterMeta[2]}>
           <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${talentLayout.grid}`}>
@@ -890,7 +878,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           </Takeaway>
         </SectionShell>
 
-        <SectionShell chapter={chapterMeta[3]} tinted>
+        {!previewOnly && <SectionShell chapter={chapterMeta[3]} tinted>
           <div>
             <h3 className="editorial-subhead serif text-[1.45rem] font-normal leading-[1.7] text-[#3C332E] md:text-[1.65rem]">你是否曾經遇過以下狀況？</h3>
             <p className="editorial-body-s editorial-supporting serif mt-2 text-[1rem] font-normal leading-8 text-[#756A61]">點開最有感的情境，看看哪位鄰居能借你一種不同的思考方式。</p>
@@ -958,12 +946,12 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
                             {situation.action !== situation.slogan && <p className="editorial-body-s mt-3 border-t border-[#E2D5CA] pt-3 text-[0.96rem] leading-8 text-[#6A5F57]">{situation.action}</p>}
                           </section>
 
-                          <a
+                          {!previewOnly && <a
                             href={`/types/${situation.neighbor.code}`}
                             className="editorial-button editorial-action mt-6 inline-block text-[13px] tracking-[0.04em] text-[#79584D] underline decoration-[#A36F63]/45 underline-offset-4 transition-colors hover:text-[#A05F54]"
                           >
                             認識{situation.neighbor.name}的完整思考方式 →
-                          </a>
+                          </a>}
                         </div>
                       </div>
                     </div>
@@ -976,11 +964,11 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           <Takeaway label="FACE Circle" link={{ href: `/types/compatibility?type=${selectedCode}`, label: '打開16型交易互補輪盤 →' }}>
             你不需要把自己變成另一種人格。只要在卡住時，<Highlight>向鄰居借一種現在缺少的能力。</Highlight>
           </Takeaway>
-        </SectionShell>
+        </SectionShell>}
 
         <SectionShell chapter={chapterMeta[4]}>
           <div className="space-y-7">
-            {profile.triggers.map((trigger, index) => (
+            {(previewOnly ? profile.triggers.slice(0, 1) : profile.triggers).map((trigger, index) => (
               <article key={trigger.title} className="overflow-hidden border border-[#D8CDBD] bg-white">
                 {(() => {
                   const triggerCopy = `${trigger.title}${trigger.event}${trigger.emotion}${trigger.behavior}${trigger.consequence}${trigger.watchFor}`;
@@ -1026,7 +1014,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           </Takeaway>
         </SectionShell>
 
-        <section id={chapterMeta[5].id} className="relative overflow-hidden border-x border-b border-[#D9CFC2] bg-[#211C19]">
+        {!previewOnly && <section id={chapterMeta[5].id} className="relative overflow-hidden border-x border-b border-[#D9CFC2] bg-[#211C19]">
           <img
             src={profileLineArt}
             alt=""
@@ -1163,8 +1151,10 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
               </div>
             )}
           </div>
-        </section>
+        </section>}
       </main>
+
+      {previewOnly && onUnlock && <GuestUnlockSummary onUnlock={onUnlock} profileCode={selectedCode} />}
 
       </article>
     </>

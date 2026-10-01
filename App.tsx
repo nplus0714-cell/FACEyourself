@@ -1,35 +1,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ZenLayout } from './components/ZenLayout';
-import { FaceAssessment } from './components/FaceAssessment';
-import { FaceSequentialMockup } from './components/FaceSequentialMockup';
-import { Dashboard } from './components/Dashboard';
-import { RoleGallery } from './components/RoleGallery';
-import { CompatibilityWheel } from './components/CompatibilityWheel';
-import { AboutFace } from './components/AboutFace';
-import { CoachProfile } from './components/CoachProfile';
-import { ContentHub } from './components/ContentHub';
-import { ContentDetail } from './components/ContentDetail';
-import { SurvivalKitPricing } from './components/SurvivalKitPricing';
-import { LandingInfo } from './components/LandingInfo';
-import { MirrorTrade } from './components/MirrorTrade';
-import { ResultPreview } from './components/ResultPreview';
-import { AuthDialog } from './components/AuthDialog';
-import { MemberHome } from './components/MemberHome';
-import { LastAssessmentCard } from './components/LastAssessmentCard';
-import { ResearchAdmin } from './components/ResearchAdmin';
-import { DailyAwarenessCheckIn } from './components/DailyAwarenessCheckIn';
-import { AwarenessUnavailable } from './components/AwarenessUnavailable';
-import { ReadingLayerPrototype } from './components/ReadingLayerPrototype';
-import { NotFoundPage } from './components/NotFoundPage';
-import { LegalPage } from './components/LegalPage';
 import { scoreDailyAwareness, type DailyAwarenessAnswers } from './data/dailyAwarenessQuestions';
 import type { DailyAwarenessResult } from './data/dailyAwarenessPreview';
 import { saveDailyAwarenessResult } from './services/memberAwarenessJournal';
 import { CONTENT_CATALOG, ContentItem } from './data/contentCatalog';
 import { FACE_MAP, getFaceCode } from './constants';
 import { FaceScores, UserState, DiaryEntry, Language, PersonalityProfile } from './types';
-import { translations } from './i18n';
 import { signOut, toAuthUser } from './services/authService';
 import { getSupabaseClient } from './lib/supabase';
 import { claimPendingGuestAssessment } from './services/guestResultClaim';
@@ -40,14 +17,42 @@ import { getMemberAssessmentHistory } from './services/memberAssessmentHistory';
 import { getBrowserPendingAssessment, isFaceScores } from './services/localAssessmentResult';
 import { applyPageMetadata } from './lib/pageMetadata';
 import { FEATURE_FLAGS } from './config/featureFlags';
-import { trackTestFunnelEvent } from './services/funnelAnalytics';
+import { trackFunnelEvent } from './services/funnelAnalytics';
+import { clearLocalAssessmentProgress } from './services/localAssessmentProgress';
+import { FunnelLanding } from './components/FunnelLanding';
+
+// Keep the public funnel lightweight; the existing deeper surfaces load only
+// when their routes are visited.
+const FaceAssessment = React.lazy(() => import('./components/FaceAssessment').then((module) => ({ default: module.FaceAssessment })));
+const FunnelResult = React.lazy(() => import('./components/FunnelResult').then((module) => ({ default: module.FunnelResult })));
+const SurvivalGuideLanding = React.lazy(() => import('./components/SurvivalGuideLanding').then((module) => ({ default: module.SurvivalGuideLanding })));
+const SurvivalGuideReader = React.lazy(() => import('./components/SurvivalGuideReader').then((module) => ({ default: module.SurvivalGuideReader })));
+const PersonalTradingManual = React.lazy(() => import('./components/PersonalTradingManual').then((module) => ({ default: module.PersonalTradingManual })));
+const FaceSequentialMockup = React.lazy(() => import('./components/FaceSequentialMockup').then((module) => ({ default: module.FaceSequentialMockup })));
+const Dashboard = React.lazy(() => import('./components/Dashboard').then((module) => ({ default: module.Dashboard })));
+const RoleGallery = React.lazy(() => import('./components/RoleGallery').then((module) => ({ default: module.RoleGallery })));
+const CompatibilityWheel = React.lazy(() => import('./components/CompatibilityWheel').then((module) => ({ default: module.CompatibilityWheel })));
+const AboutFace = React.lazy(() => import('./components/AboutFace').then((module) => ({ default: module.AboutFace })));
+const CoachProfile = React.lazy(() => import('./components/CoachProfile').then((module) => ({ default: module.CoachProfile })));
+const ContentHub = React.lazy(() => import('./components/ContentHub').then((module) => ({ default: module.ContentHub })));
+const ContentDetail = React.lazy(() => import('./components/ContentDetail').then((module) => ({ default: module.ContentDetail })));
+const MirrorTrade = React.lazy(() => import('./components/MirrorTrade').then((module) => ({ default: module.MirrorTrade })));
+const ResultPreview = React.lazy(() => import('./components/ResultPreview').then((module) => ({ default: module.ResultPreview })));
+const AuthDialog = React.lazy(() => import('./components/AuthDialog').then((module) => ({ default: module.AuthDialog })));
+const MemberHome = React.lazy(() => import('./components/MemberHome').then((module) => ({ default: module.MemberHome })));
+const MemberWorkspace = React.lazy(() => import('./components/MemberWorkspace').then((module) => ({ default: module.MemberWorkspace })));
+const ResearchAdmin = React.lazy(() => import('./components/ResearchAdmin').then((module) => ({ default: module.ResearchAdmin })));
+const DailyAwarenessCheckIn = React.lazy(() => import('./components/DailyAwarenessCheckIn').then((module) => ({ default: module.DailyAwarenessCheckIn })));
+const ReadingLayerPrototype = React.lazy(() => import('./components/ReadingLayerPrototype').then((module) => ({ default: module.ReadingLayerPrototype })));
+const NotFoundPage = React.lazy(() => import('./components/NotFoundPage').then((module) => ({ default: module.NotFoundPage })));
+const LegalPage = React.lazy(() => import('./components/LegalPage').then((module) => ({ default: module.LegalPage })));
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 const DAILY_ANSWERS_KEY = 'face-daily-v1-answers';
 const DAILY_RESULT_KEY = 'face-daily-v1-result';
 const DAILY_AWAITING_LOGIN_KEY = 'face-daily-v1-awaiting-login';
 
-type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'privacy' | 'terms' | 'refund-policy' | 'data-deletion' | 'not-found';
+type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'survival-guide' | 'survival-guide-full' | 'personal-trading-manual' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'privacy' | 'terms' | 'refund-policy' | 'data-deletion' | 'not-found';
 
 const roleCodeFromPath = (path: string): string | null => {
   const prefix = path.startsWith('/types/')
@@ -92,6 +97,9 @@ const viewFromPath = (path: string): AppView => {
   }
   if (path === '/watch') return 'content-hub';
   if (path === '/survival-kit') return 'survival-kit';
+  if (path === '/guide') return 'survival-guide';
+  if (path === '/guide/line') return 'survival-guide-full';
+  if (path === '/manual') return 'personal-trading-manual';
   if (path === '/test') return 'dna-test';
   if (path === '/test-mockup') return 'sequential-test-mockup';
   if (path === '/daily-awareness') return FEATURE_FLAGS.dailyAwareness ? 'daily-test' : 'member-home';
@@ -112,6 +120,9 @@ const pathForView = (view: AppView) => ({
   compatibility: '/types/compatibility',
   'content-hub': '/watch',
   'survival-kit': '/survival-kit',
+  'survival-guide': '/guide',
+  'survival-guide-full': '/guide/line',
+  'personal-trading-manual': '/manual',
   'mirror-trade': '/mirror-trade',
   'result-preview': '/preview-results',
   'reading-prototype': '/reading-prototype',
@@ -150,14 +161,14 @@ const App: React.FC = () => {
   });
   const [showDailyResultAfterLogin, setShowDailyResultAfterLogin] = useState(() => sessionStorage.getItem(DAILY_AWAITING_LOGIN_KEY) === '1');
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [isAuthResolved, setIsAuthResolved] = useState(false);
   const [hasSurvivalKitAccess, setHasSurvivalKitAccess] = useState(false);
   const [isLocalStateHydrated, setIsLocalStateHydrated] = useState(false);
   const [isMemberResultLoading, setIsMemberResultLoading] = useState(false);
-  const claimedGuestResultRef = useRef(false);
+  const [hydratedMemberId, setHydratedMemberId] = useState<string | null>(null);
+  const [memberResultError, setMemberResultError] = useState(false);
   const recordedActivityRef = useRef(new Set<string>());
   
-  const t = translations[language];
-
   const navigateTo = (nextView: AppView) => {
     const path = pathForView(nextView);
     if (path && window.location.pathname !== path) window.history.pushState({}, '', path);
@@ -294,7 +305,7 @@ const App: React.FC = () => {
   }, [view]);
 
   useEffect(() => {
-    if (view === 'dna-test') trackTestFunnelEvent('test_landing');
+    if (view === 'dna-test') trackFunnelEvent('quiz_landing_view');
   }, [view]);
 
   useEffect(() => {
@@ -335,8 +346,8 @@ const App: React.FC = () => {
       const pending = getBrowserPendingAssessment();
       setState((previous) => ({
         ...previous,
-        dna: isFaceScores(parsed?.dna) ? parsed.dna : pending?.scores ?? previous.dna,
-        history: Array.isArray(parsed?.history) ? parsed.history : previous.history,
+        dna: !parsed?.user && isFaceScores(parsed?.dna) ? parsed.dna : pending?.scores ?? previous.dna,
+        history: !parsed?.user && Array.isArray(parsed?.history) ? parsed.history : previous.history,
         tempDaily: isFaceScores(parsed?.tempDaily) ? parsed.tempDaily : null,
       }));
     } catch (error) {
@@ -354,35 +365,43 @@ const App: React.FC = () => {
   }, [isLocalStateHydrated, state]);
 
   useEffect(() => {
+    if (!isLocalStateHydrated || !isAuthResolved || !state.user) return;
     let active = true;
-    const needsBaseline = ['dashboard', 'daily-test', 'member-home'].includes(view);
-    if (!isLocalStateHydrated || !state.user || state.dna || !needsBaseline) return () => { active = false; };
-
+    const memberId = state.user.id;
     setIsMemberResultLoading(true);
-    void getMemberAssessmentHistory()
-      .then((records) => {
-        if (!active || !records[0]) return;
+    setMemberResultError(false);
+    void (async () => {
+      try {
+        await claimPendingGuestAssessment();
+      } catch (error) {
+        console.warn('Unable to claim the guest result yet', error);
+      }
+      try {
+        const records = await getMemberAssessmentHistory();
+        if (!active) return;
         const latest = records[0];
-        const baseline: DiaryEntry = {
-          id: latest.id,
-          date: latest.completedAt,
-          scores: latest.scores,
+        const history: DiaryEntry[] = records.map((record) => ({
+          id: record.id,
+          date: record.completedAt,
+          scores: record.scores,
           marketScenario: '24 題基準測驗',
           isBaseline: true,
-        };
-        setState((previous) => ({
-          ...previous,
-          dna: latest.scores,
-          history: previous.history.some((entry) => entry.id === latest.id)
-            ? previous.history
-            : [baseline, ...previous.history],
         }));
-      })
-      .catch((error) => console.warn('Unable to restore the latest member assessment', error))
-      .finally(() => { if (active) setIsMemberResultLoading(false); });
-
+        setState((previous) => previous.user?.id === memberId ? {
+          ...previous,
+          dna: latest?.scores ?? previous.dna,
+          history,
+        } : previous);
+        setHydratedMemberId(memberId);
+      } catch (error) {
+        console.warn('Unable to restore the latest member assessment', error);
+        if (active) setMemberResultError(true);
+      } finally {
+        if (active) setIsMemberResultLoading(false);
+      }
+    })();
     return () => { active = false; };
-  }, [isLocalStateHydrated, state.dna, state.user?.id, view]);
+  }, [isAuthResolved, isLocalStateHydrated, state.user?.id]);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -392,15 +411,11 @@ const App: React.FC = () => {
 
       void supabase.auth.getSession().then(({ data }) => {
         const authUser = data.session ? toAuthUser(data.session.user) : null;
-        setState((previous) => (
-          previous.user?.id === authUser?.id ? previous : { ...previous, user: authUser }
-        ));
-        if (authUser && !claimedGuestResultRef.current) {
-          claimedGuestResultRef.current = true;
-          void claimPendingGuestAssessment().catch((error) => console.warn('Unable to claim the guest result yet', error));
-        } else if (!authUser) {
-          claimedGuestResultRef.current = false;
-        }
+        setState((previous) => {
+          if (previous.user?.id === authUser?.id) return previous;
+          const comingFromGuest = !previous.user && !!authUser;
+          return { ...previous, user: authUser, dna: comingFromGuest ? previous.dna : null, history: comingFromGuest ? previous.history : [], tempDaily: null };
+        });
         if (authUser) {
           const activityKey = `session_restored:${authUser.id}`;
           if (!recordedActivityRef.current.has(activityKey)) {
@@ -412,14 +427,20 @@ const App: React.FC = () => {
             .catch((error) => console.warn('Unable to load member entitlement', error));
         } else {
           setHasSurvivalKitAccess(false);
+          setIsMemberResultLoading(false);
+          setHydratedMemberId(null);
         }
-      });
+      }).catch((error) => console.warn('Unable to restore the auth session', error))
+        .finally(() => setIsAuthResolved(true));
 
       const { data } = supabase.auth.onAuthStateChange((event, session) => {
         const authUser = session ? toAuthUser(session.user) : null;
-        setState((previous) => (
-          previous.user?.id === authUser?.id ? previous : { ...previous, user: authUser }
-        ));
+        setState((previous) => {
+          if (previous.user?.id === authUser?.id) return previous;
+          const comingFromGuest = !previous.user && !!authUser;
+          return { ...previous, user: authUser, dna: comingFromGuest ? previous.dna : null, history: comingFromGuest ? previous.history : [], tempDaily: null };
+        });
+        setIsAuthResolved(true);
         if (authUser) {
           setIsAuthDialogOpen(false);
           if (showDailyResultAfterLogin && pendingDailyAwareness && pendingDailyResult) {
@@ -430,10 +451,6 @@ const App: React.FC = () => {
                 navigateTo('member-home');
               })
               .catch((error) => console.warn('Unable to save daily awareness result', error));
-          }
-          if (!claimedGuestResultRef.current) {
-            claimedGuestResultRef.current = true;
-            void claimPendingGuestAssessment().catch((error) => console.warn('Unable to claim the guest result yet', error));
           }
           if (event === 'SIGNED_IN') {
             const activityKey = `signed_in:${authUser.id}`;
@@ -446,13 +463,15 @@ const App: React.FC = () => {
             .then(setHasSurvivalKitAccess)
             .catch((error) => console.warn('Unable to refresh member entitlement', error));
         } else {
-          claimedGuestResultRef.current = false;
           setHasSurvivalKitAccess(false);
+          setIsMemberResultLoading(false);
+          setHydratedMemberId(null);
         }
       });
       unsubscribe = () => data.subscription.unsubscribe();
     } catch (error) {
       console.warn('Supabase Auth is not configured yet', error);
+      setIsAuthResolved(true);
     }
 
     return () => unsubscribe?.();
@@ -471,7 +490,10 @@ const App: React.FC = () => {
     } catch (error) {
       console.error('Unable to sign out', error);
     } finally {
-      setState((previous) => ({ ...previous, user: null }));
+      setState((previous) => ({ ...previous, user: null, dna: null, history: [], tempDaily: null }));
+      setIsMemberResultLoading(false);
+      setHydratedMemberId(null);
+      localStorage.removeItem(STORAGE_KEY);
     }
   };
 
@@ -562,8 +584,6 @@ const App: React.FC = () => {
     setView('daily-test');
   };
 
-  const startDailyAwareness = () => void openDailyAwareness();
-
   const handleRetestDna = () => {
     const confirmMsg = language === 'zh' 
       ? '這會清除你的測驗結果與歷史紀錄，並重新開始。確定嗎？'
@@ -577,6 +597,7 @@ const App: React.FC = () => {
         history: [], 
         tempDaily: null 
       }));
+      clearLocalAssessmentProgress();
       // 回到首頁重新開始
       setView('landing');
       
@@ -591,8 +612,6 @@ const App: React.FC = () => {
     setLanguage(prev => prev === 'zh' ? 'en' : 'zh');
   };
 
-  const paymentStatus = new URLSearchParams(window.location.search).get('payment');
-
   return (
     <>
     <ZenLayout 
@@ -600,7 +619,8 @@ const App: React.FC = () => {
       hasDna={!!state.dna} 
       onLogin={handleLogin} 
       onLogout={() => void handleLogout()}
-      showNav={view !== 'shared-dashboard'}
+      showNav={isAuthResolved && !!state.user && view !== 'shared-dashboard'}
+      showAccountActions={isAuthResolved && !!state.user && view !== 'shared-dashboard'}
       activeView={view}
       onViewChange={(v) => {
         if (v === 'history') {
@@ -609,112 +629,22 @@ const App: React.FC = () => {
         }
         navigateTo(v as AppView);
       }}
-      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'survival-kit', 'mirror-trade', 'result-preview', 'reading-prototype', 'member-home', 'research-admin', 'privacy', 'terms', 'refund-policy', 'data-deletion'].includes(view)}
+      wide={['landing', 'dashboard', 'role-gallery', 'role-detail', 'compatibility', 'history', 'report-detail', 'shared-dashboard', 'about-face', 'coach-profile', 'content-hub', 'content-detail', 'survival-kit', 'survival-guide', 'survival-guide-full', 'personal-trading-manual', 'mirror-trade', 'result-preview', 'reading-prototype', 'member-home', 'research-admin', 'privacy', 'terms', 'refund-policy', 'data-deletion'].includes(view)}
       isLanding={view === 'landing'}
       language={language}
       onToggleLanguage={toggleLanguage}
     >
-      {view === 'landing' && <>
-        {paymentStatus && (
-          <div className={`mb-8 border px-5 py-4 text-sm leading-7 ${paymentStatus === 'success' ? 'border-[#78947A] bg-[#EEF4EE] text-[#314D35]' : 'border-[#B98A83] bg-[#F8EFED] text-[#75463F]'}`} role="status">
-            {paymentStatus === 'success'
-              ? hasSurvivalKitAccess
-                ? '付款已完成，FACE 交易生存指南與付費工具權益已綁定到你的會員帳號。'
-                : '付款已完成，系統正在核對並開通你的會員權益。'
-              : paymentStatus === 'cancelled'
-                ? '你已返回 FACE，這筆付款尚未完成。'
-                : '付款未完成或驗證失敗，請重新操作；若已扣款請先聯絡我們確認。'}
-          </div>
-        )}
-        <div className="-mx-4 fade-in sm:-mx-6 md:mx-0">
-          <section className="relative isolate min-h-[760px] overflow-hidden border-y border-[#CFC6B8] bg-[#F6F1E9] sm:min-h-[850px] lg:min-h-[880px] lg:border">
-            <div className="absolute inset-x-0 bottom-0 h-[38%] overflow-hidden sm:h-[48%] lg:h-[62%]" aria-hidden="true">
-              <img
-                src="/images/homepage-trading-salon.png"
-                alt=""
-                className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-[52%_center] opacity-70 mix-blend-multiply saturate-[0.82] contrast-[0.92]"
-              />
-              <span className="absolute inset-0 bg-[linear-gradient(to_bottom,#F6F1E9_0%,rgba(246,241,233,0.96)_8%,rgba(246,241,233,0.72)_24%,rgba(246,241,233,0.18)_52%,rgba(246,241,233,0.04)_76%)]" />
-              <span className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(246,241,233,0.48)_100%)]" />
-            </div>
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,253,248,0.9),transparent_45%)]" aria-hidden="true" />
-
-            <div className="relative z-10 flex flex-col items-center px-6 pb-72 pt-12 text-center sm:px-12 sm:pb-80 sm:pt-16 lg:mx-auto lg:max-w-5xl lg:px-14 lg:pb-[22rem] lg:pt-20 xl:px-20">
-              <p className="text-[10px] font-bold tracking-[0.28em] text-[#8C635B] sm:text-xs">FACE · TRADING SELF-AWARENESS</p>
-
-              <h1 className="mt-6 max-w-[22rem] serif text-[1.75rem] leading-[1.62] text-[#2D2D2D] sm:max-w-2xl sm:text-[2.65rem] sm:leading-[1.55] lg:mt-8 lg:max-w-3xl lg:text-[3.25rem] lg:leading-[1.48] xl:text-[3.55rem]">
-                {String(t.landing.title).split('\n').map((line: string, index: number) => (
-                  <span key={line} className={index === 0 ? 'block' : 'mt-1 block sm:mt-2'}>{line}</span>
-                ))}
-              </h1>
-
-              <div className="my-7 flex items-center gap-3 text-[#B59E7B] sm:my-8" aria-hidden="true">
-                <span className="h-px w-10 bg-current sm:w-14" />
-                <span className="h-2 w-2 rotate-45 border border-current" />
-                <span className="h-px w-10 bg-current sm:w-14" />
-              </div>
-
-              <div className="max-w-[21rem] text-[15px] leading-[2] text-[#625A53] sm:max-w-xl sm:text-lg sm:leading-[2.05] lg:max-w-lg">
-                <p className="font-medium text-[#4B433D]">{t.landing.motto}</p>
-                {String(t.landing.supportingLine).split('\n').map((line: string) => <p key={line}>{line}</p>)}
-              </div>
-
-              <div className="mt-8 w-full max-w-[21rem] sm:mt-10 sm:max-w-sm lg:max-w-md">
-                {!state.dna ? (
-                  <button
-                    type="button"
-                    onClick={() => navigateTo('dna-test')}
-                    className="group flex min-h-14 w-full items-center justify-center gap-5 border border-[#4A382D] bg-[#4A382D] px-7 py-4 text-base font-bold tracking-[0.12em] text-white shadow-[0_12px_30px_rgba(74,56,45,0.18)] transition hover:bg-[#34261F] focus-visible:outline-[#8C635B] sm:min-h-16 sm:text-lg"
-                  >
-                    <span>{t.landing.startTest}</span>
-                    <span className="text-2xl font-light transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
-                  </button>
-                ) : (
-                  <div className="grid gap-3">
-                    <button
-                      type="button"
-                      onClick={startDailyAwareness}
-                      className="min-h-14 w-full border border-[#8C635B] bg-[#8C635B] px-6 py-4 text-base font-bold tracking-[0.1em] text-white transition hover:bg-[#754F48]"
-                    >
-                      {FEATURE_FLAGS.dailyAwareness ? t.landing.todayAwareness : (language === 'zh' ? '覺察日記 · 尚未開放' : 'Awareness Journal · Coming Soon')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => navigateTo('dashboard')}
-                      className="min-h-12 w-full border border-[#4A382D] bg-white/70 px-6 py-3 text-sm font-bold tracking-[0.1em] text-[#2D2D2D] transition hover:bg-white"
-                    >
-                      {t.landing.dashboard}
-                    </button>
-                  </div>
-                )}
-
-                <div className="mt-4">
-                  <LastAssessmentCard
-                    user={state.user}
-                    localScores={state.dna}
-                    localCompletedAt={state.history.find((entry) => entry.isBaseline)?.date}
-                    onViewResult={(scores) => {
-                      setState((previous) => ({ ...previous, dna: scores, tempDaily: null }));
-                      navigateTo('dashboard');
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-          </section>
-        </div>
-        <LandingInfo
+      <React.Suspense fallback={<div className="py-24 text-center text-sm tracking-[0.12em] text-[#8C7E6D]" role="status">正在載入…</div>}>
+      {view === 'landing' && (
+        <FunnelLanding
+          hasResult={Boolean(state.dna) && (!state.user || hydratedMemberId === state.user.id)}
+          isLoggedIn={Boolean(state.user)}
           onStartTest={() => navigateTo('dna-test')}
-          onExploreTypes={() => navigateTo('role-gallery')}
-          onOpenContent={() => navigateTo('content-hub')}
-          onAbout={() => navigateTo('about-face')}
-          isLoggedIn={!!state.user}
-          hasSurvivalKitAccess={hasSurvivalKitAccess}
-          onRequireLogin={handleLogin}
+          onViewResult={() => navigateTo('dashboard')}
           onOpenMemberHome={() => navigateTo('member-home')}
+          onLogin={handleLogin}
         />
-      </>}
+      )}
 
       {view === 'dna-test' && <FaceAssessment onComplete={handleDnaComplete} />}
       {view === 'sequential-test-mockup' && <FaceSequentialMockup onExit={() => navigateTo('landing')} />}
@@ -726,46 +656,46 @@ const App: React.FC = () => {
         />
       )}
 
-      {view === 'dashboard' && state.dna && (
-        <div className="space-y-6">
-          <div className="flex justify-end mb-4">
-             <button onClick={startDailyAwareness} className="px-8 py-3 bg-[#8C635B] text-white text-[12px] tracking-[0.4em] uppercase font-black rounded-sm shadow-lg hover:bg-[#7D5A50] transition-all">
-                {FEATURE_FLAGS.dailyAwareness
-                  ? (language === 'zh' ? '進行今日覺察 Today Check-in' : 'Today Check-in')
-                  : (language === 'zh' ? '覺察日記 · 尚未開放' : 'Awareness Journal · Coming Soon')}
-             </button>
+      {view === 'dashboard' && state.dna && isAuthResolved && !isMemberResultLoading && (!state.user || hydratedMemberId === state.user.id) && (
+        state.user ? (
+          <div className="space-y-8">
+            <div className="border border-[#D1D1C7] bg-[#FCFBF8] px-6 py-6 sm:px-9">
+              <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">FACE Trader · 會員深度解讀</p>
+              <p className="mt-3 text-sm leading-7 text-[#70665D]">這是你在公開結果頁看到的同一份測驗，現在可以往下看完整人格分析。指南與後續工具也會接續這份結果。</p>
+              <button type="button" onClick={() => navigateTo('survival-kit')} className="mt-4 border-b border-[#4A382D] pb-1 text-sm font-bold text-[#4A382D]">接著看交易生存指南 →</button>
+            </div>
+            <Dashboard
+              dna={state.dna}
+              daily={state.tempDaily || undefined}
+              history={state.history}
+              user={state.user}
+              onLoginRequest={handleLogin}
+              onSave={(report, timestamp) => {
+                if (!state.tempDaily) return;
+                const entry: DiaryEntry = {
+                  id: Date.now().toString(),
+                  date: timestamp,
+                  scores: state.tempDaily,
+                  marketScenario: language === 'zh' ? '每日偏移覺察' : 'Daily Offset Awareness',
+                  report,
+                };
+                setState((previous) => ({ ...previous, history: [entry, ...previous.history], tempDaily: null }));
+                navigateTo('history');
+              }}
+              onGoToGallery={() => navigateTo('role-gallery')}
+              onGoToMirrorTrade={() => navigateTo('mirror-trade')}
+              onOpenContent={() => navigateTo('content-hub')}
+              onOpenPricing={() => navigateTo('survival-kit')}
+              onOpenCoach={() => navigateTo('coach-profile')}
+              onOpenMemberHome={() => navigateTo('member-home')}
+              onOpenCompatibility={() => navigateTo('compatibility')}
+              onOpenDeepDive={() => void openDailyAwareness()}
+              onStartAwareness={() => void openDailyAwareness()}
+              onRetest={handleRetestDna}
+              language={language}
+            />
           </div>
-          <Dashboard 
-            dna={state.dna} 
-            daily={state.tempDaily || undefined} 
-            history={state.history}
-            user={state.user} 
-            onLoginRequest={handleLogin} 
-            onSave={(report, ts) => {
-              if (!state.tempDaily) return;
-              const entry: DiaryEntry = { 
-                id: Date.now().toString(), 
-                date: ts, 
-                scores: state.tempDaily, 
-                marketScenario: language === 'zh' ? "每日偏移覺察" : "Daily Offset Awareness",
-                report 
-              };
-              setState(p => ({ ...p, history: [entry, ...p.history], tempDaily: null }));
-              setView('history');
-            }} 
-            onGoToGallery={() => navigateTo('role-gallery')}
-            onGoToMirrorTrade={() => navigateTo('mirror-trade')}
-            onOpenContent={() => navigateTo('content-hub')}
-            onOpenPricing={() => navigateTo('survival-kit')}
-            onOpenCoach={() => navigateTo('coach-profile')}
-            onOpenMemberHome={() => navigateTo('member-home')}
-            onOpenCompatibility={() => navigateTo('compatibility')}
-            onOpenDeepDive={() => openDailyAwareness()}
-            onStartAwareness={openDailyAwareness}
-            onRetest={handleRetestDna}
-            language={language}
-          />
-        </div>
+        ) : <FunnelResult dna={state.dna} onOpenGuide={() => navigateTo('survival-kit')} onLogin={handleLogin} />
       )}
 
       {view === 'shared-dashboard' && sharedDna && (
@@ -777,7 +707,7 @@ const App: React.FC = () => {
           <Dashboard 
             dna={sharedDna} 
             user={null} 
-            onLoginRequest={() => {}} 
+            onLoginRequest={handleLogin}
             isSharedView={true}
             language={language}
           />
@@ -798,11 +728,12 @@ const App: React.FC = () => {
       {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} onOpenCoach={() => navigateTo('coach-profile')} onStartTest={() => navigateTo('dna-test')} onExploreTypes={() => navigateTo('role-gallery')} onOpenContent={() => navigateTo('content-hub')} />}
       {view === 'coach-profile' && <CoachProfile onStartTest={() => navigateTo('dna-test')} onBackToAbout={() => navigateTo('about-face')} />}
       {view === 'mirror-trade' && <MirrorTrade user={state.user} onLogin={handleLogin} />}
-      {view === 'member-home' && !FEATURE_FLAGS.dailyAwareness && <AwarenessUnavailable hasAssessmentResult={!!state.dna} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onBackHome={() => navigateTo('landing')} />}
+      {view === 'member-home' && !FEATURE_FLAGS.dailyAwareness && state.user && <MemberWorkspace userName={state.user.name} hasAssessmentResult={!!state.dna && hydratedMemberId === state.user.id} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onOpenGuide={() => navigateTo('survival-kit')} onOpenContent={() => navigateTo('content-hub')} onOpenGallery={() => navigateTo('role-gallery')} onOpenMirrorTrade={() => navigateTo('mirror-trade')} />}
+      {view === 'member-home' && !FEATURE_FLAGS.dailyAwareness && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">登入後可接續測驗結果、完整人格分析與會員內容。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">登入我的 FACE</button></div>}
       {view === 'member-home' && FEATURE_FLAGS.dailyAwareness && state.user && <MemberHome user={state.user} dna={state.dna} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onStartAwareness={() => void openDailyAwareness()} onOpenContent={() => navigateTo('content-hub')} onNicknameChange={(nickname) => setState((previous) => previous.user ? { ...previous, user: { ...previous.user, name: nickname } } : previous)} hasSurvivalKitAccess={hasSurvivalKitAccess} />}
       {view === 'member-home' && FEATURE_FLAGS.dailyAwareness && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">登入後可以保存測驗結果、回看變化，並使用 RATE 鏡相診股。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">登入並保存結果</button></div>}
       {view === 'result-preview' && <ResultPreview selectedCode={previewResultCode} onSelectCode={openResultPreview} onBackToList={backToResultPreviewList} language={language} onOpenDeepDive={() => openDailyAwareness()} onStartAwareness={openDailyAwareness} onRetest={() => navigateTo('dna-test')} />}
-      {view === 'reading-prototype' && <ReadingLayerPrototype />}
+      {view === 'reading-prototype' && <ReadingLayerPrototype showPrototypeControls={!!state.user} previewOnly={!state.user} onUnlock={handleLogin} />}
       {view === 'research-admin' && state.user && <ResearchAdmin />}
       {view === 'research-admin' && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">研究後台僅開放管理者帳號。請先登入。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">管理者登入</button></div>}
       {view === 'content-hub' && (
@@ -814,61 +745,38 @@ const App: React.FC = () => {
           onStartTest={() => navigateTo('dna-test')}
           onViewResult={() => state.dna ? navigateTo('dashboard') : navigateTo('dna-test')}
           onLoginRequest={handleLogin}
-          onOpenPricing={() => navigateTo('survival-kit')}
+          onOpenPricing={() => navigateTo('personal-trading-manual')}
           onOpenContent={openContent}
         />
       )}
 
-      {view === 'dashboard' && (!isLocalStateHydrated || isMemberResultLoading) && (
+      {view === 'dashboard' && (!isLocalStateHydrated || !isAuthResolved || isMemberResultLoading || (!!state.user && hydratedMemberId !== state.user.id && !memberResultError)) && (
         <section className="mx-auto max-w-2xl py-28 text-center" role="status" aria-live="polite">
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border border-[#CFC6B8] border-t-[#8C635B]" aria-hidden="true" />
           <p className="mt-6 text-sm leading-7 text-[#70665D]">正在找回你的 FACE 測驗結果…</p>
         </section>
       )}
 
-      {view === 'dashboard' && isLocalStateHydrated && !isMemberResultLoading && !state.dna && (
+      {view === 'dashboard' && state.user && memberResultError && !isMemberResultLoading && <section className="mx-auto max-w-2xl border border-[#B98A83] bg-[#F8EFED] px-7 py-14 text-center"><h1 className="serif text-3xl text-[#2D2D2D]">暫時無法讀取會員結果</h1><p className="mt-4 text-sm leading-7 text-[#70665D]">你的資料沒有被清除。請稍後重新整理，或確認網路連線。</p></section>}
+      {view === 'dashboard' && isLocalStateHydrated && isAuthResolved && !isMemberResultLoading && !memberResultError && (!state.user || hydratedMemberId === state.user.id) && !state.dna && (
         <section className="mx-auto max-w-2xl border border-[#D1D1C7] bg-[#FCFBF8] px-7 py-20 text-center sm:px-12">
           <p className="text-xs font-medium tracking-[0.24em] text-[#8C635B]">MY FACE</p>
           <h1 className="mt-5 serif text-4xl leading-[1.4] text-[#2D2D2D] sm:text-5xl">尚未完成 FACE 測驗</h1>
           <p className="mx-auto mt-6 max-w-lg text-base leading-8 text-[#70665D]">
-            完成 24 題後，這裡會顯示你的交易人格與四個決策面向。若你曾用其他帳號作答，請先登入正確帳號。
+            完成 24 題後，這裡會立即顯示你的交易人格、優勢與容易卡住的地方。
           </p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="mt-9 flex justify-center">
             <button type="button" onClick={() => navigateTo('dna-test')} className="bg-[#2D2D2D] px-8 py-4 text-sm font-medium text-white transition hover:bg-black">
               開始 FACE 測驗 →
             </button>
-            {!state.user && <button type="button" onClick={handleLogin} className="border border-[#8C7E6D] bg-white px-8 py-4 text-sm font-medium text-[#4A382D] transition hover:bg-[#F3F0EB]">
-              登入找回結果
-            </button>}
           </div>
         </section>
       )}
-      {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} isLoggedIn={!!state.user} hasSurvivalKitAccess={hasSurvivalKitAccess} onBack={() => navigateTo('content-hub')} onLoginRequest={handleLogin} onOpenPricing={() => navigateTo('survival-kit')} onOpenContent={openContent} onStartTest={() => navigateTo('dna-test')} />}
-      {view === 'survival-kit' && <section className="mx-auto max-w-6xl pb-28 pt-4 fade-in md:pt-10">
-        <button type="button" onClick={() => navigateTo('content-hub')} className="text-sm font-medium text-[#70665D] transition hover:text-[#2D2D2D]">← 回到內容中心</button>
-        {paymentStatus && (
-          <div className={`mt-7 border px-5 py-4 text-sm leading-7 ${paymentStatus === 'success' ? 'border-[#78947A] bg-[#EEF4EE] text-[#314D35]' : 'border-[#B98A83] bg-[#F8EFED] text-[#75463F]'}`} role="status">
-            {paymentStatus === 'success'
-              ? hasSurvivalKitAccess
-                ? '付款已完成，FACE 交易生存指南的內容權限已綁定到你的會員帳號。'
-                : '付款已完成，系統正在核對並開通你的會員權限。若稍後仍未更新，請保留訂單編號並聯絡我們。'
-              : paymentStatus === 'cancelled'
-                ? '你已返回 FACE，這筆付款尚未完成。'
-                : '付款未完成或驗證失敗，請重新操作；若已扣款請先聯絡我們確認。'}
-          </div>
-        )}
-        <header className="mx-auto max-w-3xl pb-10 pt-12 text-center md:pb-14 md:pt-16">
-          <p className="text-xs font-medium tracking-[0.28em] text-[#8C635B]">FACE SURVIVAL · EARLY ACCESS</p>
-          <h1 className="mt-5 serif text-4xl leading-[1.45] text-[#2D2D2D] md:text-6xl">把交易，慢慢整理成自己的方法</h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-[2] text-[#70665D] md:text-lg">為願意長期留在市場的人，準備一套可以閱讀、覺察、計畫與計算的交易整理系統。</p>
-        </header>
-        <SurvivalKitPricing
-          isLoggedIn={!!state.user}
-          hasAccess={hasSurvivalKitAccess}
-          onRequireLogin={handleLogin}
-          onOpenMemberAccess={() => navigateTo('member-home')}
-        />
-      </section>}
+      {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} isLoggedIn={!!state.user} hasSurvivalKitAccess={hasSurvivalKitAccess} onBack={() => navigateTo('content-hub')} onLoginRequest={handleLogin} onOpenPricing={() => navigateTo('personal-trading-manual')} onOpenContent={openContent} onStartTest={() => navigateTo('dna-test')} />}
+      {view === 'survival-kit' && <SurvivalGuideLanding />}
+      {view === 'survival-guide' && <SurvivalGuideReader onOpenManual={() => navigateTo('personal-trading-manual')} />}
+      {view === 'survival-guide-full' && <SurvivalGuideReader fullFree onOpenManual={() => navigateTo('personal-trading-manual')} />}
+      {view === 'personal-trading-manual' && <PersonalTradingManual isLoggedIn={!!state.user} onLogin={handleLogin} onOpenMemberHome={() => navigateTo('member-home')} />}
 
       {view === 'history' && (
         <div className="space-y-12 fade-in pb-40">
@@ -902,6 +810,8 @@ const App: React.FC = () => {
           showPrototypeControls={false}
           isUserType={!!state.dna && getFaceCode(state.dna) === selectedRoleCode}
           onBack={() => navigateTo('role-gallery')}
+          previewOnly={!state.user}
+          onUnlock={handleLogin}
         />
       )}
       {view === 'compatibility' && <CompatibilityWheel dna={state.dna} initialCode={new URLSearchParams(window.location.search).get('type')} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
@@ -910,8 +820,9 @@ const App: React.FC = () => {
       {view === 'refund-policy' && <LegalPage kind="refund" />}
       {view === 'data-deletion' && <LegalPage kind="data-deletion" />}
       {view === 'not-found' && <NotFoundPage onHome={() => navigateTo('landing')} onExploreTypes={() => navigateTo('role-gallery')} onOpenContent={() => navigateTo('content-hub')} />}
+      </React.Suspense>
     </ZenLayout>
-    {isAuthDialogOpen && <AuthDialog onClose={() => setIsAuthDialogOpen(false)} />}
+    {isAuthDialogOpen && <React.Suspense fallback={null}><AuthDialog onClose={() => setIsAuthDialogOpen(false)} /></React.Suspense>}
     </>
   );
 };

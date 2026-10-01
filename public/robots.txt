@@ -3,6 +3,8 @@ Allow: /
 Disallow: /test
 Disallow: /test-mockup
 Disallow: /my-result
+Disallow: /guide/line
+Disallow: /manual
 Disallow: /me
 Disallow: /daily-awareness
 Disallow: /daily-awareness-result
@@ -11,5 +13,9 @@ Disallow: /preview-results
 Disallow: /reading-prototype
 Disallow: /mirror-trade
 Disallow: /journal/
+Disallow: /types
+Disallow: /watch
+Disallow: /about
+Disallow: /coach
 
 Sitemap: https://faceyourself.vercel.app/sitemap.xml

@@ -1,6 +1,6 @@
 export const SITE_IDENTITY = {
-  publicName: 'FACE 如鏡／交易解憂 Bar',
-  brand: 'FACE 如鏡／交易解憂 Bar',
+  publicName: 'FACE Trader 知己交易',
+  brand: 'FACE Trader 知己交易',
   provider: 'NPC（個人經營）',
   email: 'face.trader.npc@gmail.com',
   address: '台北市大安區富陽街151巷5號四樓',

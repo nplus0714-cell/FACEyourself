@@ -124,7 +124,7 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
     description: content.summary,
   };
   if (path === '/') return {
-    title: 'FACE 交易心理測驗｜交易人格測驗，看懂你的交易心態與決策模式',
+    title: 'FACE Trader 知己交易｜交易人格測驗',
     description: 'FACE 交易心理測驗（交易人格測驗）：用 24 題看懂你的交易心態、決策邏輯與資金管理偏好，找到屬於你的 16 型交易人格。',
   };
   if (path === '/types') return {
@@ -144,23 +144,35 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
     description: '認識 FACE 的研究脈絡、交易心理觀點與內容創作背景。',
   };
   if (path === '/survival-kit') return {
-    title: 'FACE 交易生存指南｜個人交易使用說明書',
-    description: '把交易人格轉成風險、部位、紀律與情緒管理的實作方向。正式交付完成前暫不收款。',
+    title: '交易生存指南｜FACE Trader 知己交易',
+    description: '公開閱讀一篇生存篇，加入 LINE 並回覆「生存」，領取破繭與生存的完整網頁篇章。',
+  };
+  if (path === '/guide') return {
+    title: '交易生存指南公開試讀｜FACE Trader 知己交易',
+    description: '免費閱讀生存篇〈停損不是失敗，是入場費〉，了解破繭、生存、進攻與歸真的交易旅程。',
+  };
+  if (path === '/guide/line') return {
+    title: '破繭與生存完整篇章｜FACE Trader 知己交易',
+    description: 'LINE 領取的交易生存指南免費篇章。',
+  };
+  if (path === '/manual') return {
+    title: '個人交易使用說明書｜FACE Trader 知己交易',
+    description: '了解規劃中的進攻、歸真完整版、人格分析與交易輔助道具。',
   };
   if (path === '/privacy') return {
-    title: '隱私權政策｜FACE 如鏡／交易解憂 Bar',
-    description: '了解 FACE 如鏡如何收集、使用、保存與保護帳號、測驗、覺察及交易資料。',
+    title: '隱私權政策｜FACE Trader 知己交易',
+    description: '了解 FACE Trader 如何收集、使用、保存與保護帳號、測驗、覺察及交易資料。',
   };
   if (path === '/terms') return {
-    title: '使用條款｜FACE 如鏡／交易解憂 Bar',
-    description: 'FACE 如鏡網站、交易人格測驗、數位內容與付費服務的使用約定。',
+    title: '使用條款｜FACE Trader 知己交易',
+    description: 'FACE Trader 網站、交易人格測驗、數位內容與付費服務的使用約定。',
   };
   if (path === '/refund-policy') return {
-    title: '退款與取消政策｜FACE 如鏡／交易解憂 Bar',
+    title: '退款與取消政策｜FACE Trader 知己交易',
     description: 'FACE 數位內容的候補登記、交付、取消、退款條件與申請方式。',
   };
   if (path === '/data-deletion') return {
-    title: '帳號與資料刪除說明｜FACE 如鏡／交易解憂 Bar',
+    title: '帳號與資料刪除說明｜FACE Trader 知己交易',
     description: '申請刪除 FACE 帳號、測驗結果與自我覺察資料的方式及處理時間。',
   };
   if (path === '/test') return {
@@ -176,7 +188,7 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
     description: '保存 FACE 測驗結果與個人交易覺察紀錄。',
   };
   return {
-    title: 'FACE 交易人格測驗｜交易解憂 Bar',
+    title: 'FACE 交易人格測驗｜FACE Trader 知己交易',
     description: '看懂你的交易心理與決策模式，在不確定中建立適合自己的交易方式。',
   };
 };
@@ -187,6 +199,8 @@ const shouldNoIndex = (path: string, content?: ContentItem | null, isNotFound?: 
     '/test',
     '/test-mockup',
     '/my-result',
+    '/guide/line',
+    '/manual',
     '/me',
     '/daily-awareness',
     '/daily-awareness-result',
@@ -195,6 +209,10 @@ const shouldNoIndex = (path: string, content?: ContentItem | null, isNotFound?: 
     '/reading-prototype',
     '/mirror-trade',
     '/journal/',
+    '/types',
+    '/watch',
+    '/about',
+    '/coach',
   ].some((privatePath) => path === privatePath || path.startsWith(privatePath));
 };
 

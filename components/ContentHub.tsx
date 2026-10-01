@@ -30,12 +30,12 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
   const topicArticles = publishedArticles.filter((item) => item.channel === 'topic-articles');
 
   const openArticle = (item: ContentItem) => {
-    if (item.requiresLogin && !isLoggedIn) {
-      onLoginRequest();
-      return;
-    }
     if (item.requiresPurchase && !hasSurvivalKitAccess) {
       onOpenPricing();
+      return;
+    }
+    if (item.requiresLogin && !isLoggedIn) {
+      onLoginRequest();
       return;
     }
     onOpenContent(item);
@@ -48,8 +48,8 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
   };
 
   const getActionLabel = (item: ContentItem) => {
+    if (item.requiresPurchase && !hasSurvivalKitAccess) return '了解完整版規劃 →';
     if (item.requiresLogin && !isLoggedIn) return '登入閱讀 →';
-    if (item.requiresPurchase && !hasSurvivalKitAccess) return '查看方案 →';
     return '閱讀文章 →';
   };
 
@@ -62,20 +62,20 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
             <img src="/images/content-hub/survival-guide-cover.png" alt="金雕與北極熊閱讀 FACE 生存指南" className="absolute inset-0 h-full w-full object-cover saturate-125 contrast-105 transition duration-500 group-hover:scale-[1.03]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/90 via-[#211916]/32 to-[#211916]/5" />
             <div className="relative flex h-full max-w-md flex-col justify-end p-7 text-[#FFF9ED] md:p-10 [text-shadow:0_2px_14px_rgba(28,20,17,0.9)]">
-              <p className="text-xs font-normal tracking-[0.22em] text-[#70443C] [text-shadow:none]">FACE 交易生存指南</p>
+              <p className="text-xs font-normal tracking-[0.22em] text-[#70443C] [text-shadow:none]">FACE Trader · 交易生存指南</p>
               <h4 className="mt-4 serif text-4xl leading-[1.45] md:text-5xl">教你如何建構你的交易計畫</h4>
               <p className="mt-4 text-[15px] font-medium leading-[1.9] text-[#FFF9ED]/90 md:text-base">從破繭、生存、進攻到歸真，慢慢整理出一套你做得出來的交易過程。</p>
               <span className="mt-7 inline-block w-fit border-b border-[#FFF9ED]/80 pb-1 text-sm font-semibold">查看生存指南目錄 →</span>
             </div>
           </a>
           <a href="#topic-articles" className="group relative min-h-[320px] overflow-hidden border border-[#2D2D2D] bg-[#2D2D2D] shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-4 md:min-h-[360px]">
-            <img src="/images/content-hub/trading-bar-cover.png" alt="夜梟、獵豹與酒保在交易解憂 Bar 交談" className="absolute inset-0 h-full w-full object-cover saturate-125 contrast-105 transition duration-500 group-hover:scale-[1.03]" />
+            <img src="/images/content-hub/trading-bar-cover.png" alt="夜梟、獵豹與酒保討論交易" className="absolute inset-0 h-full w-full object-cover saturate-125 contrast-105 transition duration-500 group-hover:scale-[1.03]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/90 via-[#211916]/32 to-[#211916]/5" />
             <div className="relative flex h-full max-w-md flex-col justify-end p-7 text-[#FFF9ED] md:p-10 [text-shadow:0_2px_14px_rgba(28,20,17,0.9)]">
-              <p className="text-xs font-normal tracking-[0.22em] text-[#E9D39A] [text-shadow:none]">交易解憂 Bar</p>
+              <p className="text-xs font-normal tracking-[0.22em] text-[#E9D39A] [text-shadow:none]">FACE Trader · 交易主題文章</p>
               <h4 className="mt-4 serif text-4xl leading-[1.45] md:text-5xl">聊聊交易計畫以外的事情</h4>
               <p className="mt-4 text-[15px] font-medium leading-[1.9] text-[#FFF9ED]/90 md:text-base">追高、套牢、賣飛、停損。把心裡那句沒寫進交易計畫的話，先說清楚，隨時保持清醒交易。</p>
-              <span className="mt-7 inline-block w-fit border-b border-[#FFF9ED]/80 pb-1 text-sm font-semibold">查看交易解憂 Bar →</span>
+              <span className="mt-7 inline-block w-fit border-b border-[#FFF9ED]/80 pb-1 text-sm font-semibold">查看交易主題文章 →</span>
             </div>
           </a>
         </nav>
@@ -84,7 +84,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
           <div className="flex flex-col gap-3 border-l-2 border-[#A05F54] pl-5 md:flex-row md:items-end md:justify-between md:gap-8 md:pl-7">
             <div>
               <p className="text-xs font-medium tracking-[0.22em] text-[#A05F54]">TOPIC ARTICLES</p>
-              <h4 id="topic-articles-heading" className="mt-2 serif text-3xl text-[#2D2D2D] md:text-4xl">交易解憂 Bar</h4>
+              <h4 id="topic-articles-heading" className="mt-2 serif text-3xl text-[#2D2D2D] md:text-4xl">交易主題文章</h4>
             </div>
             <p className="max-w-2xl text-[15px] leading-[1.9] text-[#70665D] md:text-right md:text-base">從你現在最卡的問題開始：追高、套牢、賣飛、停損、部位、焦慮與交易復盤。</p>
           </div>
@@ -109,7 +109,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
           <div className="border-y border-[#D8D2CA] py-8 md:flex md:items-end md:justify-between md:gap-10 md:py-10">
             <div>
               <p className="text-xs font-medium tracking-[0.24em] text-[#A05F54]">FACE GUIDE · TABLE OF CONTENTS</p>
-              <h4 className="mt-3 serif text-3xl text-[#2D2D2D] md:text-5xl">FACE 生存指南</h4>
+              <h4 className="mt-3 serif text-3xl text-[#2D2D2D] md:text-5xl">交易生存指南</h4>
             </div>
             <p className="mt-5 max-w-2xl text-[15px] leading-[1.95] text-[#70665D] md:mt-0 md:text-right md:text-base">從破繭、生存、進攻到歸真，一步一步建構你的交易計畫。每一章都可直接閱讀、登入後閱讀，或取得方案後解鎖。</p>
           </div>
@@ -152,8 +152,8 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
           </div>
 
           <div className="mt-6 flex flex-col justify-between gap-5 border border-[#B9AA9D] bg-[#F7F1EC] p-6 md:flex-row md:items-center md:px-8">
-            <p className="max-w-2xl text-[15px] leading-[1.85] text-[#5F574F]">取得 FACE Survival 後，可閱讀完整生存指南，並把內容轉成適合你交易習慣的使用說明書。</p>
-            <a href="/survival-kit" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="shrink-0 bg-[#2D2D2D] px-6 py-3 text-center text-sm font-medium text-white transition hover:bg-[#3A302B]">查看方案與解鎖內容 →</a>
+            <p className="max-w-2xl text-[15px] leading-[1.85] text-[#5F574F]">破繭與生存先從免費章節開始；進攻與歸真的完整版規劃收錄於《個人交易使用說明書》。</p>
+            <a href="/manual" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="shrink-0 bg-[#2D2D2D] px-6 py-3 text-center text-sm font-medium text-white transition hover:bg-[#3A302B]">了解完整版規劃 →</a>
           </div>
         </section>
       </section>

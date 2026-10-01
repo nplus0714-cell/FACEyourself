@@ -3,7 +3,6 @@ import { AuthUser, Language } from '../types';
 import { translations } from '../i18n';
 import { FaceWordmark } from './FaceWordmark';
 import { SiteFooter } from './SiteFooter';
-import { FEATURE_FLAGS } from '../config/featureFlags';
 
 interface ZenLayoutProps {
   children: React.ReactNode;
@@ -14,6 +13,7 @@ interface ZenLayoutProps {
   onLogin?: () => void;
   onLogout?: () => void;
   showNav?: boolean;
+  showAccountActions?: boolean;
   activeView?: string;
   onViewChange?: (view: any) => void;
   isLanding?: boolean;
@@ -30,6 +30,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   onLogin, 
   onLogout,
   showNav,
+  showAccountActions = true,
   activeView,
   onViewChange,
   isLanding,
@@ -68,7 +69,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
         
         {/* Header - 質感深度優化 */}
         <header className={`${isAssessmentView ? 'mb-5 md:mb-8' : isLanding ? 'mb-0' : 'mb-10 md:mb-16'} text-center relative`}>
-          <div className="flex justify-between items-center gap-3 mb-7 md:mb-9">
+          <div className={`flex items-center gap-3 mb-7 md:mb-9 ${showAccountActions ? 'justify-between' : 'justify-center'}`}>
             <a
               href="/"
               className="group flex items-center gap-3"
@@ -79,7 +80,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                <FaceWordmark className="h-[3.25rem] w-[8.25rem] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 sm:h-[3.875rem] sm:w-[9.75rem]" />
             </a>
 
-            <div className="flex shrink-0 items-center gap-2 sm:gap-6">
+            {showAccountActions && <div className="flex shrink-0 items-center gap-2 sm:gap-6">
               {user ? (
                 <div 
                   className="relative -mb-3 pb-3"
@@ -129,7 +130,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                   {t.common.login}
                 </button>
               )}
-            </div>
+            </div>}
           </div>
 
           {/* Nav */}
@@ -164,11 +165,11 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                   {t.nav.watch}
                 </a>
                 <button
-                  onClick={() => FEATURE_FLAGS.dailyAwareness ? (user ? onViewChange('member-home') : onLogin?.()) : onViewChange('member-home')}
+                  onClick={() => user ? onViewChange('member-home') : onLogin?.()}
                   className={`shrink-0 snap-start whitespace-nowrap border-b-2 px-0.5 pb-4 transition-all hover:text-[#2D2D2D] md:px-1 md:pb-5 ${activeView === 'member-home' ? 'border-[#2D2D2D] font-black text-[#2D2D2D]' : 'border-transparent text-[#8C7E6D]'}`}
-                  aria-label={FEATURE_FLAGS.dailyAwareness ? (user ? '進入 FACE 自我覺察日記' : '登入後使用 FACE 自我覺察日記') : 'FACE 自我覺察日記尚未開放'}
+                  aria-label={user ? '前往我的 FACE' : '登入後前往我的 FACE'}
                 >
-                  覺察日記{!FEATURE_FLAGS.dailyAwareness && <span className="ml-1 text-[10px] tracking-normal text-[#A28A7D]">尚未開放</span>}
+                  我的 FACE
                 </button>
             </nav>
           )}

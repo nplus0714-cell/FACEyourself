@@ -1,10 +1,22 @@
-type FunnelEventType = 'test_landing' | 'test_started' | 'test_completed';
+type FunnelEventType =
+  | 'quiz_landing_view'
+  | 'quiz_start'
+  | 'quiz_question_progress'
+  | 'quiz_complete'
+  | 'result_view'
+  | 'result_share_click'
+  | 'result_feedback_click'
+  | 'survival_guide_click'
+  | 'line_click'
+  | 'guide_access'
+  | 'guide_read_start';
 
 type FunnelPayload = {
   anonymousVisitorId?: string;
   sessionId?: string;
   eventType?: FunnelEventType;
   path?: string;
+  step?: number;
   attribution?: {
     source?: string;
     medium?: string;
@@ -28,7 +40,19 @@ type VercelResponseLike = {
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SAFE_VALUE_PATTERN = /^[a-z0-9][a-z0-9_-]{0,119}$/;
 const SAFE_PATH_PATTERN = /^\/[a-z0-9/_-]{0,180}$/;
-const EVENT_TYPES = new Set<FunnelEventType>(['test_landing', 'test_started', 'test_completed']);
+const EVENT_TYPES = new Set<FunnelEventType>([
+  'quiz_landing_view',
+  'quiz_start',
+  'quiz_question_progress',
+  'quiz_complete',
+  'result_view',
+  'result_share_click',
+  'result_feedback_click',
+  'survival_guide_click',
+  'line_click',
+  'guide_access',
+  'guide_read_start',
+]);
 
 const firstHeader = (value: string | string[] | undefined): string | undefined =>
   Array.isArray(value) ? value[0] : value;
@@ -91,8 +115,11 @@ export default async function handler(
     const sessionId = body.sessionId?.trim();
     const eventType = body.eventType;
     const path = body.path?.trim() || '/test';
+    const step = body.step;
     if (!visitorId || !sessionId || !UUID_PATTERN.test(visitorId) || !UUID_PATTERN.test(sessionId)
-      || !eventType || !EVENT_TYPES.has(eventType) || !SAFE_PATH_PATTERN.test(path)) {
+      || !eventType || !EVENT_TYPES.has(eventType) || !SAFE_PATH_PATTERN.test(path)
+      || (step !== undefined && (!Number.isInteger(step) || step < 1 || step > 24))
+      || (eventType === 'quiz_question_progress' && step === undefined)) {
       throw new Error('INVALID_FUNNEL_EVENT');
     }
 
@@ -113,6 +140,7 @@ export default async function handler(
         p_session_id: sessionId,
         p_event_type: eventType,
         p_path: path,
+        p_step: step ?? null,
         p_has_attribution: Boolean(source || medium || campaign || content),
         p_source: source,
         p_medium: medium,

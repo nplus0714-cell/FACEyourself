@@ -1,5 +1,5 @@
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { FaceScores, ReportContent, AuthUser, DiaryEntry, Language, FaceDimension, FaceTrait } from '../types';
+import { FaceScores, ReportContent, AuthUser, DiaryEntry, Language } from '../types';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { generateDynamicReport } from '../services/geminiService';
 import { ShareModal } from './ShareModal';
@@ -7,6 +7,7 @@ import { ReadingLayerPrototype } from './ReadingLayerPrototype';
 import { Compass, FileText, MessageCircle, PlayCircle } from 'lucide-react';
 import { translations } from '../i18n';
 import { submitNpcQuestion } from '../services/npcQuestionService';
+import { getFaceRadarData, getFaceScorePairs } from '../lib/faceScorePresentation';
 
 interface DashboardProps {
   dna: FaceScores;
@@ -29,11 +30,6 @@ interface DashboardProps {
   isSharedView?: boolean;
   language: Language;
 }
-
-const calcRatio = (v1: number, v2: number) => {
-  const total = v1 + v2;
-  return total === 0 ? 50 : Math.round((v1 / total) * 100);
-};
 
 const NPC_PROMPTS = [
   '這個結果真的像我嗎？',
@@ -129,7 +125,7 @@ const NpcQuestionSection: React.FC<NpcQuestionSectionProps> = ({ faceCode, initi
           <p className="text-[11px] font-bold tracking-[0.28em] text-[#D2B8A2]">TRADING WORRY-FREE BAR</p>
           <h2 id="ask-npc-heading" className="mt-4 serif text-4xl leading-tight sm:text-5xl">問問 NPC</h2>
           <p className="mt-7 max-w-md serif text-xl font-medium leading-9 text-[#F5E9DC]">
-            交易解憂 Bar，是一個聊交易，也聊交易裡的自己的地方。
+            FACE Trader，是一個聊交易，也聊交易裡的自己的地方。
           </p>
           <div className="mt-6 max-w-md space-y-4 text-sm leading-7 text-[#DCCFC5] sm:text-base sm:leading-8">
             <p>我是 NPC。我想陪你看懂那些反覆卡住你的交易問題，慢慢找到更適合自己的交易方式。</p>
@@ -257,39 +253,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
     }
   }, [daily, dna, profile, staticReport]);
 
-  const radarData = useMemo(() => [
-    { subject: '積極 A', base: dna.A, current: daily?.A ?? dna.A },
-    { subject: '理性 R', base: dna.R, current: daily?.R ?? dna.R },
-    { subject: '長期 L', base: dna.L, current: daily?.L ?? dna.L },
-    { subject: '集中 C', base: dna.C, current: daily?.C ?? dna.C },
-    { subject: '保守 P', base: dna.P, current: daily?.P ?? dna.P },
-    { subject: '感性 I', base: dna.I, current: daily?.I ?? dna.I },
-    { subject: '交易 T', base: dna.T, current: daily?.T ?? dna.T },
-    { subject: '分散 D', base: dna.D, current: daily?.D ?? dna.D },
-  ], [dna, daily]);
+  const radarData = useMemo(() => getFaceRadarData(dna, daily), [dna, daily]);
 
   const faceData = useMemo(() => {
     const scores = daily || dna;
-    const getPairData = (dimension: FaceDimension, label: string, l1Name: string, l1Key: FaceTrait, l2Name: string, l2Key: FaceTrait) => {
-      const v1 = calcRatio(scores[l1Key], scores[l2Key]);
-      const v2 = 100 - v1;
-      return {
-        dimension,
-        label,
-        l1Name,
-        l2Name,
-        v1,
-        v2,
-        isBalanced: v1 >= 45 && v1 <= 55,
-        confidence: daily ? null : dna.assessmentMeta?.confidenceByDimension[dimension] ?? null,
-      };
-    };
-    return [
-      getPairData('FOCUS', '獲利動機', '積極型 (A)', 'A', '保守型 (P)', 'P'),
-      getPairData('ANALYSIS', '決策邏輯', '理性數據 (R)', 'R', '感應直覺 (I)', 'I'),
-      getPairData('CYCLE', '交易週期', '長期投資 (L)', 'L', '短期投機 (T)', 'T'),
-      getPairData('EXPOSURE', '資金管理', '集中 (C)', 'C', '分散 (D)', 'D'),
-    ];
+    return getFaceScorePairs(scores, !daily);
   }, [dna, daily]);
 
   const skippedScenarioCount = dna.assessmentMeta?.skippedQuestionIds.length ?? 0;
@@ -359,6 +327,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
             profileCode={code}
             showPrototypeControls={false}
             isUserType={!isSharedView}
+            previewOnly={isSharedView && !user}
+            onUnlock={onLoginRequest}
             onShareResult={() => setIsShareModalOpen(true)}
             onRetest={onRetest}
             onViewGallery={onGoToGallery}
@@ -374,7 +344,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
               <div className="max-w-2xl">
                 <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">NEXT STEPS · {profile.code}</p>
                 <h2 id="result-next-steps-heading" className="mt-3 serif text-3xl leading-[1.5] text-[#2D2D2D] md:text-4xl">從看見自己，走到下一個適合你的動作</h2>
-                <p className="mt-4 text-sm leading-7 text-[#70665D] md:text-base">不需要一次做完。你可以先從內容開始；想把觀察變成方法時，再回來使用 FACE Survival 或申請一對一初談。</p>
+                <p className="mt-4 text-sm leading-7 text-[#70665D] md:text-base">不需要一次做完。你可以先從《交易生存指南》開始，把這份人格分析轉成面對市場時能使用的原則；其他內容可按需要慢慢探索。</p>
               </div>
 
               <div className="mt-8 grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] md:grid-cols-2">
@@ -396,10 +366,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
 
                 <button type="button" onClick={onOpenPricing} className="group bg-white p-6 text-left transition hover:bg-[#F7F4EF] md:p-7">
                   <Compass size={24} strokeWidth={1.5} className="text-[#8C635B]" aria-hidden="true" />
-                  <p className="mt-6 text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">FACE SURVIVAL</p>
+                  <p className="mt-6 text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">TRADING SURVIVAL GUIDE</p>
                   <h3 className="mt-3 serif text-2xl text-[#2D2D2D]">把觀察整理成可持續的方法</h3>
                   <p className="mt-3 text-sm leading-7 text-[#70665D]">從生存、計畫到覺察，先用一套通用框架，替每一次決定留下一個可以回看的依據。</p>
-                  <span className="mt-6 inline-flex text-sm font-bold text-[#2D2D2D] transition group-hover:text-[#8C635B]">查看 FACE 生存指南 →</span>
+                  <span className="mt-6 inline-flex text-sm font-bold text-[#2D2D2D] transition group-hover:text-[#8C635B]">查看交易生存指南 →</span>
                 </button>
 
                 <button type="button" onClick={onOpenCoach} className="group bg-[#2D2D2D] p-6 text-left text-white transition hover:bg-[#3A302B] md:p-7">

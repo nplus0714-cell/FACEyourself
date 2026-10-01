@@ -1,9 +1,26 @@
 import { getAnonymousVisitorId } from './assessmentPersistence';
 
-export type FunnelEventType = 'test_landing' | 'test_started' | 'test_completed';
+export type FunnelEventType =
+  | 'quiz_landing_view'
+  | 'quiz_start'
+  | 'quiz_question_progress'
+  | 'quiz_complete'
+  | 'result_view'
+  | 'result_share_click'
+  | 'result_feedback_click'
+  | 'survival_guide_click'
+  | 'line_click'
+  | 'guide_access'
+  | 'guide_read_start';
+
+interface FunnelEventOptions {
+  step?: number;
+  once?: boolean;
+}
 
 const SESSION_ID_KEY = 'face_funnel_session_id_v1';
-const trackedEvents = new Set<FunnelEventType>();
+const ATTRIBUTION_KEY = 'face_funnel_attribution_v1';
+const trackedEvents = new Set<string>();
 
 const getFunnelSessionId = (): string => {
   const existing = sessionStorage.getItem(SESSION_ID_KEY);
@@ -13,23 +30,35 @@ const getFunnelSessionId = (): string => {
   return sessionId;
 };
 
-const getAttribution = () => {
+const readAttribution = (): Record<string, string | undefined> => {
   const params = new URLSearchParams(window.location.search);
-  return {
+  const current = {
     source: params.get('utm_source') ?? undefined,
     medium: params.get('utm_medium') ?? undefined,
     campaign: params.get('utm_campaign') ?? undefined,
     content: params.get('utm_content') ?? undefined,
   };
+
+  if (Object.values(current).some(Boolean)) {
+    try { sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(current)); } catch { /* best effort */ }
+    return current;
+  }
+
+  try {
+    return JSON.parse(sessionStorage.getItem(ATTRIBUTION_KEY) ?? '{}') as Record<string, string | undefined>;
+  } catch {
+    return current;
+  }
 };
 
 /**
  * Best-effort anonymous funnel tracking. It never includes assessment answers,
  * names, email addresses, referrer URLs, or authentication tokens.
  */
-export const trackTestFunnelEvent = (eventType: FunnelEventType): void => {
-  if (trackedEvents.has(eventType)) return;
-  trackedEvents.add(eventType);
+export const trackFunnelEvent = (eventType: FunnelEventType, options: FunnelEventOptions = {}): void => {
+  const eventKey = `${eventType}:${options.step ?? ''}`;
+  if (options.once !== false && trackedEvents.has(eventKey)) return;
+  trackedEvents.add(eventKey);
 
   try {
     void fetch('/api/analytics/funnel', {
@@ -41,9 +70,11 @@ export const trackTestFunnelEvent = (eventType: FunnelEventType): void => {
         sessionId: getFunnelSessionId(),
         eventType,
         path: window.location.pathname,
-        attribution: getAttribution(),
+        step: options.step,
+        attribution: readAttribution(),
       }),
     }).then((response) => {
+      if (import.meta.env.DEV && response.status === 404) return;
       if (!response.ok) throw new Error(`Funnel tracking failed (${response.status})`);
     }).catch((error) => console.warn('Unable to record anonymous funnel event', error));
   } catch (error) {
@@ -52,3 +83,6 @@ export const trackTestFunnelEvent = (eventType: FunnelEventType): void => {
     console.warn('Unable to prepare anonymous funnel event', error);
   }
 };
+
+/** @deprecated Use trackFunnelEvent with the V1 funnel event names. */
+export const trackTestFunnelEvent = trackFunnelEvent;
