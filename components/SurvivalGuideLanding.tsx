@@ -52,8 +52,8 @@ export const SurvivalGuideLanding: React.FC = () => (
     <section className="mx-auto mt-12 max-w-3xl bg-[#2D2D2D] px-7 py-10 text-center text-white sm:px-12" aria-labelledby="line-steps-title">
       <p className="text-xs font-bold tracking-[0.2em] text-[#D9C7A9]">免費領取</p>
       <h2 id="line-steps-title" className="mt-4 serif text-3xl leading-[1.5] sm:text-4xl">加入 LINE，回覆「生存」</h2>
-      <p className="mt-5 text-sm leading-8 text-white/75">你會收到網頁閱讀連結：破繭與生存的完整篇章，以及進攻與歸真的試讀內容。</p>
-      <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackFunnelEvent('line_click')} className="mt-8 inline-flex min-h-14 w-full max-w-sm items-center justify-center bg-white px-7 py-4 text-base font-bold text-[#2D2D2D] transition hover:bg-[#D9C7A9]">加入 LINE，領取免費章節 →</a>
+      <p className="mt-5 text-sm leading-8 text-white/75">在 LINE 回覆「生存」，向我們索取網頁閱讀連結：破繭與生存的完整篇章，以及進攻與歸真的試讀內容。</p>
+      <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackFunnelEvent('line_click')} className="mt-8 inline-flex min-h-14 w-full max-w-sm items-center justify-center bg-white px-7 py-4 text-base font-bold text-[#2D2D2D] transition hover:bg-[#D9C7A9]">前往 LINE 索取免費章節 →</a>
     </section>
   </div>
 );

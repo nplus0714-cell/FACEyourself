@@ -39,7 +39,7 @@ export const SurvivalGuideReader: React.FC<SurvivalGuideReaderProps> = ({ fullFr
         <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-[#625A53]">{fullFree ? '破繭與生存完整閱讀｜進攻與歸真試讀' : '公開試讀｜先讀一篇生存篇，再決定要不要領取更多'}</p>
       </header>
 
-      {!fullFree && <section className="mx-auto max-w-3xl py-9 text-center"><p className="text-sm leading-8 text-[#70665D]">這裡公開一篇〈停損不是失敗，是入場費〉。加入 LINE 並回覆「生存」，即可收到破繭與生存完整篇章的閱讀連結。</p><a href="/survival-kit" className="mt-5 inline-flex bg-[#2D2D2D] px-7 py-3 text-sm font-bold text-white">前往 LINE 領取方式 →</a></section>}
+      {!fullFree && <section className="mx-auto max-w-3xl py-9 text-center"><p className="text-sm leading-8 text-[#70665D]">這裡公開一篇〈停損不是失敗，是入場費〉。加入 LINE 並回覆「生存」，向我們索取破繭與生存完整篇章的閱讀連結。</p><a href="/survival-kit" className="mt-5 inline-flex bg-[#2D2D2D] px-7 py-3 text-sm font-bold text-white">前往 LINE 領取方式 →</a></section>}
 
       {!fullFree && <section id="sample" className="scroll-mt-6 border border-[#D1D1C7] bg-white p-6 sm:p-10" aria-labelledby="sample-title">
         <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">生存篇 · 公開完整試讀</p>
