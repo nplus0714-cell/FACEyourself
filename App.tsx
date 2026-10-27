@@ -167,6 +167,7 @@ const App: React.FC = () => {
   const [isMemberResultLoading, setIsMemberResultLoading] = useState(false);
   const [hydratedMemberId, setHydratedMemberId] = useState<string | null>(null);
   const [memberResultError, setMemberResultError] = useState(false);
+  const [resultSaveStatus, setResultSaveStatus] = useState<'cloud' | 'browser' | 'memory' | null>(null);
   const recordedActivityRef = useRef(new Set<string>());
   
   const navigateTo = (nextView: AppView) => {
@@ -497,7 +498,8 @@ const App: React.FC = () => {
     }
   };
 
-  const handleDnaComplete = (scores: FaceScores) => {
+  const handleDnaComplete = (scores: FaceScores, saveStatus: 'cloud' | 'browser' | 'memory') => {
+    setResultSaveStatus(saveStatus);
     const baseline: DiaryEntry = { 
       id: 'dna-' + Date.now(), 
       date: new Date().toLocaleDateString('zh-TW'), 
@@ -695,7 +697,7 @@ const App: React.FC = () => {
               language={language}
             />
           </div>
-        ) : <FunnelResult dna={state.dna} onOpenGuide={() => navigateTo('survival-kit')} onLogin={handleLogin} />
+        ) : <FunnelResult dna={state.dna} saveStatus={resultSaveStatus} onOpenGuide={() => navigateTo('survival-kit')} onLogin={handleLogin} />
       )}
 
       {view === 'shared-dashboard' && sharedDna && (

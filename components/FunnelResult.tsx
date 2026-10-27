@@ -9,6 +9,7 @@ import { ReadingLayerPrototype } from './ReadingLayerPrototype';
 
 interface FunnelResultProps {
   dna: FaceScores;
+  saveStatus?: 'cloud' | 'browser' | 'memory' | null;
   onOpenGuide: () => void;
   onLogin: () => void;
   initialEmail?: string;
@@ -16,7 +17,7 @@ interface FunnelResultProps {
 
 const MESSAGE_TOPICS = ['交易疑問', '內容疑問', '網站建議', '其他'] as const;
 
-export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, onOpenGuide, onLogin, initialEmail = '' }) => {
+export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onOpenGuide, onLogin, initialEmail = '' }) => {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -48,6 +49,8 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, onOpenGuide, on
 
   return (
     <div className="mx-auto max-w-5xl pb-20 fade-in">
+      {saveStatus === 'browser' && <p role="alert" className="mb-6 border border-[#B98A83] bg-[#F8EFED] px-5 py-4 text-sm leading-7 text-[#744A44]">雲端暫時無法保存這次測驗。結果已暫存在這個瀏覽器；請勿清除瀏覽資料。服務恢復後，登入時會再嘗試存入帳號。</p>}
+      {saveStatus === 'memory' && <p role="alert" className="mb-6 border border-[#B98A83] bg-[#F8EFED] px-5 py-4 text-sm leading-7 text-[#744A44]">這次結果目前無法保存到雲端或此瀏覽器。請先留在本頁閱讀，離開或重新整理後可能需要重新測驗。</p>}
       <ReadingLayerPrototype
         profileCode={code}
         showPrototypeControls={false}

@@ -6,7 +6,6 @@ import {
   FACE_V2_AGREEMENT_SCALE,
 } from '../data/faceQuestionsV2';
 import {
-  AssessmentPersistenceError,
   completeFaceAssessmentRun,
   startAssessmentRun,
 } from '../services/assessmentPersistence';
@@ -118,7 +117,7 @@ const LOCAL_PENDING_ASSESSMENT_KEY = 'face_pending_assessment_v3';
 const cacheCompletedAssessment = (
   answers: Record<string, FaceResponse>,
   scores: FaceScores,
-): void => {
+): boolean => {
   try {
     localStorage.setItem(LOCAL_PENDING_ASSESSMENT_KEY, JSON.stringify({
       assessmentVersion: FACE_BASELINE_V2_VERSION,
@@ -126,10 +125,12 @@ const cacheCompletedAssessment = (
       scores,
       savedAt: new Date().toISOString(),
     }));
+    return true;
   } catch (error) {
     // The result is still passed back to App below. This only affects the
     // browser backup when storage is unavailable or full.
     console.warn('Unable to cache FACE assessment locally', error);
+    return false;
   }
 };
 
@@ -228,7 +229,7 @@ const calculateScores = (answers: Record<string, FaceResponse>): { scores: FaceS
 };
 
 interface FaceAssessmentProps {
-  onComplete: (scores: FaceScores) => void;
+  onComplete: (scores: FaceScores, saveStatus: 'cloud' | 'browser' | 'memory') => void;
 }
 
 export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) => {
@@ -236,7 +237,6 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
   const [step, setStep] = useState(initialProgress?.step ?? 0);
   const [answers, setAnswers] = useState<Record<string, FaceResponse>>(initialProgress?.answers ?? {});
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
   const clientRunIdRef = useRef<string | null>(null);
   const runIdRef = useRef<string | null>(null);
   const runPromiseRef = useRef<Promise<string> | null>(null);
@@ -271,23 +271,26 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
 
   const finish = async (completedAnswers: Record<string, FaceResponse>) => {
     setIsSaving(true);
-    setSaveError(null);
     const { scores, scoreValues } = calculateScores(completedAnswers);
 
     // Keep an anonymous browser copy before attempting the cloud write.
     // App also saves the final result card into its persisted local state.
-    cacheCompletedAssessment(completedAnswers, scores);
+    const cachedInBrowser = cacheCompletedAssessment(completedAnswers, scores);
     clearLocalAssessmentProgress();
 
     try {
       const runId = await getOrStartRun();
       await completeFaceAssessmentRun(runId, FACE_BASELINE_V2_QUESTIONS, completedAnswers, scores, scoreValues);
       trackFunnelEvent('quiz_complete');
-      const { data: { session } } = await getSupabaseClient().auth.getSession();
-      if (session?.user && !session.user.is_anonymous) {
-        localStorage.removeItem(LOCAL_PENDING_ASSESSMENT_KEY);
+      try {
+        const { data: { session } } = await getSupabaseClient().auth.getSession();
+        if (session?.user && !session.user.is_anonymous) {
+          localStorage.removeItem(LOCAL_PENDING_ASSESSMENT_KEY);
+        }
+      } catch (error) {
+        console.warn('Unable to check the current session after saving the assessment', error);
       }
-      onComplete(scores);
+      onComplete(scores, 'cloud');
     } catch (error) {
       console.error('Failed to persist FACE 24q assessment', error);
 
@@ -295,14 +298,8 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
       // cloud write is unavailable. The browser copy remains available until
       // a future signed-in account can merge it.
       trackFunnelEvent('quiz_complete');
-      onComplete(scores);
+      onComplete(scores, cachedInBrowser ? 'browser' : 'memory');
       return;
-
-      setSaveError(
-        error instanceof AssessmentPersistenceError
-          ? error.message
-          : '無法保存這次測驗，請確認網路後再試一次。',
-      );
     } finally {
       setIsSaving(false);
     }
@@ -525,14 +522,6 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
         )}
 
         {isSaving && <p className="text-center text-sm tracking-[0.15em] text-[#8C7E6D]" role="status">正在保存你的測驗結果…</p>}
-        {saveError && (
-          <div className="space-y-3 text-center" role="alert">
-            <p className="text-sm text-[#8C635B]">{saveError}</p>
-            <button type="button" onClick={() => void finish(answers)} className="border border-[#8C635B] px-6 py-3 text-xs tracking-[0.15em] text-[#8C635B] transition-colors hover:bg-[#8C635B] hover:text-white">
-              重新嘗試保存
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

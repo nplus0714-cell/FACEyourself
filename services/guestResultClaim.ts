@@ -9,6 +9,7 @@ import {
   FACE_BASELINE_V2_VERSION,
 } from '../data/faceQuestionsV2';
 import { completeFaceAssessmentRun, startAssessmentRun } from './assessmentPersistence';
+import { getSupabaseClient } from '../lib/supabase';
 import type { AssessmentAnswer, FaceQuestion, FaceScores } from '../types';
 
 type PendingAssessment = {
@@ -16,6 +17,7 @@ type PendingAssessment = {
   answers: Record<string, AssessmentAnswer['selected_option']>;
   scores: FaceScores;
   savedAt: string;
+  claim?: { userId: string; runId: string };
 };
 
 const PENDING_ASSESSMENTS: Array<{
@@ -51,6 +53,7 @@ const gradedValues: Partial<Record<AssessmentAnswer['selected_option'], number>>
   very_b: 0,
   not_applicable: 0,
 };
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const isPendingAssessment = (value: unknown, version: string): value is PendingAssessment => {
   if (!value || typeof value !== 'object') return false;
@@ -68,6 +71,11 @@ const getScoreValue = (question: FaceQuestion, answer: AssessmentAnswer['selecte
 /** Copies completed guest results into the account selected by the visitor. */
 export const claimPendingGuestAssessment = async (): Promise<boolean> => {
   let claimedAny = false;
+  const { data: { session }, error } = await getSupabaseClient().auth.getSession();
+  if (error || !session?.user || session.user.is_anonymous) {
+    throw new Error('A member session is required to claim a guest assessment.');
+  }
+  const memberId = session.user.id;
 
   for (const source of PENDING_ASSESSMENTS) {
     const raw = localStorage.getItem(source.storageKey);
@@ -87,7 +95,18 @@ export const claimPendingGuestAssessment = async (): Promise<boolean> => {
       return [question.id, getScoreValue(question, answer)];
     }));
 
-    const runId = await startAssessmentRun(crypto.randomUUID(), source.version, source.questionCount);
+    // Keep the same run ID across retries. A lost response after the server
+    // saved the result must not create a duplicate assessment on refresh.
+    const canReuseClaim = pending.claim?.userId === memberId
+      && UUID_PATTERN.test(pending.claim.runId);
+    const claimRunId = canReuseClaim
+      ? pending.claim.runId
+      : crypto.randomUUID();
+    if (!canReuseClaim) {
+      pending = { ...pending, claim: { userId: memberId, runId: claimRunId } };
+      localStorage.setItem(source.storageKey, JSON.stringify(pending));
+    }
+    const runId = await startAssessmentRun(claimRunId, source.version, source.questionCount);
     await completeFaceAssessmentRun(runId, source.questions, pending.answers, pending.scores, scoreValues);
     localStorage.removeItem(source.storageKey);
     claimedAny = true;
