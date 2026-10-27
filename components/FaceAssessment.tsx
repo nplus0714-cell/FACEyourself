@@ -113,6 +113,21 @@ const emptyDimensionCounts = (): Record<FaceDimension, number> => ({
   EXPOSURE: 0,
 });
 const LOCAL_PENDING_ASSESSMENT_KEY = 'face_pending_assessment_v3';
+const CLOUD_SAVE_TIMEOUT_MS = 12_000;
+
+const waitForCloudSave = async (save: Promise<unknown>): Promise<void> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      save,
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('Assessment cloud save timed out.')), CLOUD_SAVE_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
 
 const cacheCompletedAssessment = (
   answers: Record<string, FaceResponse>,
@@ -279,17 +294,16 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
     clearLocalAssessmentProgress();
 
     try {
-      const runId = await getOrStartRun();
-      await completeFaceAssessmentRun(runId, FACE_BASELINE_V2_QUESTIONS, completedAnswers, scores, scoreValues);
+      await waitForCloudSave((async () => {
+        const runId = await getOrStartRun();
+        await completeFaceAssessmentRun(runId, FACE_BASELINE_V2_QUESTIONS, completedAnswers, scores, scoreValues);
+      })());
       trackFunnelEvent('quiz_complete');
-      try {
-        const { data: { session } } = await getSupabaseClient().auth.getSession();
-        if (session?.user && !session.user.is_anonymous) {
-          localStorage.removeItem(LOCAL_PENDING_ASSESSMENT_KEY);
-        }
-      } catch (error) {
-        console.warn('Unable to check the current session after saving the assessment', error);
-      }
+      void getSupabaseClient().auth.getSession()
+        .then(({ data: { session } }) => {
+          if (session?.user && !session.user.is_anonymous) localStorage.removeItem(LOCAL_PENDING_ASSESSMENT_KEY);
+        })
+        .catch((error) => console.warn('Unable to check the current session after saving the assessment', error));
       onComplete(scores, 'cloud');
     } catch (error) {
       console.error('Failed to persist FACE 24q assessment', error);
