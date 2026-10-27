@@ -71,6 +71,7 @@ const getScoreValue = (question: FaceQuestion, answer: AssessmentAnswer['selecte
 /** Copies completed guest results into the account selected by the visitor. */
 export const claimPendingGuestAssessment = async (): Promise<boolean> => {
   let claimedAny = false;
+  if (!PENDING_ASSESSMENTS.some((source) => localStorage.getItem(source.storageKey))) return false;
   const { data: { session }, error } = await getSupabaseClient().auth.getSession();
   if (error || !session?.user || session.user.is_anonymous) {
     throw new Error('A member session is required to claim a guest assessment.');

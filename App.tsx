@@ -373,7 +373,8 @@ const App: React.FC = () => {
     setMemberResultError(false);
     void (async () => {
       try {
-        await claimPendingGuestAssessment();
+        const claimed = await claimPendingGuestAssessment();
+        if (active && claimed) setResultSaveStatus('cloud');
       } catch (error) {
         console.warn('Unable to claim the guest result yet', error);
       }
@@ -661,6 +662,8 @@ const App: React.FC = () => {
       {view === 'dashboard' && state.dna && isAuthResolved && !isMemberResultLoading && (!state.user || hydratedMemberId === state.user.id) && (
         state.user ? (
           <div className="space-y-8">
+            {resultSaveStatus === 'browser' && <p role="alert" className="border border-[#B98A83] bg-[#F8EFED] px-5 py-4 text-sm leading-7 text-[#744A44]">雲端暫時無法保存這次測驗。結果已暫存在這個瀏覽器；請勿清除瀏覽資料。服務恢復後，重新整理頁面即可再嘗試存入帳號。</p>}
+            {resultSaveStatus === 'memory' && <p role="alert" className="border border-[#B98A83] bg-[#F8EFED] px-5 py-4 text-sm leading-7 text-[#744A44]">這次結果目前無法保存到帳號或此瀏覽器。離開或重新整理後可能需要重新測驗。</p>}
             <div className="border border-[#D1D1C7] bg-[#FCFBF8] px-6 py-6 sm:px-9">
               <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">FACE Trader · 會員深度解讀</p>
               <p className="mt-3 text-sm leading-7 text-[#70665D]">這是你在公開結果頁看到的同一份測驗，現在可以往下看完整人格分析。指南與後續工具也會接續這份結果。</p>
