@@ -1,13 +1,10 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { CONTENT_CATALOG } from '../data/contentCatalog';
-import { trackFunnelEvent } from '../services/funnelAnalytics';
-
-const LINE_URL = 'https://line.me/ti/p/@227bctxh';
 
 const stages = [
-  { number: '01', title: '破繭', meaning: '理解交易', access: 'LINE 領取完整版' },
-  { number: '02', title: '生存', meaning: '學習停損', access: '一篇公開試讀；LINE 領取完整版' },
+  { number: '01', title: '破繭', meaning: '理解交易', access: '免費閱讀完整版' },
+  { number: '02', title: '生存', meaning: '學習停損', access: '一篇公開試讀；免費閱讀完整版' },
   { number: '03', title: '進攻', meaning: '持續獲利', access: '免費試讀；完整版規劃為付費內容' },
   { number: '04', title: '歸真', meaning: '認識自己', access: '免費試讀；完整版規劃為付費內容' },
 ];
@@ -49,11 +46,11 @@ export const SurvivalGuideLanding: React.FC = () => (
       </div>
     </section>
 
-    <section className="mx-auto mt-12 max-w-3xl bg-[#2D2D2D] px-7 py-10 text-center text-white sm:px-12" aria-labelledby="line-steps-title">
-      <p className="text-xs font-bold tracking-[0.2em] text-[#D9C7A9]">免費領取</p>
-      <h2 id="line-steps-title" className="mt-4 serif text-3xl leading-[1.5] sm:text-4xl">加入 LINE，回覆「生存」</h2>
-      <p className="mt-5 text-sm leading-8 text-white/75">在 LINE 回覆「生存」，向我們索取網頁閱讀連結：破繭與生存的完整篇章，以及進攻與歸真的試讀內容。</p>
-      <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackFunnelEvent('line_click')} className="mt-8 inline-flex min-h-14 w-full max-w-sm items-center justify-center bg-white px-7 py-4 text-base font-bold text-[#2D2D2D] transition hover:bg-[#D9C7A9]">前往 LINE 索取免費章節 →</a>
+    <section className="mx-auto mt-12 max-w-3xl bg-[#2D2D2D] px-7 py-10 text-center text-white sm:px-12" aria-labelledby="free-steps-title">
+      <p className="text-xs font-bold tracking-[0.2em] text-[#D9C7A9]">免費閱讀</p>
+      <h2 id="free-steps-title" className="mt-4 serif text-3xl leading-[1.5] sm:text-4xl">現在就讀破繭與生存完整版</h2>
+      <p className="mt-5 text-sm leading-8 text-white/75">直接閱讀破繭與生存的完整篇章，也可以先看進攻與歸真的試讀目錄。</p>
+      <a href="/guide/line" className="mt-8 inline-flex min-h-14 w-full max-w-sm items-center justify-center bg-white px-7 py-4 text-base font-bold text-[#2D2D2D] transition hover:bg-[#D9C7A9]">免費閱讀完整篇章 →</a>
     </section>
   </div>
 );

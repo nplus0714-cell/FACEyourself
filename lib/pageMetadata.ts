@@ -145,7 +145,7 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
   };
   if (path === '/survival-kit') return {
     title: '交易生存指南｜FACE Trader 知己交易',
-    description: '公開閱讀一篇生存篇，加入 LINE 並回覆「生存」，領取破繭與生存的完整網頁篇章。',
+    description: '公開閱讀生存篇試讀，並免費閱讀破繭與生存的完整網頁篇章。',
   };
   if (path === '/guide') return {
     title: '交易生存指南公開試讀｜FACE Trader 知己交易',
@@ -153,7 +153,7 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
   };
   if (path === '/guide/line') return {
     title: '破繭與生存完整篇章｜FACE Trader 知己交易',
-    description: 'LINE 領取的交易生存指南免費篇章。',
+    description: '免費閱讀交易生存指南的破繭與生存完整篇章。',
   };
   if (path === '/manual') return {
     title: '個人交易使用說明書｜FACE Trader 知己交易',

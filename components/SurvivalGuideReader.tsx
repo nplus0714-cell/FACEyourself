@@ -36,10 +36,10 @@ export const SurvivalGuideReader: React.FC<SurvivalGuideReaderProps> = ({ fullFr
       <header className="border-b border-[#D1D1C7] pb-10 pt-6 text-center sm:pb-14">
         <p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">FACE TRADER · 知己交易</p>
         <h1 className="mt-5 serif text-4xl leading-[1.4] text-[#2D2D2D] sm:text-6xl">交易生存指南</h1>
-        <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-[#625A53]">{fullFree ? '破繭與生存完整閱讀｜進攻與歸真試讀' : '公開試讀｜先讀一篇生存篇，再決定要不要領取更多'}</p>
+        <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-[#625A53]">{fullFree ? '破繭與生存完整閱讀｜進攻與歸真試讀' : '公開試讀｜先讀一篇生存篇，再決定要不要繼續閱讀'}</p>
       </header>
 
-      {!fullFree && <section className="mx-auto max-w-3xl py-9 text-center"><p className="text-sm leading-8 text-[#70665D]">這裡公開一篇〈停損不是失敗，是入場費〉。加入 LINE 並回覆「生存」，向我們索取破繭與生存完整篇章的閱讀連結。</p><a href="/survival-kit" className="mt-5 inline-flex bg-[#2D2D2D] px-7 py-3 text-sm font-bold text-white">前往 LINE 領取方式 →</a></section>}
+      {!fullFree && <section className="mx-auto max-w-3xl py-9 text-center"><p className="text-sm leading-8 text-[#70665D]">這裡公開一篇〈停損不是失敗，是入場費〉。想繼續讀，可以直接開啟破繭與生存的完整篇章。</p><a href="/guide/line" className="mt-5 inline-flex bg-[#2D2D2D] px-7 py-3 text-sm font-bold text-white">免費閱讀完整篇章 →</a></section>}
 
       {!fullFree && <section id="sample" className="scroll-mt-6 border border-[#D1D1C7] bg-white p-6 sm:p-10" aria-labelledby="sample-title">
         <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">生存篇 · 公開完整試讀</p>
@@ -49,7 +49,7 @@ export const SurvivalGuideReader: React.FC<SurvivalGuideReaderProps> = ({ fullFr
       </section>}
 
       {fullFree && <section className="mt-14" aria-labelledby="free-chapters-title">
-        <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">LINE 領取 · 完整篇章</p>
+        <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">免費閱讀 · 完整篇章</p>
         <h2 id="free-chapters-title" className="mt-3 serif text-3xl text-[#2D2D2D]">破繭與生存</h2>
         <p className="mt-4 text-sm leading-7 text-[#70665D]">選一篇開始讀。這些文章原本就是 FACE Trader 的破繭與生存篇完整內容。</p>
         <div className="mt-7 grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)]">
