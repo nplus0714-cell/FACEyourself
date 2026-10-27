@@ -51,6 +51,7 @@ const STORAGE_KEY = 'face_zen_diary_v3';
 const DAILY_ANSWERS_KEY = 'face-daily-v1-answers';
 const DAILY_RESULT_KEY = 'face-daily-v1-result';
 const DAILY_AWAITING_LOGIN_KEY = 'face-daily-v1-awaiting-login';
+const AUTH_RESTORE_TIMEOUT_MS = 8_000;
 
 type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'survival-guide' | 'survival-guide-full' | 'personal-trading-manual' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'privacy' | 'terms' | 'refund-policy' | 'data-deletion' | 'not-found';
 
@@ -407,6 +408,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
+    // A stalled auth refresh must not keep an anonymous visitor on the result
+    // loading screen indefinitely. A later auth response can still update it.
+    const authRestoreTimer = window.setTimeout(() => setIsAuthResolved(true), AUTH_RESTORE_TIMEOUT_MS);
 
     try {
       const supabase = getSupabaseClient();
@@ -433,7 +437,10 @@ const App: React.FC = () => {
           setHydratedMemberId(null);
         }
       }).catch((error) => console.warn('Unable to restore the auth session', error))
-        .finally(() => setIsAuthResolved(true));
+        .finally(() => {
+          window.clearTimeout(authRestoreTimer);
+          setIsAuthResolved(true);
+        });
 
       const { data } = supabase.auth.onAuthStateChange((event, session) => {
         const authUser = session ? toAuthUser(session.user) : null;
@@ -476,7 +483,10 @@ const App: React.FC = () => {
       setIsAuthResolved(true);
     }
 
-    return () => unsubscribe?.();
+    return () => {
+      window.clearTimeout(authRestoreTimer);
+      unsubscribe?.();
+    };
   }, [showDailyResultAfterLogin, pendingDailyAwareness, pendingDailyResult]);
 
   const handleLogin = () => setIsAuthDialogOpen(true);
