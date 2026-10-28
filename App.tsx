@@ -4,7 +4,8 @@ import { ZenLayout } from './components/ZenLayout';
 import { scoreDailyAwareness, type DailyAwarenessAnswers } from './data/dailyAwarenessQuestions';
 import type { DailyAwarenessResult } from './data/dailyAwarenessPreview';
 import { saveDailyAwarenessResult } from './services/memberAwarenessJournal';
-import { CONTENT_CATALOG, ContentItem } from './data/contentCatalog';
+import type { ContentItem } from './data/contentCatalog';
+import { isPublishedContentSlug } from './data/contentCatalogRoutes';
 import { FACE_MAP, getFaceCode } from './constants';
 import { FaceScores, UserState, DiaryEntry, Language, PersonalityProfile } from './types';
 import { signOut, toAuthUser } from './services/authService';
@@ -46,6 +47,11 @@ const DailyAwarenessCheckIn = React.lazy(() => import('./components/DailyAwarene
 const ReadingLayerPrototype = React.lazy(() => import('./components/ReadingLayerPrototype').then((module) => ({ default: module.ReadingLayerPrototype })));
 const NotFoundPage = React.lazy(() => import('./components/NotFoundPage').then((module) => ({ default: module.NotFoundPage })));
 const LegalPage = React.lazy(() => import('./components/LegalPage').then((module) => ({ default: module.LegalPage })));
+
+const loadPublishedContent = async (slug: string): Promise<ContentItem | null> => {
+  const { CONTENT_CATALOG } = await import('./data/contentCatalog');
+  return CONTENT_CATALOG.find((item) => item.slug === slug && item.status === 'published') ?? null;
+};
 
 const STORAGE_KEY = 'face_zen_diary_v3';
 const DAILY_ANSWERS_KEY = 'face-daily-v1-answers';
@@ -105,7 +111,7 @@ const viewFromPath = (path: string): AppView => {
   if (path === '/types') return 'role-gallery';
   if (path.startsWith('/watch/')) {
     const slug = path.slice('/watch/'.length);
-    return CONTENT_CATALOG.some((item) => item.slug === slug && item.status === 'published') ? 'content-detail' : 'not-found';
+    return isPublishedContentSlug(slug) ? 'content-detail' : 'not-found';
   }
   if (path === '/watch') return 'content-hub';
   if (path === '/survival-kit') return 'survival-kit';
@@ -155,10 +161,7 @@ const App: React.FC = () => {
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null);
   const [sharedDna, setSharedDna] = useState<FaceScores | null>(null);
   const [language, setLanguage] = useState<Language>('zh');
-  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(() => {
-    const slug = window.location.pathname.replace('/watch/', '');
-    return CONTENT_CATALOG.find((item) => item.slug === slug) ?? null;
-  });
+  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   const [selectedRoleCode, setSelectedRoleCode] = useState<string | null>(() => {
     return roleCodeFromPath(window.location.pathname);
   });
@@ -257,6 +260,19 @@ const App: React.FC = () => {
     setView('result-preview');
   };
 
+  const contentSlug = view === 'content-detail'
+    ? window.location.pathname.slice('/watch/'.length)
+    : null;
+
+  useEffect(() => {
+    if (!contentSlug) return;
+    let active = true;
+    void loadPublishedContent(contentSlug).then((content) => {
+      if (active) setSelectedContent(content);
+    });
+    return () => { active = false; };
+  }, [contentSlug]);
+
   useEffect(() => {
     if (['/deep-dive', '/daily-awareness-result'].includes(window.location.pathname)) {
       const destination = FEATURE_FLAGS.dailyAwareness && window.location.pathname === '/deep-dive'
@@ -292,8 +308,7 @@ const App: React.FC = () => {
     const handlePopState = () => {
       const nextView = viewFromPath(window.location.pathname);
       if (nextView === 'content-detail') {
-        const slug = window.location.pathname.replace('/watch/', '');
-        setSelectedContent(CONTENT_CATALOG.find((item) => item.slug === slug) ?? null);
+        setSelectedContent(null);
       }
       if (nextView === 'role-detail') {
         setSelectedRoleCode(roleCodeFromPath(window.location.pathname));
@@ -802,6 +817,7 @@ const App: React.FC = () => {
         </section>
       )}
       {view === 'content-detail' && selectedContent && <ContentDetail item={selectedContent} isLoggedIn={!!state.user} hasSurvivalKitAccess={hasSurvivalKitAccess} onBack={() => navigateTo('content-hub')} onLoginRequest={handleLogin} onOpenPricing={() => navigateTo('personal-trading-manual')} onOpenContent={openContent} onStartTest={() => navigateTo('dna-test')} />}
+      {view === 'content-detail' && !selectedContent && <section className="mx-auto max-w-2xl py-28 text-center" role="status" aria-live="polite"><p className="text-sm leading-7 text-[#70665D]">正在載入文章…</p></section>}
       {view === 'survival-kit' && <SurvivalGuideLanding />}
       {view === 'survival-guide' && <SurvivalGuideReader onOpenManual={() => navigateTo('personal-trading-manual')} />}
       {view === 'survival-guide-full' && <SurvivalGuideReader fullFree onOpenManual={() => navigateTo('personal-trading-manual')} />}
