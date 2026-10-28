@@ -245,6 +245,18 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      claim_guest_assessment: {
+        Args: {
+          p_run_id: string;
+          p_visitor_id: string;
+          p_assessment_version: string;
+          p_question_count: number;
+          p_face_code: string;
+          p_scores: Json;
+          p_answers: Json;
+        };
+        Returns: string;
+      };
       complete_assessment: {
         Args: {
           p_run_id: string;

@@ -1,14 +1,12 @@
 import {
-  FACE_BASELINE_40_QUESTION_COUNT,
   FACE_BASELINE_40_QUESTIONS,
   FACE_BASELINE_40_VERSION,
 } from '../data/faceQuestions';
 import {
-  FACE_BASELINE_V2_QUESTION_COUNT,
   FACE_BASELINE_V2_QUESTIONS,
   FACE_BASELINE_V2_VERSION,
 } from '../data/faceQuestionsV2';
-import { completeFaceAssessmentRun, startAssessmentRun } from './assessmentPersistence';
+import { claimGuestFaceAssessmentRun } from './assessmentPersistence';
 import { getSupabaseClient } from '../lib/supabase';
 import type { AssessmentAnswer, FaceQuestion, FaceScores } from '../types';
 
@@ -24,19 +22,16 @@ type PendingAssessment = {
 const PENDING_ASSESSMENTS: Array<{
   storageKey: string;
   version: string;
-  questionCount: number;
   questions: FaceQuestion[];
 }> = [
   {
     storageKey: 'face_pending_assessment_v3',
     version: FACE_BASELINE_V2_VERSION,
-    questionCount: FACE_BASELINE_V2_QUESTION_COUNT,
     questions: FACE_BASELINE_V2_QUESTIONS,
   },
   {
     storageKey: 'face_pending_assessment_v1',
     version: FACE_BASELINE_40_VERSION,
-    questionCount: FACE_BASELINE_40_QUESTION_COUNT,
     questions: FACE_BASELINE_40_QUESTIONS,
   },
 ];
@@ -126,8 +121,14 @@ const claimPendingGuestAssessmentUnlocked = async (): Promise<boolean> => {
       pending = { ...pending, claim: { userId: memberId, runId: claimRunId } };
       localStorage.setItem(source.storageKey, JSON.stringify(pending));
     }
-    const runId = await startAssessmentRun(claimRunId, source.version, source.questionCount);
-    await completeFaceAssessmentRun(runId, source.questions, pending.answers, pending.scores, scoreValues);
+    await claimGuestFaceAssessmentRun(
+      claimRunId,
+      source.version,
+      source.questions,
+      pending.answers,
+      pending.scores,
+      scoreValues,
+    );
     localStorage.removeItem(source.storageKey);
     claimedAny = true;
   }

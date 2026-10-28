@@ -164,6 +164,25 @@ export const completeAssessmentRun = async (
   }
 };
 
+const serializeFaceAssessmentAnswers = (
+  questions: FaceQuestion[],
+  answers: Record<string, AssessmentAnswer['selected_option']>,
+  scoreValues: Record<string, number>,
+): AssessmentAnswer[] => questions.map((question) => {
+  const selectedOption = answers[question.id];
+  if (!selectedOption) {
+    throw new AssessmentPersistenceError(`Question ${question.id} is missing an answer.`);
+  }
+
+  return {
+    question_code: question.id,
+    selected_option: selectedOption,
+    dimension: question.dimension,
+    score_value: scoreValues[question.id],
+    answered_at: new Date().toISOString(),
+  };
+});
+
 export const completeFaceAssessmentRun = async (
   runId: string,
   questions: FaceQuestion[],
@@ -173,20 +192,7 @@ export const completeFaceAssessmentRun = async (
 ): Promise<string> => {
   try {
     const supabase = getSupabaseClient();
-    const serializedAnswers: AssessmentAnswer[] = questions.map((question) => {
-      const selectedOption = answers[question.id];
-      if (!selectedOption) {
-        throw new AssessmentPersistenceError(`Question ${question.id} is missing an answer.`);
-      }
-
-      return {
-        question_code: question.id,
-        selected_option: selectedOption,
-        dimension: question.dimension,
-        score_value: scoreValues[question.id],
-        answered_at: new Date().toISOString(),
-      };
-    });
+    const serializedAnswers = serializeFaceAssessmentAnswers(questions, answers, scoreValues);
 
     const { data, error } = await supabase.rpc('complete_assessment', {
       p_run_id: runId,
@@ -201,5 +207,33 @@ export const completeFaceAssessmentRun = async (
   } catch (error) {
     if (error instanceof AssessmentPersistenceError) throw error;
     throw new AssessmentPersistenceError('無法保存這次測驗，請再試一次。', error);
+  }
+};
+
+export const claimGuestFaceAssessmentRun = async (
+  runId: string,
+  assessmentVersion: string,
+  questions: FaceQuestion[],
+  answers: Record<string, AssessmentAnswer['selected_option']>,
+  scores: FaceScores,
+  scoreValues: Record<string, number>,
+): Promise<string> => {
+  try {
+    const serializedAnswers = serializeFaceAssessmentAnswers(questions, answers, scoreValues);
+    const { data, error } = await getSupabaseClient().rpc('claim_guest_assessment', {
+      p_run_id: runId,
+      p_visitor_id: getAnonymousVisitorId(),
+      p_assessment_version: assessmentVersion,
+      p_question_count: questions.length,
+      p_face_code: getFaceCode(scores),
+      p_scores: scores as unknown as Json,
+      p_answers: serializedAnswers as unknown as Json,
+    });
+    if (error) throw error;
+    if (!data) throw new Error('Guest assessment claim did not return a run id.');
+    return data;
+  } catch (error) {
+    if (error instanceof AssessmentPersistenceError) throw error;
+    throw new AssessmentPersistenceError('無法將訪客測驗保存到帳戶，請再試一次。', error);
   }
 };
