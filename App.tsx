@@ -52,6 +52,17 @@ const DAILY_ANSWERS_KEY = 'face-daily-v1-answers';
 const DAILY_RESULT_KEY = 'face-daily-v1-result';
 const DAILY_AWAITING_LOGIN_KEY = 'face-daily-v1-awaiting-login';
 const AUTH_RESTORE_TIMEOUT_MS = 8_000;
+const AUTH_CALLBACK_CLAIM_KEY = 'face-auth-callback-claim-v1';
+
+// Supabase completes an OAuth or magic-link login in one tab, then broadcasts
+// the new session to every open tab. Only the callback tab should copy a guest
+// result into the member account; otherwise each tab can create its own run.
+const authQuery = new URLSearchParams(window.location.search);
+const authHash = new URLSearchParams(window.location.hash.slice(1));
+if (authQuery.has('code') || authQuery.has('token_hash')
+  || authHash.has('access_token') || authHash.has('refresh_token')) {
+  sessionStorage.setItem(AUTH_CALLBACK_CLAIM_KEY, '1');
+}
 
 type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'survival-guide' | 'survival-guide-full' | 'personal-trading-manual' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'privacy' | 'terms' | 'refund-policy' | 'data-deletion' | 'not-found';
 
@@ -374,8 +385,11 @@ const App: React.FC = () => {
     setMemberResultError(false);
     void (async () => {
       try {
-        const claimed = await claimPendingGuestAssessment();
-        if (active && claimed) setResultSaveStatus('cloud');
+        if (sessionStorage.getItem(AUTH_CALLBACK_CLAIM_KEY) === '1') {
+          const claimed = await claimPendingGuestAssessment();
+          sessionStorage.removeItem(AUTH_CALLBACK_CLAIM_KEY);
+          if (active && claimed) setResultSaveStatus('cloud');
+        }
       } catch (error) {
         console.warn('Unable to claim the guest result yet', error);
       }
