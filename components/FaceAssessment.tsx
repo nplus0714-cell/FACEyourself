@@ -139,6 +139,7 @@ const cacheCompletedAssessment = (
       answers,
       scores,
       savedAt: new Date().toISOString(),
+      submissionId: crypto.randomUUID(),
     }));
     return true;
   } catch (error) {
