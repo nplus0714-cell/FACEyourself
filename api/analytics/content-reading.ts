@@ -230,25 +230,60 @@ export default async function handler(
         serviceRoleKey,
       );
     } else {
-      await persistReading(
-        '',
-        'POST',
-        {
-          content_id: contentId,
-          content_slug: contentSlug,
-          access_mode: accessMode,
-          user_id: user?.id ?? null,
-          anonymous_visitor_id: anonymousVisitorId,
-          view_count: 1,
-          max_progress: maxProgress,
-          first_viewed_at: now,
-          last_viewed_at: now,
-          completed_at: completedAt,
-          metadata,
-        },
-        supabaseUrl,
-        serviceRoleKey,
-      );
+      try {
+        await persistReading(
+          '',
+          'POST',
+          {
+            content_id: contentId,
+            content_slug: contentSlug,
+            access_mode: accessMode,
+            user_id: user?.id ?? null,
+            anonymous_visitor_id: anonymousVisitorId,
+            view_count: 1,
+            max_progress: maxProgress,
+            first_viewed_at: now,
+            last_viewed_at: now,
+            completed_at: completedAt,
+            metadata,
+          },
+          supabaseUrl,
+          serviceRoleKey,
+        );
+      } catch (error) {
+        // A first page view can send more than one event at nearly the same
+        // time. The unique index deliberately rejects the second INSERT; it
+        // is not a user-facing outage. Re-read and merge its progress instead.
+        if (!(error instanceof Error) || error.message !== 'READING_WRITE_FAILED_409') throw error;
+
+        const concurrentRecord = await readExisting(
+          { contentId },
+          user?.id ?? null,
+          anonymousVisitorId,
+          supabaseUrl,
+          serviceRoleKey,
+        );
+        if (!concurrentRecord) throw error;
+
+        const concurrentMetadata = concurrentRecord.metadata && typeof concurrentRecord.metadata === 'object'
+          ? concurrentRecord.metadata
+          : {};
+        const concurrentProgress = Math.max(concurrentRecord.max_progress, progress);
+        await persistReading(
+          `?id=eq.${encodeURIComponent(concurrentRecord.id)}`,
+          'PATCH',
+          {
+            content_slug: contentSlug,
+            access_mode: accessMode,
+            max_progress: concurrentProgress,
+            last_viewed_at: now,
+            completed_at: concurrentProgress >= 90 ? concurrentRecord.completed_at ?? now : concurrentRecord.completed_at ?? null,
+            metadata: { ...concurrentMetadata, last_session_id: sessionId, app_version: '2.5.0' },
+          },
+          supabaseUrl,
+          serviceRoleKey,
+        );
+      }
     }
 
     sendJson(response, 200, { recorded: true });
