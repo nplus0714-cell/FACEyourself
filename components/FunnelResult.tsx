@@ -70,13 +70,13 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
       </section>
 
       <div className="mt-8 flex flex-col items-center justify-center gap-4 text-sm sm:flex-row sm:gap-8">
-        <button type="button" onClick={openShare} className="border-b border-[#8C7E6D]/50 pb-1 font-medium text-[#4A382D] transition hover:border-[#2D2D2D]">
+        <button type="button" onClick={openShare} className="inline-flex min-h-11 items-center border-b border-[#8C7E6D]/50 py-1 font-medium text-[#4A382D] transition hover:border-[#2D2D2D]">
           覺得有幫助？分享給朋友
         </button>
         <button
           type="button"
           onClick={() => { trackFunnelEvent('result_feedback_click'); setIsFeedbackOpen(true); }}
-          className="border-b border-[#8C7E6D]/50 pb-1 font-medium text-[#4A382D] transition hover:border-[#2D2D2D]"
+          className="inline-flex min-h-11 items-center border-b border-[#8C7E6D]/50 py-1 font-medium text-[#4A382D] transition hover:border-[#2D2D2D]"
         >
           想對設計者說的話
         </button>

@@ -12,7 +12,7 @@ export const SiteFooter: React.FC = () => (
     <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-[1fr_auto] md:items-end">
       <div>
         <p className="serif text-xl text-[#2D2D2D]">FACE Trader 知己交易</p>
-        <a className="mt-3 inline-block text-sm underline decoration-[#A99182] underline-offset-4 transition hover:text-[#8C635B]" href={`mailto:${SITE_IDENTITY.email}`}>
+        <a className="mt-2 inline-flex min-h-11 items-center text-sm underline decoration-[#A99182] underline-offset-4 transition hover:text-[#8C635B]" href={`mailto:${SITE_IDENTITY.email}`}>
           {SITE_IDENTITY.email}
         </a>
         <p className="mt-4 max-w-xl text-xs leading-6 text-[#7A7169]">
@@ -21,7 +21,7 @@ export const SiteFooter: React.FC = () => (
       </div>
       <nav className="flex max-w-xl flex-wrap gap-x-5 gap-y-3 text-sm" aria-label="法律與服務資訊">
         {legalLinks.map((link) => (
-          <a key={link.href} href={link.href} className="border-b border-transparent pb-0.5 transition hover:border-[#8C635B] hover:text-[#8C635B]">
+          <a key={link.href} href={link.href} className="inline-flex min-h-11 items-center border-b border-transparent py-1 transition hover:border-[#8C635B] hover:text-[#8C635B]">
             {link.label}
           </a>
         ))}

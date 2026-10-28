@@ -27,7 +27,7 @@ export const PersonalTradingManual: React.FC<PersonalTradingManualProps> = ({ is
       <p className="text-xs font-bold tracking-[0.18em] text-[#D9C7A9]">完整版閱讀權限</p>
       <h2 className="mt-4 serif text-3xl">分析免費，付費內容稍後解鎖</h2>
       <p className="mt-4 text-sm leading-7 text-white/75">登入後可免費看完整人格分析；進攻與歸真目前提供試讀，完整版仍需要付費權限。價格尚未公布，也尚未開放購買。</p>
-      {!isLoggedIn ? <button type="button" onClick={onLogin} className="mt-7 min-h-12 bg-white px-7 py-3 text-sm font-bold text-[#2D2D2D]">登入，免費看完整人格分析 →</button> : <div className="mt-7"><p className="border border-white/30 px-6 py-4 text-sm text-white/85">已登入 · 完整人格分析可在「我的 FACE」查看；付費篇章尚未開賣</p><button type="button" onClick={onOpenMemberHome} className="mt-5 border-b border-white pb-1 text-sm font-bold text-white">前往我的 FACE →</button></div>}
+      {!isLoggedIn ? <button type="button" onClick={onLogin} className="mt-7 min-h-12 bg-white px-7 py-3 text-sm font-bold text-[#2D2D2D]">登入，免費看完整人格分析 →</button> : <div className="mt-7"><p className="border border-white/30 px-6 py-4 text-sm text-white/85">已登入 · 完整人格分析可在「我的 FACE」查看；付費篇章尚未開賣</p><button type="button" onClick={onOpenMemberHome} className="mt-3 inline-flex min-h-11 items-center border-b border-white py-1 text-sm font-bold text-white">前往我的 FACE →</button></div>}
     </section>
   </div>
 );

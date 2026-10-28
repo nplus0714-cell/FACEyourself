@@ -42,14 +42,14 @@ export const FunnelLanding: React.FC<FunnelLandingProps> = ({ hasResult, isLogge
         </a>
 
         {hasResult && (
-          <button type="button" onClick={onViewResult} className="mt-5 border-b border-[#7A6E64]/50 pb-1 text-sm text-[#5F574F] transition hover:border-[#2D2D2D] hover:text-[#2D2D2D]">
+          <button type="button" onClick={onViewResult} className="mt-4 inline-flex min-h-11 items-center border-b border-[#7A6E64]/50 py-1 text-sm text-[#5F574F] transition hover:border-[#2D2D2D] hover:text-[#2D2D2D]">
             {isLoggedIn ? '查看我的完整人格分析' : '已完成測驗？查看上次結果'}
           </button>
         )}
         {isLoggedIn ? (
-          <button type="button" onClick={onOpenMemberHome} className="mt-4 text-sm font-medium text-[#5F574F] underline decoration-[#7A6E64]/50 underline-offset-4">前往我的 FACE →</button>
+          <button type="button" onClick={onOpenMemberHome} className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-[#5F574F] underline decoration-[#7A6E64]/50 underline-offset-4">前往我的 FACE →</button>
         ) : (
-          <button type="button" onClick={onLogin} className="mt-4 text-xs text-[#7A6E64] underline decoration-[#7A6E64]/40 underline-offset-4">已有帳號？登入後接續閱讀</button>
+          <button type="button" onClick={onLogin} className="mt-2 inline-flex min-h-11 items-center text-xs text-[#7A6E64] underline decoration-[#7A6E64]/40 underline-offset-4">已有帳號？登入後接續閱讀</button>
         )}
       </div>
     </section>
