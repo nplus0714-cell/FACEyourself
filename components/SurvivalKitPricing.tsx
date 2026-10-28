@@ -252,10 +252,12 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
                 key={slide.src}
                 type="button"
                 onClick={() => showProductSlide(index)}
-                className={`h-2 transition-all ${activeProductSlide === index ? 'w-8 bg-[#D9C7A9]' : 'w-2 bg-white/30 hover:bg-white/55'}`}
+                className="flex h-11 w-11 items-center justify-center"
                 aria-label={`查看第 ${index + 1} 張：${slide.title}`}
                 aria-current={activeProductSlide === index ? 'true' : undefined}
-              />
+              >
+                <span aria-hidden="true" className={`h-2 transition-all ${activeProductSlide === index ? 'w-8 bg-[#D9C7A9]' : 'w-2 bg-white/30 hover:bg-white/55'}`} />
+              </button>
             ))}
           </div>
           <p className="mt-4 text-xs leading-5 text-white/55">{PRODUCT_PREVIEW_DISCLAIMER}</p>
