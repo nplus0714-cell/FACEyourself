@@ -55,6 +55,22 @@ const gradedValues: Partial<Record<AssessmentAnswer['selected_option'], number>>
 };
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const stableClaimRunId = async (memberId: string, version: string, pending: PendingAssessment): Promise<string> => {
+  // Auth callbacks can run in several same-origin tabs at once. Every tab must
+  // choose the same run ID before any of them writes the claim back to storage.
+  const identity = JSON.stringify([
+    memberId,
+    version,
+    pending.savedAt ?? '',
+    Object.entries(pending.answers).sort(([left], [right]) => left.localeCompare(right)),
+  ]);
+  const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(identity))).slice(0, 16);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
+
 const isPendingAssessment = (value: unknown, version: string): value is PendingAssessment => {
   if (!value || typeof value !== 'object') return false;
   const item = value as Partial<PendingAssessment>;
@@ -102,7 +118,7 @@ export const claimPendingGuestAssessment = async (): Promise<boolean> => {
       && UUID_PATTERN.test(pending.claim.runId);
     const claimRunId = canReuseClaim
       ? pending.claim.runId
-      : crypto.randomUUID();
+      : await stableClaimRunId(memberId, source.version, pending);
     if (!canReuseClaim) {
       pending = { ...pending, claim: { userId: memberId, runId: claimRunId } };
       localStorage.setItem(source.storageKey, JSON.stringify(pending));
