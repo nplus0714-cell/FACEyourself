@@ -21,7 +21,7 @@ const LINE_CONSULTATION_URL = 'https://line.me/ti/p/@227bctxh';
 
 export const CoachProfile: React.FC<CoachProfileProps> = ({ onStartTest, onBackToAbout }) => (
   <div className="mx-auto max-w-6xl space-y-16 pb-28 pt-2 fade-in md:space-y-24 md:pt-8">
-    <button type="button" onClick={onBackToAbout} className="text-sm text-[#70665D] transition hover:text-[#2D2D2D]">← 回到關於 FACE</button>
+    <button type="button" onClick={onBackToAbout} className="inline-flex min-h-11 items-center text-sm text-[#70665D] transition hover:text-[#2D2D2D]">← 回到關於 FACE</button>
 
     <header className="grid overflow-hidden border border-[#D1D1C7] bg-[#F7F4EF] lg:grid-cols-[1.03fr_0.97fr]">
       <div className="p-8 sm:p-12 md:p-16">
