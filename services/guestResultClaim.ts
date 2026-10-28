@@ -85,7 +85,7 @@ const getScoreValue = (question: FaceQuestion, answer: AssessmentAnswer['selecte
 };
 
 /** Copies completed guest results into the account selected by the visitor. */
-export const claimPendingGuestAssessment = async (): Promise<boolean> => {
+const claimPendingGuestAssessmentUnlocked = async (): Promise<boolean> => {
   let claimedAny = false;
   if (!PENDING_ASSESSMENTS.some((source) => localStorage.getItem(source.storageKey))) return false;
   const { data: { session }, error } = await getSupabaseClient().auth.getSession();
@@ -130,4 +130,15 @@ export const claimPendingGuestAssessment = async (): Promise<boolean> => {
   }
 
   return claimedAny;
+};
+
+export const claimPendingGuestAssessment = async (): Promise<boolean> => {
+  // Several open result tabs receive the same auth change. Read and remove the
+  // shared pending result while holding one origin-wide lock, so only the first
+  // tab can claim it. The stable run ID above also protects retries when a
+  // browser does not support Web Locks or a response is lost.
+  if (typeof navigator !== 'undefined' && navigator.locks?.request) {
+    return navigator.locks.request('face-guest-result-claim', claimPendingGuestAssessmentUnlocked);
+  }
+  return claimPendingGuestAssessmentUnlocked();
 };
