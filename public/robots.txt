@@ -13,9 +13,5 @@ Disallow: /preview-results
 Disallow: /reading-prototype
 Disallow: /mirror-trade
 Disallow: /journal/
-Disallow: /types
-Disallow: /watch
-Disallow: /about
-Disallow: /coach
 
 Sitemap: https://faceyourself.vercel.app/sitemap.xml

@@ -209,10 +209,6 @@ const shouldNoIndex = (path: string, content?: ContentItem | null, isNotFound?: 
     '/reading-prototype',
     '/mirror-trade',
     '/journal/',
-    '/types',
-    '/watch',
-    '/about',
-    '/coach',
   ].some((privatePath) => path === privatePath || path.startsWith(privatePath));
 };
 
