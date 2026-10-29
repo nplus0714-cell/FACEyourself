@@ -3,7 +3,7 @@
     "api/paid-content.ts": {
       "includeFiles": "docs/content/articles/*.md"
     },
-    "api/article-page.ts": {
+    "api/share.ts": {
       "includeFiles": "docs/content/**/*.md"
     }
   },
@@ -37,7 +37,7 @@
     },
     {
       "source": "/watch/:slug",
-      "destination": "/api/article-page?slug=:slug"
+      "destination": "/api/share?render=article&slug=:slug"
     },
     {
       "source": "/privacy",
@@ -137,7 +137,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/api/not-found"
+      "destination": "/api/share?render=not-found"
     }
   ]
 }
