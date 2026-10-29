@@ -1,6 +1,3 @@
-import articlePageHandler from './_lib/articlePage';
-import notFoundPageHandler from './_lib/notFoundPage';
-
 const SITE_ORIGIN = 'https://faceyourself.vercel.app';
 
 // 人格分享資料自帶於此檔（不 import 專案其他模組），確保 Vercel serverless 穩定執行。
@@ -188,7 +185,6 @@ const escapeHtml = (value: string): string => value
 
 type VercelRequestLike = {
   url?: string;
-  query?: Record<string, string | string[] | undefined>;
   headers?: { host?: string };
 };
 
@@ -284,15 +280,6 @@ export default async function handler(
   response: VercelResponseLike,
 ): Promise<void> {
   const requestUrl = new URL(request.url ?? '/', `https://${request.headers?.host ?? 'faceyourself.vercel.app'}`);
-  const renderMode = requestUrl.searchParams.get('render');
-  if (renderMode === 'article') {
-    await articlePageHandler(request, response);
-    return;
-  }
-  if (renderMode === 'not-found') {
-    await notFoundPageHandler(request, response);
-    return;
-  }
   const code = (requestUrl.searchParams.get('code') ?? '').toUpperCase();
   const profile = SHARE_PROFILES[code];
 
@@ -301,7 +288,7 @@ export default async function handler(
     return;
   }
 
-  if (renderMode === 'app') {
+  if (requestUrl.searchParams.get('render') === 'app') {
     const appHtml = await renderAppShell(profile);
     response.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400');
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
