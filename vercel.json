@@ -40,8 +40,104 @@
       "destination": "/api/article-page?slug=:slug"
     },
     {
-      "source": "/(.*)",
+      "source": "/privacy",
       "destination": "/index.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/refund-policy",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/data-deletion",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/my-result",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/journal/history",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/preview-results",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/reading-prototype",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/daily-awareness-result",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/deep-dive",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/research-admin",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/me",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/mirror-trade",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/types",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/watch",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/survival-kit",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/guide",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/guide/line",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/manual",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/test",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/test-mockup",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/daily-awareness",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/coach",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/not-found"
     }
   ]
 }

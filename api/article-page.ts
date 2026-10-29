@@ -90,6 +90,21 @@ const PUBLIC_ARTICLES: Record<string, PublicArticle> = {
   },
 };
 
+const PRIVATE_ARTICLE_SLUGS = new Set([
+  'three-dimensions-for-surviving-the-trading-jungle',
+  'attack-is-changing-gears',
+  'probability-payoff-and-expectancy',
+  'let-time-make-money',
+  'how-far-behind-the-market-is-your-news',
+  'direction-position-and-time',
+  'let-resources-stay-with-winners',
+  'good-stocks-are-amulets',
+  'leverage-requires-discipline',
+  'follow-the-trend-and-your-nature',
+  'trading-should-be-sustainable',
+  'from-holy-grail-to-self-knowledge',
+]);
+
 type VercelRequestLike = {
   url?: string;
   query?: Record<string, string | string[] | undefined>;
@@ -221,9 +236,14 @@ export default async function handler(
     let html: string;
     if (article) {
       html = await renderPublicArticle(slug, article);
-    } else {
+    } else if (PRIVATE_ARTICLE_SLUGS.has(slug)) {
       html = await loadAppShell();
       html = replaceFirst(html, /<meta name="robots" content="[^"]*">/i, '<meta name="robots" content="noindex, nofollow">');
+    } else {
+      response.setHeader('Cache-Control', 'public, max-age=0, s-maxage=300');
+      response.setHeader('Content-Type', 'text/html; charset=utf-8');
+      response.status(404).send('<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><title>找不到文章｜FACE Trader</title></head><body><h1>找不到文章</h1><p><a href="/watch">回到內容中心</a></p></body></html>');
+      return;
     }
 
     response.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400');
