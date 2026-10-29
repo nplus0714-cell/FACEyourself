@@ -2,6 +2,9 @@
   "functions": {
     "api/paid-content.ts": {
       "includeFiles": "docs/content/articles/*.md"
+    },
+    "api/article-page.ts": {
+      "includeFiles": "docs/content/**/*.md"
     }
   },
   "rewrites": [
@@ -20,6 +23,10 @@
     {
       "source": "/types/:code",
       "destination": "/api/share?code=:code&render=app"
+    },
+    {
+      "source": "/watch/:slug",
+      "destination": "/api/article-page?slug=:slug"
     },
     {
       "source": "/(.*)",
