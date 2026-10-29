@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import { sendEmailMagicLink, signInWithGoogle, signInWithLine } from '../services/authService';
 
 interface AuthDialogProps {
@@ -13,10 +13,48 @@ const friendlyError = (error: unknown): string => {
 };
 
 export const AuthDialog: React.FC<AuthDialogProps> = ({ onClose }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const firstActionRef = useRef<HTMLButtonElement>(null);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState<'google' | 'line' | 'email' | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    firstActionRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [onClose]);
 
   const begin = async (method: 'google' | 'line') => {
     setLoading(method);
@@ -49,16 +87,16 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ onClose }) => {
   };
 
   return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#2D2D2D]/55 p-4" role="dialog" aria-modal="true" aria-labelledby="auth-dialog-title">
-    <div className="w-full max-w-md border border-[#D1D1C7] bg-[#FCFBF8] p-7 shadow-2xl md:p-9">
-      <div className="flex items-start justify-between gap-5"><div><p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">MEMBER ACCESS</p><h2 id="auth-dialog-title" className="mt-3 serif text-3xl text-[#2D2D2D]">登入 FACE Trader</h2></div><button type="button" onClick={onClose} className="text-2xl leading-none text-[#70665D] transition hover:text-[#2D2D2D]" aria-label="關閉登入視窗">×</button></div>
+    <div ref={dialogRef} className="w-full max-w-md border border-[#D1D1C7] bg-[#FCFBF8] p-7 shadow-2xl md:p-9">
+      <div className="flex items-start justify-between gap-5"><div><p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">MEMBER ACCESS</p><h2 id="auth-dialog-title" className="mt-3 serif text-3xl text-[#2D2D2D]">登入 FACE Trader</h2></div><button type="button" onClick={onClose} className="grid h-11 w-11 shrink-0 place-items-center text-2xl leading-none text-[#70665D] transition hover:text-[#2D2D2D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]" aria-label="關閉登入視窗">×</button></div>
       <p className="mt-5 text-sm leading-[1.85] text-[#70665D]">登入後會接續你剛完成的測驗，免費閱讀完整人格分析；進攻與歸真篇章的完整版仍需另行解鎖。公開試讀不需要登入。</p>
 
-      <div className="mt-7 space-y-3"><button type="button" onClick={() => void begin('google')} disabled={loading !== null} className="flex w-full items-center justify-center border border-[#D1D1C7] bg-white px-5 py-3.5 text-sm font-bold text-[#2D2D2D] transition hover:border-[#2D2D2D] disabled:cursor-wait disabled:opacity-60">{loading === 'google' ? '正在前往 Google…' : '使用 Google 登入'}</button><button type="button" onClick={() => void begin('line')} disabled={loading !== null} className="flex w-full items-center justify-center bg-[#06C755] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#05B64D] disabled:cursor-wait disabled:opacity-60">{loading === 'line' ? '正在前往 LINE…' : '使用 LINE 登入'}</button></div>
+      <div className="mt-7 space-y-3"><button ref={firstActionRef} type="button" onClick={() => void begin('google')} disabled={loading !== null} className="flex w-full items-center justify-center border border-[#D1D1C7] bg-white px-5 py-3.5 text-sm font-bold text-[#2D2D2D] transition hover:border-[#2D2D2D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B] disabled:cursor-wait disabled:opacity-60">{loading === 'google' ? '正在前往 Google…' : '使用 Google 登入'}</button><button type="button" onClick={() => void begin('line')} disabled={loading !== null} className="flex w-full items-center justify-center bg-[#06C755] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#05B64D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2D2D2D] disabled:cursor-wait disabled:opacity-60">{loading === 'line' ? '正在前往 LINE…' : '使用 LINE 登入'}</button></div>
 
       <div className="my-7 flex items-center gap-3 text-xs text-[#8C7E6D]"><span className="h-px flex-1 bg-[#D1D1C7]" />或用 Email 登入<span className="h-px flex-1 bg-[#D1D1C7]" /></div>
-      <form onSubmit={submitEmail}><label className="sr-only" htmlFor="auth-email">Email</label><input id="auth-email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" placeholder="輸入你的 Email" required disabled={loading !== null} className="w-full border border-[#D1D1C7] bg-white px-4 py-3.5 text-sm text-[#2D2D2D] outline-none transition placeholder:text-[#A69D93] focus:border-[#2D2D2D] disabled:opacity-60" /><button type="submit" disabled={loading !== null} className="mt-3 w-full bg-[#2D2D2D] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-black disabled:cursor-wait disabled:opacity-60">{loading === 'email' ? '正在寄送…' : '寄送 Email 驗證連結'}</button></form>
-      {notice && <p className="mt-5 border border-[#9DA99A] bg-[#EEF2EC] px-4 py-3 text-sm leading-6 text-[#40503F]">{notice}</p>}
-      {error && <p className="mt-5 border border-[#B98A81] bg-[#F8ECE8] px-4 py-3 text-sm leading-6 text-[#87443D]">{error}</p>}
+      <form onSubmit={submitEmail}><label className="sr-only" htmlFor="auth-email">Email</label><input id="auth-email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" placeholder="輸入你的 Email" required disabled={loading !== null} className="w-full border border-[#D1D1C7] bg-white px-4 py-3.5 text-sm text-[#2D2D2D] outline-none transition placeholder:text-[#A69D93] focus:border-[#2D2D2D] focus:ring-2 focus:ring-[#8C635B]/30 disabled:opacity-60" /><button type="submit" disabled={loading !== null} className="mt-3 w-full bg-[#2D2D2D] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B] disabled:cursor-wait disabled:opacity-60">{loading === 'email' ? '正在寄送…' : '寄送 Email 驗證連結'}</button></form>
+      {notice && <p role="status" aria-live="polite" className="mt-5 border border-[#9DA99A] bg-[#EEF2EC] px-4 py-3 text-sm leading-6 text-[#40503F]">{notice}</p>}
+      {error && <p role="alert" className="mt-5 border border-[#B98A81] bg-[#F8ECE8] px-4 py-3 text-sm leading-6 text-[#87443D]">{error}</p>}
     </div>
   </div>;
 };
