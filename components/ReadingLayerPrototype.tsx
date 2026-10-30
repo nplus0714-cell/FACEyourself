@@ -373,7 +373,7 @@ const SectionShell: React.FC<{
   children: React.ReactNode;
   tinted?: boolean;
 }> = ({ chapter, children, tinted = false }) => (
-  <section id={chapter.id} className={`editorial-section border-x border-b border-[#D9CFC2] px-5 py-12 sm:px-8 md:px-14 md:py-20 ${tinted ? 'bg-[#F7F2EC]' : 'bg-[#FFFEFC]'}`}>
+  <section id={chapter.id} className={`editorial-section scroll-mt-24 border-x border-b border-[#D9CFC2] px-5 py-12 sm:px-8 md:px-14 md:py-20 ${tinted ? 'bg-[#F7F2EC]' : 'bg-[#FFFEFC]'}`}>
     <ChapterHeader chapter={chapter} />
     {children}
   </section>
@@ -1014,7 +1014,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           </Takeaway>
         </SectionShell>
 
-        {!previewOnly && <section id={chapterMeta[5].id} className="relative overflow-hidden border-x border-b border-[#D9CFC2] bg-[#211C19]">
+        {!previewOnly && <section id={chapterMeta[5].id} className="relative scroll-mt-24 overflow-hidden border-x border-b border-[#D9CFC2] bg-[#211C19]">
           <img
             src={profileLineArt}
             alt=""
@@ -1067,7 +1067,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
             </div>
           </div>
 
-          <div id={chapterMeta[6].id} className="relative z-20 px-5 pb-16 pt-6 text-white sm:px-8 md:px-14 md:pb-24 md:pt-8">
+          <div id={chapterMeta[6].id} className="relative z-20 scroll-mt-24 px-5 pb-16 pt-6 text-white sm:px-8 md:px-14 md:pb-24 md:pt-8">
             <svg
               className="pointer-events-none absolute bottom-10 right-4 hidden h-[56%] w-[50%] max-w-[700px] text-[#D4C1B2] opacity-[0.22] md:block"
               viewBox="0 0 720 320"

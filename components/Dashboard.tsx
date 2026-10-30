@@ -8,6 +8,7 @@ import { Compass, FileText, MessageCircle, PlayCircle } from 'lucide-react';
 import { translations } from '../i18n';
 import { submitNpcQuestion } from '../services/npcQuestionService';
 import { getFaceRadarData, getFaceScorePairs } from '../lib/faceScorePresentation';
+import { FACE_READING_CHAPTERS } from '../data/faceReadingChapters';
 
 interface DashboardProps {
   dna: FaceScores;
@@ -240,6 +241,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
   const [report, setReport] = useState<ReportContent | null>(staticReport || null);
   const [loading, setLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [showMobileGuideCta, setShowMobileGuideCta] = useState(false);
   const t = translations[language];
 
   useEffect(() => {
@@ -252,6 +254,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
       });
     }
   }, [daily, dna, profile, staticReport]);
+
+  useEffect(() => {
+    if (isSharedView || daily || !onOpenPricing) return;
+    const updateVisibility = () => setShowMobileGuideCta(window.scrollY > 520);
+    updateVisibility();
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    return () => window.removeEventListener('scroll', updateVisibility);
+  }, [daily, isSharedView, onOpenPricing]);
 
   const radarData = useMemo(() => getFaceRadarData(dna, daily), [dna, daily]);
 
@@ -322,6 +332,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
         </div>
       )}
 
+      {!isSharedView && !daily && (
+        <nav className="sticky top-0 z-30 -mx-4 border-y border-[#D1C6B8] bg-[#F7F2EA]/95 px-4 py-3 shadow-[0_10px_28px_rgba(70,55,44,0.08)] backdrop-blur sm:mx-0 sm:px-5" aria-label="結果章節導覽">
+          <div className="hide-scrollbar flex snap-x gap-2 overflow-x-auto">
+            {FACE_READING_CHAPTERS.slice(0, 6).map((chapter) => (
+              <a key={chapter.id} href={`#${chapter.id}`} className="inline-flex min-h-11 shrink-0 snap-start items-center gap-2 border border-[#CFC2B3] bg-[#FFFEFC] px-3 text-xs font-medium text-[#4A4038] transition hover:border-[#8C635B] hover:text-[#8C635B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
+                <span className="font-mono text-[10px] text-[#A36F63]">{chapter.number}</span>
+                {chapter.number === '01' ? '你的 FACE' : chapter.number === '02' ? '兩面鏡子' : chapter.number === '03' ? '交易天賦' : chapter.number === '04' ? '優勢盲點' : chapter.number === '05' ? '失控觸發' : '回看自己'}
+              </a>
+            ))}
+            <a href="#result-next-steps" className="inline-flex min-h-11 shrink-0 snap-start items-center border border-[#4A382D] bg-[#4A382D] px-4 text-xs font-bold text-white transition hover:bg-[#2D2D2D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
+              下一步 →
+            </a>
+          </div>
+        </nav>
+      )}
+
           {/* Use the latest editorial content and layout from the personality atlas. */}
           <ReadingLayerPrototype
             profileCode={code}
@@ -340,7 +366,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
           />
 
           {!isSharedView && onOpenPricing && onOpenCoach && (
-            <section className="mx-auto max-w-5xl border border-stone-200 bg-[#FCFBF8] p-6 sm:p-8 md:p-10" aria-labelledby="result-next-steps-heading">
+            <section id="result-next-steps" className="mx-auto max-w-5xl scroll-mt-24 border border-stone-200 bg-[#FCFBF8] p-6 sm:p-8 md:p-10" aria-labelledby="result-next-steps-heading">
               <div className="max-w-2xl">
                 <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">NEXT STEPS · {profile.code}</p>
                 <h2 id="result-next-steps-heading" className="mt-3 serif text-3xl leading-[1.5] text-[#2D2D2D] md:text-4xl">從看見自己，走到下一個適合你的動作</h2>
@@ -503,6 +529,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
 
       {!isSharedView && !daily && (
         <NpcQuestionSection faceCode={code} initialEmail={user?.email} />
+      )}
+
+      {!isSharedView && !daily && onOpenPricing && (
+        <div className={`fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] transition duration-300 sm:hidden ${showMobileGuideCta ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0'}`}>
+          <div className="mx-auto flex max-w-md items-center gap-3 border border-[#CFC2B3] bg-[#FFFEFC]/95 p-2 shadow-[0_-10px_30px_rgba(45,45,45,0.16)] backdrop-blur">
+            <div className="min-w-0 flex-1 pl-2">
+              <p className="text-[10px] font-bold tracking-[0.16em] text-[#8C635B]">你的下一步</p>
+              <p className="truncate text-sm font-medium text-[#2D2D2D]">把人格觀察變成交易原則</p>
+            </div>
+            <button type="button" onClick={onOpenPricing} className="min-h-12 shrink-0 bg-[#4A382D] px-4 text-sm font-bold text-white transition active:bg-[#2D2D2D]">
+              生存指南 →
+            </button>
+          </div>
+        </div>
       )}
 
       {isShareModalOpen && (

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AuthUser, Language } from '../types';
 import { translations } from '../i18n';
 import { FaceWordmark } from './FaceWordmark';
@@ -37,31 +37,47 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   language,
   onToggleLanguage
 }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = translations[language];
 
   const openUserMenu = () => {
     if (menuCloseTimer.current) clearTimeout(menuCloseTimer.current);
-    setIsMenuOpen(true);
+    setIsAccountMenuOpen(true);
   };
 
   const closeUserMenuLater = () => {
     if (menuCloseTimer.current) clearTimeout(menuCloseTimer.current);
     // Leave enough time for the pointer to travel from the avatar to the menu.
-    menuCloseTimer.current = setTimeout(() => setIsMenuOpen(false), 700);
+    menuCloseTimer.current = setTimeout(() => setIsAccountMenuOpen(false), 700);
   };
 
   const handleLogoClick = () => {
+    setIsMobileNavOpen(false);
     onViewChange?.('landing');
   };
 
   const handleInternalLink = (event: React.MouseEvent<HTMLAnchorElement>, view: string) => {
     event.preventDefault();
+    setIsMobileNavOpen(false);
     onViewChange?.(view);
   };
 
   const isAssessmentView = activeView === 'dna-test' || activeView === 'daily-test';
+
+  useEffect(() => {
+    setIsMobileNavOpen(false);
+  }, [activeView]);
+
+  useEffect(() => {
+    if (!isMobileNavOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMobileNavOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [isMobileNavOpen]);
 
   return (
     <div className={`face-site min-h-screen relative flex flex-col items-center transition-colors duration-1000 bg-zen-paper px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-12`}>
@@ -80,14 +96,31 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                <FaceWordmark className="h-[3.25rem] w-[8.25rem] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 sm:h-[3.875rem] sm:w-[9.75rem]" />
             </a>
 
-            {showAccountActions && <div className="flex shrink-0 items-center gap-2 sm:gap-6">
+            {showAccountActions && <div className="flex shrink-0 items-center gap-1 sm:gap-6">
+              {showNav && !isAssessmentView && (
+                <button
+                  type="button"
+                  onClick={() => setIsMobileNavOpen((open) => !open)}
+                  aria-expanded={isMobileNavOpen}
+                  aria-controls="mobile-site-navigation"
+                  aria-label={isMobileNavOpen ? '關閉網站選單' : '開啟網站選單'}
+                  className="grid h-11 w-11 place-items-center rounded-full text-[#2D2D2D] transition hover:bg-white/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B] sm:hidden"
+                >
+                  <span className="sr-only">{isMobileNavOpen ? '關閉網站選單' : '開啟網站選單'}</span>
+                  <span aria-hidden="true" className="relative block h-4 w-5">
+                    <span className={`absolute left-0 top-0.5 h-px w-5 bg-current transition ${isMobileNavOpen ? 'translate-y-[6px] rotate-45' : ''}`} />
+                    <span className={`absolute left-0 top-[7px] h-px w-5 bg-current transition ${isMobileNavOpen ? 'opacity-0' : ''}`} />
+                    <span className={`absolute bottom-0.5 left-0 h-px w-5 bg-current transition ${isMobileNavOpen ? '-translate-y-[6px] -rotate-45' : ''}`} />
+                  </span>
+                </button>
+              )}
               {user ? (
                 <div 
                   className="relative -mb-3 pb-3"
                   onMouseEnter={openUserMenu}
                   onMouseLeave={closeUserMenuLater}
                 >
-                  <button type="button" onClick={() => setIsMenuOpen((open) => !open)} aria-expanded={isMenuOpen} aria-label="開啟會員選單" className="flex items-center gap-3 rounded-full p-1.5 transition-all hover:bg-white/60">
+                  <button type="button" onClick={() => setIsAccountMenuOpen((open) => !open)} aria-expanded={isAccountMenuOpen} aria-label="開啟會員選單" className="flex items-center gap-3 rounded-full p-1.5 transition-all hover:bg-white/60">
                     <div className="text-right hidden md:block px-1">
                       {/* ✅ 用戶名稱放大 */}
                       <p className={`text-xs font-black uppercase tracking-widest text-[#2D2D2D]`}>{user.name}</p>
@@ -99,11 +132,11 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                     />
                   </button>
                   
-                  <div className={`absolute top-full right-0 z-50 transition-all duration-200 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'}`}>
+                  {isAccountMenuOpen && <div className="absolute right-0 top-full z-50 animate-fade-in">
                     <div className="bg-white border border-[#D1D1C7] shadow-2xl rounded-sm min-w-[180px] overflow-hidden">
                       <button
                         onClick={() => {
-                          setIsMenuOpen(false);
+                          setIsAccountMenuOpen(false);
                           onViewChange?.('member-home');
                         }}
                         className="w-full text-left px-5 py-4 text-xs tracking-[0.18em] text-[#2D2D2D] hover:bg-[#F3F0EB] transition-colors flex items-center gap-4 font-bold"
@@ -112,7 +145,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                       </button>
                       <button 
                         onClick={() => {
-                          setIsMenuOpen(false);
+                          setIsAccountMenuOpen(false);
                           onLogout?.();
                         }}
                         className="w-full text-left px-5 py-4 text-xs tracking-[0.3em] uppercase text-[#A64D4D] hover:bg-[#A64D4D] hover:text-white transition-colors flex items-center gap-4 font-bold"
@@ -120,7 +153,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                         {t.common.logout}
                       </button>
                     </div>
-                  </div>
+                  </div>}
                 </div>
               ) : (
                 <button 
@@ -135,7 +168,38 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
 
           {/* Nav */}
           {showNav && !isAssessmentView && onViewChange && (
-            <nav className={`${isLanding ? 'mb-0' : 'mb-8 md:mb-10'} hide-scrollbar -mx-4 flex snap-x items-end gap-x-5 overflow-x-auto border-b border-[#D1D1C7]/60 px-4 text-sm font-medium leading-6 tracking-[0.04em] sm:mx-0 sm:justify-center sm:gap-x-9 sm:px-0 md:gap-x-12 md:text-base`}>
+            <>
+              <nav
+                id="mobile-site-navigation"
+                aria-label="網站導覽"
+                hidden={!isMobileNavOpen}
+                className={`${isLanding ? 'mb-0' : 'mb-8'} -mx-4 animate-fade-in border-y border-[#D1D1C7]/60 bg-[#F8F5EF]/95 px-4 py-2 text-left sm:hidden`}
+              >
+                <a href="/test" onClick={(event) => handleInternalLink(event, 'dna-test')} className="flex min-h-12 items-center justify-between border-b border-[#D1D1C7]/50 px-2 text-sm font-medium text-[#2D2D2D]">
+                  開始測驗 <span aria-hidden="true">→</span>
+                </a>
+                <a href="/types" onClick={(event) => handleInternalLink(event, 'role-gallery')} className="flex min-h-12 items-center justify-between border-b border-[#D1D1C7]/50 px-2 text-sm font-medium text-[#2D2D2D]">
+                  {t.nav.gallery} <span aria-hidden="true">→</span>
+                </a>
+                <a href="/about" onClick={(event) => handleInternalLink(event, 'about-face')} className="flex min-h-12 items-center justify-between border-b border-[#D1D1C7]/50 px-2 text-sm font-medium text-[#2D2D2D]">
+                  {t.nav.about} <span aria-hidden="true">→</span>
+                </a>
+                <a href="/watch" onClick={(event) => handleInternalLink(event, 'content-hub')} className="flex min-h-12 items-center justify-between border-b border-[#D1D1C7]/50 px-2 text-sm font-medium text-[#2D2D2D]">
+                  {t.nav.watch} <span aria-hidden="true">→</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    user ? onViewChange('member-home') : onLogin?.();
+                  }}
+                  className="flex min-h-12 items-center justify-between px-2 text-left text-sm font-bold text-[#2D2D2D]"
+                >
+                  我的 FACE <span aria-hidden="true">→</span>
+                </button>
+              </nav>
+
+              <nav aria-label="網站導覽" className={`${isLanding ? 'mb-0' : 'mb-8 md:mb-10'} hidden items-end gap-x-9 border-b border-[#D1D1C7]/60 text-sm font-medium leading-6 tracking-[0.04em] sm:flex sm:justify-center md:gap-x-12 md:text-base`}>
                 <a
                   href="/test"
                   onClick={(event) => handleInternalLink(event, 'dna-test')}
@@ -171,7 +235,8 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                 >
                   我的 FACE
                 </button>
-            </nav>
+              </nav>
+            </>
           )}
 
           {title && !isAssessmentView && (

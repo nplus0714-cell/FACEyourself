@@ -1,4 +1,5 @@
 import React from 'react';
+import { EarlyAccessWaitlistForm } from './EarlyAccessWaitlistForm';
 
 interface PersonalTradingManualProps {
   isLoggedIn: boolean;
@@ -23,11 +24,21 @@ export const PersonalTradingManual: React.FC<PersonalTradingManualProps> = ({ is
       ].map(([number, title, description]) => <article key={number} className="bg-white p-7 sm:p-9"><p className="font-mono text-xs text-[#9A6D62]">{number}</p><h2 className="mt-3 serif text-2xl text-[#2D2D2D]">{title}</h2><p className="mt-4 text-sm leading-7 text-[#70665D]">{description}</p></article>)}
     </section>
 
-    <section className="mx-auto mt-12 max-w-3xl bg-[#2D2D2D] px-7 py-10 text-center text-white sm:px-12">
-      <p className="text-xs font-bold tracking-[0.18em] text-[#D9C7A9]">完整版閱讀權限</p>
-      <h2 className="mt-4 serif text-3xl">分析免費，付費內容稍後解鎖</h2>
-      <p className="mt-4 text-sm leading-7 text-white/75">登入後可免費看完整人格分析；進攻與歸真目前提供試讀，完整版仍需要付費權限。價格尚未公布，也尚未開放購買。</p>
-      {!isLoggedIn ? <button type="button" onClick={onLogin} className="mt-7 min-h-12 bg-white px-7 py-3 text-sm font-bold text-[#2D2D2D]">登入，免費看完整人格分析 →</button> : <div className="mt-7"><p className="border border-white/30 px-6 py-4 text-sm text-white/85">已登入 · 完整人格分析可在「我的 FACE」查看；付費篇章尚未開賣</p><button type="button" onClick={onOpenMemberHome} className="mt-3 inline-flex min-h-11 items-center border-b border-white py-1 text-sm font-bold text-white">前往我的 FACE →</button></div>}
+    <section className="mx-auto mt-12 grid max-w-5xl gap-10 bg-[#2D2D2D] px-7 py-10 text-white sm:px-12 sm:py-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+      <div className="flex flex-col justify-center">
+        <p className="text-xs font-bold tracking-[0.18em] text-[#D9C7A9]">完整版閱讀權限</p>
+        <h2 className="mt-4 serif text-3xl leading-[1.5]">分析免費，付費內容稍後解鎖</h2>
+        <p className="mt-4 text-sm leading-7 text-white/75">登入後可免費看完整人格分析；進攻與歸真目前提供試讀，完整版仍需要付費權限。價格尚未公布，也尚未開放購買。</p>
+        {!isLoggedIn ? <button type="button" onClick={onLogin} className="mt-7 min-h-12 bg-white px-7 py-3 text-sm font-bold text-[#2D2D2D]">登入，免費看完整人格分析 →</button> : <div className="mt-7"><p className="border border-white/30 px-6 py-4 text-sm text-white/85">已登入 · 完整人格分析可在「我的 FACE」查看；付費篇章尚未開賣</p><button type="button" onClick={onOpenMemberHome} className="mt-3 inline-flex min-h-11 items-center border-b border-white py-1 text-sm font-bold text-white">前往我的 FACE →</button></div>}
+      </div>
+      <div className="border border-white/15 bg-white/[0.06] p-6 sm:p-7">
+        <p className="text-xs font-bold tracking-[0.18em] text-[#D9C7A9]">OPENING NOTICE · EMAIL ONLY</p>
+        <h3 className="mt-3 serif text-2xl leading-[1.5]">想知道何時開放？</h3>
+        <p className="mt-3 text-sm leading-7 text-white/70">留下 Email；等內容、價格與取得方式確定後，再通知你決定要不要加入。現在不會建立訂單或收費。</p>
+        <div className="mt-6">
+          <EarlyAccessWaitlistForm source="personal-trading-manual" variant="manual" />
+        </div>
+      </div>
     </section>
   </div>
 );

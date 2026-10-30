@@ -4,10 +4,12 @@ import { joinEarlyAccessWaitlist } from '../services/earlyAccessWaitlist';
 
 interface EarlyAccessWaitlistFormProps {
   source?: string;
+  variant?: 'survival-guide' | 'manual';
 }
 
 export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = ({
   source = 'survival-kit-pricing',
+  variant = 'survival-guide',
 }) => {
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
@@ -15,6 +17,7 @@ export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const isManual = variant === 'manual';
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,7 +27,7 @@ export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = (
     try {
       await joinEarlyAccessWaitlist({
         email,
-        interest: 'survival_guide',
+        interest: isManual ? 'full_system' : 'survival_guide',
         source,
         marketingConsent,
         website,
@@ -40,9 +43,9 @@ export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = (
   if (isComplete) {
     return (
       <div role="status" className="border border-white/20 bg-white/10 p-6">
-        <p className="serif text-2xl leading-[1.5] text-white">已為你保留早鳥通知</p>
+        <p className="serif text-2xl leading-[1.5] text-white">{isManual ? '已為你保留開放通知' : '已為你保留早鳥通知'}</p>
         <p className="mt-3 text-sm leading-7 text-white/75">
-          正式開放時，NT$590 早鳥方案、四項數位內容與購買方式會寄到 <span className="text-[#E6D5B8]">{email.trim()}</span>。
+          {isManual ? '正式開放時，完整內容、價格與取得方式會寄到 ' : '正式開放時，NT$590 早鳥方案、四項數位內容與購買方式會寄到 '}<span className="text-[#E6D5B8]">{email.trim()}</span>。
         </p>
         <p className="mt-4 text-xs leading-6 text-white/50">這只是提前卡位，不代表購買，也不會自動扣款。</p>
       </div>
@@ -101,7 +104,7 @@ export const EarlyAccessWaitlistForm: React.FC<EarlyAccessWaitlistFormProps> = (
         disabled={isSubmitting || !email.trim() || !marketingConsent}
         className="flex w-full items-center justify-center bg-white px-6 py-4 text-center text-sm font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9] disabled:cursor-wait disabled:opacity-65"
       >
-        {isSubmitting ? '正在登記…' : '輸入 Email，提前卡位早鳥優惠 →'}
+        {isSubmitting ? '正在登記…' : isManual ? '留下 Email，開放時通知我 →' : '輸入 Email，提前卡位早鳥優惠 →'}
       </button>
       <p className="text-xs leading-6 text-white/50">
         填寫 Email 並非購買，不會產生訂單或扣款；可隨時寄信至 {SITE_IDENTITY.email} 要求停止通知。

@@ -429,7 +429,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
         )}
 
         {question.type === 'image' && !question.compositeImage && question.images && (
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-4">
             {question.images.map((item, index) => (
               <button
                 key={item.assetKey}
@@ -439,7 +439,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
                 className="group overflow-hidden border border-[#D1D1C7]/70 bg-white text-left shadow-sm transition-all duration-300 hover:border-[#2D2D2D] hover:shadow-lg disabled:cursor-wait disabled:opacity-60"
               >
                 {item.src ? (
-                  <span className="flex aspect-[2/3] w-full items-center justify-center overflow-hidden bg-[#F7F4EF]"><img src={item.src} alt={item.alt} className="h-full w-full object-contain" /></span>
+                  <span className="flex aspect-[5/4] w-full items-center justify-center overflow-hidden bg-[#F7F4EF] sm:aspect-[2/3]"><img src={item.src} alt={item.alt} className="h-full w-full object-contain" /></span>
                 ) : (
                   <div className="flex aspect-[4/3] items-center justify-center bg-[radial-gradient(circle_at_top_left,_#d9d1c7,_#f8f7f4_45%,_#d5c0b9)] p-6 text-center">
                     <p className="serif text-base leading-relaxed text-[#2D2D2D]">{item.alt}</p>

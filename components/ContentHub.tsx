@@ -23,6 +23,15 @@ const ARTICLE_SERIES: Array<{ id: ContentSeries; english: string; description: s
   { id: '歸真篇', english: 'RETURN', description: '把市場方法放回自己的個性、生活與承受範圍，形成可以長期重複的節奏。' },
 ];
 
+const PROBLEM_ARTICLES = [
+  { label: '忍不住追高', detail: '看見上漲就怕錯過', slug: 'fomo-chasing-price' },
+  { label: '套牢不知道該不該走', detail: '分不清等待還是凹單', slug: 'trapped-position' },
+  { label: '一賺錢就想賣', detail: '總是抱不住看對的交易', slug: 'selling-winners' },
+  { label: '不知道怎麼停損', detail: '一跌就怕被洗掉', slug: 'stop-loss' },
+  { label: '部位讓我睡不好', detail: '持股太多或押得太重', slug: 'position-sizing' },
+  { label: '消息越看越焦慮', detail: '資訊很多卻更難決定', slug: 'decision-anxiety' },
+] as const;
+
 export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasSurvivalKitAccess, language, onStartTest, onViewResult, onLoginRequest, onOpenPricing, onOpenContent }) => {
   const isZh = language === 'zh';
   const publishedArticles = CONTENT_CATALOG.filter((item) => item.kind === 'article' && item.status === 'published');
@@ -80,7 +89,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
           </a>
         </nav>
 
-        {topicArticles.length > 0 && <section id="topic-articles" aria-labelledby="topic-articles-heading" className="space-y-6 scroll-mt-8">
+        {topicArticles.length > 0 && <section id="topic-articles" aria-labelledby="topic-articles-heading" className="space-y-8 scroll-mt-8">
           <div className="flex flex-col gap-3 border-l-2 border-[#A05F54] pl-5 md:flex-row md:items-end md:justify-between md:gap-8 md:pl-7">
             <div>
               <p className="text-xs font-medium tracking-[0.22em] text-[#A05F54]">TOPIC ARTICLES</p>
@@ -88,6 +97,37 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
             </div>
             <p className="max-w-2xl text-[15px] leading-[1.9] text-[#70665D] md:text-right md:text-base">從你現在最卡的問題開始：追高、套牢、賣飛、停損、部位、焦慮與交易復盤。</p>
           </div>
+
+          <div className="border border-[#D1D1C7] bg-[#F7F2EC] p-5 sm:p-7" aria-labelledby="problem-finder-heading">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] font-bold tracking-[0.2em] text-[#A05F54]">START WITH YOUR QUESTION</p>
+                <h5 id="problem-finder-heading" className="mt-2 serif text-2xl text-[#2D2D2D] sm:text-3xl">你現在最想解開哪個問題？</h5>
+              </div>
+              <p className="text-sm leading-7 text-[#70665D]">不用從第一篇開始，直接選最有感的。</p>
+            </div>
+            <div className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {PROBLEM_ARTICLES.map((problem) => {
+                const item = topicArticles.find((article) => article.slug === problem.slug);
+                if (!item) return null;
+                return (
+                  <a
+                    key={problem.slug}
+                    href={`/watch/${item.slug}`}
+                    onClick={(event) => { event.preventDefault(); openArticle(item); }}
+                    className="group flex min-h-24 items-center justify-between gap-4 border border-[#D8CEC2] bg-[#FFFEFC] px-4 py-4 text-left transition hover:-translate-y-0.5 hover:border-[#A05F54] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]"
+                  >
+                    <span>
+                      <span className="block text-sm font-bold leading-6 text-[#2D2D2D]">{problem.label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[#7A7067]">{problem.detail}</span>
+                    </span>
+                    <span aria-hidden="true" className="shrink-0 text-lg text-[#A05F54] transition group-hover:translate-x-1">→</span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="grid gap-5 md:grid-cols-2">
             {topicArticles.map((item) => (
               <a key={item.id} href={`/watch/${item.slug}`} onClick={(event) => { event.preventDefault(); openArticle(item); }} className="group flex min-h-64 flex-col justify-between border border-[#D1D1C7] bg-white p-7 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#B18A80] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-4 md:p-8">

@@ -21,6 +21,7 @@ import { FEATURE_FLAGS } from './config/featureFlags';
 import { trackFunnelEvent } from './services/funnelAnalytics';
 import { clearLocalAssessmentProgress } from './services/localAssessmentProgress';
 import { FunnelLanding } from './components/FunnelLanding';
+import { PageLoadingFallback } from './components/PageLoadingFallback';
 
 // Keep the public funnel lightweight; the existing deeper surfaces load only
 // when their routes are visited.
@@ -676,7 +677,7 @@ const App: React.FC = () => {
       language={language}
       onToggleLanguage={toggleLanguage}
     >
-      <React.Suspense fallback={<div className="py-24 text-center text-sm tracking-[0.12em] text-[#8C7E6D]" role="status">正在載入…</div>}>
+      <React.Suspense fallback={<PageLoadingFallback />}>
       {view === 'landing' && (
         <FunnelLanding
           hasResult={Boolean(state.dna) && (!state.user || hydratedMemberId === state.user.id)}
