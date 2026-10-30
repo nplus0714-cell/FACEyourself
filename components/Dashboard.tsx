@@ -275,6 +275,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
   const hasInsufficientScenarioData = dna.assessmentMeta?.hasInsufficientData
     ?? skippedScenarioCount / scenarioQuestionCount > 0.5;
 
+  const scrollToResultSection = (event: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    event.preventDefault();
+    const target = document.getElementById(sectionId);
+    if (!target) return;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+    window.history.replaceState(window.history.state, '', `${window.location.pathname}${window.location.search}#${sectionId}`);
+  };
+
   if (loading) {
     return (
       <div className="py-24 flex flex-col items-center justify-center space-y-6">
@@ -336,12 +345,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ dna, daily, staticReport, 
         <nav className="sticky top-0 z-30 -mx-4 border-y border-[#D1C6B8] bg-[#F7F2EA]/95 px-4 py-3 shadow-[0_10px_28px_rgba(70,55,44,0.08)] backdrop-blur sm:mx-0 sm:px-5" aria-label="結果章節導覽">
           <div className="hide-scrollbar flex snap-x gap-2 overflow-x-auto">
             {FACE_READING_CHAPTERS.slice(0, 6).map((chapter) => (
-              <a key={chapter.id} href={`#${chapter.id}`} className="inline-flex min-h-11 shrink-0 snap-start items-center gap-2 border border-[#CFC2B3] bg-[#FFFEFC] px-3 text-xs font-medium text-[#4A4038] transition hover:border-[#8C635B] hover:text-[#8C635B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
+              <a key={chapter.id} href={`#${chapter.id}`} onClick={(event) => scrollToResultSection(event, chapter.id)} className="inline-flex min-h-11 shrink-0 snap-start items-center gap-2 border border-[#CFC2B3] bg-[#FFFEFC] px-3 text-xs font-medium text-[#4A4038] transition hover:border-[#8C635B] hover:text-[#8C635B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
                 <span className="font-mono text-[10px] text-[#A36F63]">{chapter.number}</span>
                 {chapter.number === '01' ? '你的 FACE' : chapter.number === '02' ? '兩面鏡子' : chapter.number === '03' ? '交易天賦' : chapter.number === '04' ? '優勢盲點' : chapter.number === '05' ? '失控觸發' : '回看自己'}
               </a>
             ))}
-            <a href="#result-next-steps" className="inline-flex min-h-11 shrink-0 snap-start items-center border border-[#4A382D] bg-[#4A382D] px-4 text-xs font-bold text-white transition hover:bg-[#2D2D2D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
+            <a href="#result-next-steps" onClick={(event) => scrollToResultSection(event, 'result-next-steps')} className="inline-flex min-h-11 shrink-0 snap-start items-center border border-[#4A382D] bg-[#4A382D] px-4 text-xs font-bold text-white transition hover:bg-[#2D2D2D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
               下一步 →
             </a>
           </div>
