@@ -4,6 +4,7 @@ import { SITE_IDENTITY } from '../data/siteIdentity';
 const legalLinks = [
   { href: '/privacy', label: '隱私權政策' },
   { href: '/terms', label: '使用條款' },
+  { href: '/refund-policy', label: '退款與取消政策' },
   { href: '/data-deletion', label: '資料刪除說明' },
 ];
 

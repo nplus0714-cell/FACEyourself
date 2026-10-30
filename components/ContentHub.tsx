@@ -39,26 +39,20 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
   const topicArticles = publishedArticles.filter((item) => item.channel === 'topic-articles');
 
   const openArticle = (item: ContentItem) => {
-    if (item.requiresPurchase && !hasSurvivalKitAccess) {
-      onOpenPricing();
-      return;
-    }
     if (item.requiresLogin && !isLoggedIn) {
       onLoginRequest();
+      return;
+    }
+    if (item.requiresPurchase && !hasSurvivalKitAccess) {
+      onOpenPricing();
       return;
     }
     onOpenContent(item);
   };
 
-  const getAccessLabel = (item: ContentItem) => {
-    if (item.requiresPurchase) return 'LOCK · 方案限定';
-    if (item.requiresLogin) return 'LOCK · 登入限定';
-    return item.series;
-  };
-
   const getActionLabel = (item: ContentItem) => {
-    if (item.requiresPurchase && !hasSurvivalKitAccess) return '了解完整版規劃 →';
-    if (item.requiresLogin && !isLoggedIn) return '登入閱讀 →';
+    if (item.requiresLogin && !isLoggedIn) return item.requiresPurchase ? '先登入查看開放規劃 →' : '登入後免費閱讀 →';
+    if (item.requiresPurchase && !hasSurvivalKitAccess) return '完整版尚未開放 →';
     return '閱讀文章 →';
   };
 
@@ -151,7 +145,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
               <p className="text-xs font-medium tracking-[0.24em] text-[#A05F54]">FACE GUIDE · TABLE OF CONTENTS</p>
               <h4 className="mt-3 serif text-3xl text-[#2D2D2D] md:text-5xl">交易生存指南</h4>
             </div>
-            <p className="mt-5 max-w-2xl text-[15px] leading-[1.95] text-[#70665D] md:mt-0 md:text-right md:text-base">從破繭、生存、進攻到歸真，一步一步建構你的交易計畫。每一章都可直接閱讀、登入後閱讀，或取得方案後解鎖。</p>
+            <p className="mt-5 max-w-2xl text-[15px] leading-[1.95] text-[#70665D] md:mt-0 md:text-right md:text-base">從破繭、生存、進攻到歸真，一步一步建構你的交易計畫。每一章會清楚標示可直接閱讀、登入後免費閱讀，或仍在完整版規劃中。</p>
           </div>
 
           <div className="mt-7 border border-[#D1D1C7] bg-white">

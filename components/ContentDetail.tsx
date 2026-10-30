@@ -15,6 +15,8 @@ interface ContentDetailProps {
   onStartTest: () => void;
 }
 
+const LINE_CONSULTATION_URL = 'https://line.me/ti/p/@227bctxh';
+
 export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, hasSurvivalKitAccess, onBack, onLoginRequest, onOpenPricing, onOpenContent, onStartTest }) => {
   const articleRef = useRef<HTMLElement>(null);
   const readingSessionRef = useRef(createReadingSessionId());
@@ -127,7 +129,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             {isLoginLocked && <button type="button" onClick={onLoginRequest} className="bg-[#2D2D2D] px-7 py-4 text-sm font-medium text-white transition hover:bg-[#3A302B]">登入並繼續 →</button>}
-            {(item.requiresPurchase || !isLoginLocked) && <a href="/manual" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">了解個人交易使用說明書</a>}
+            {(item.requiresPurchase || !isLoginLocked) && <a href="/manual" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">查看完整版開放規劃</a>}
           </div>
         </section>
       ) : item.requiresPurchase && paidArticleStatus === 'loading' ? (
@@ -196,8 +198,8 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
       {item.kind === 'video' && <section className="mt-14 border border-[#D1D1C7] bg-[#F7F4EF] p-7 text-center md:p-10">
         <p className="text-xs font-bold tracking-[0.22em] text-[#8C635B]">NEXT STEP</p>
         <h2 className="mt-3 serif text-2xl text-[#2D2D2D] md:text-3xl">這個問題，也正在困擾你嗎？</h2>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-[1.9] text-[#70665D]">之後這裡會放你的 LINE@ 諮詢入口；使用者看完內容後，再選擇是否主動和你聊聊。</p>
-        <button type="button" disabled className="mt-7 cursor-not-allowed bg-[#2D2D2D] px-6 py-4 text-sm font-bold text-white opacity-50">LINE@ 諮詢入口（等待你的連結）</button>
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-[1.9] text-[#70665D]">如果你想把交易壓力或決策流程說得更清楚，可以主動從 LINE@ 留下目前的困擾；不提供個別標的、買賣時點或報酬預估。</p>
+        <a href={LINE_CONSULTATION_URL} target="_blank" rel="noopener noreferrer" className="mt-7 inline-flex min-h-12 items-center justify-center bg-[#2D2D2D] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#3A302B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">前往 LINE@ 諮詢 →</a>
       </section>}
     </article>
   );

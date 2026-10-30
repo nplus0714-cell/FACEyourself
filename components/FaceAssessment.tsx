@@ -252,6 +252,9 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
   const [initialProgress] = useState(getLocalAssessmentProgress);
   const [step, setStep] = useState(initialProgress?.step ?? 0);
   const [answers, setAnswers] = useState<Record<string, FaceResponse>>(initialProgress?.answers ?? {});
+  const [showResumeNotice, setShowResumeNotice] = useState(() => Boolean(
+    initialProgress && (initialProgress.step > 0 || Object.keys(initialProgress.answers).length > 0),
+  ));
   const [isSaving, setIsSaving] = useState(false);
   const clientRunIdRef = useRef<string | null>(null);
   const runIdRef = useRef<string | null>(null);
@@ -323,6 +326,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
   const choose = (response: FaceResponse) => {
     if (isSaving) return;
 
+    setShowResumeNotice(false);
     const updated = { ...answers, [question.id]: response };
     setAnswers(updated);
     trackFunnelEvent('quiz_question_progress', { step: step + 1 });
@@ -342,6 +346,17 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
     const previousStep = Math.max(0, step - 1);
     saveLocalAssessmentProgress({ step: previousStep, answers });
     setStep(previousStep);
+  };
+
+  const restartAssessment = () => {
+    if (!window.confirm('確定要清除這台裝置上的測驗進度，從第 1 題重新開始嗎？')) return;
+    clearLocalAssessmentProgress();
+    setAnswers({});
+    setStep(0);
+    setShowResumeNotice(false);
+    clientRunIdRef.current = null;
+    runIdRef.current = null;
+    runPromiseRef.current = null;
   };
 
   const renderChoice = (item: FaceQuestion['options'][number]) => {
@@ -370,6 +385,16 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
   return (
     <div className="mx-auto flex min-h-[72vh] max-w-5xl flex-col justify-center px-0 sm:px-4 py-2 md:px-8 md:py-4 fade-in">
       <div className="mb-6 md:mb-8 space-y-5 md:space-y-6 text-center">
+        {showResumeNotice && (
+          <div className="flex flex-col gap-3 border border-[#CDBDB0] bg-[#F7F1EC] px-4 py-3 text-left sm:flex-row sm:items-center sm:justify-between" role="status" aria-live="polite">
+            <p className="text-sm leading-6 text-[#5F574F]">
+              已從這台裝置的第 {step + 1} 題接續，上次作答會保留。完成測驗後，這份暫存進度會自動清除。
+            </p>
+            <button type="button" onClick={restartAssessment} className="min-h-11 shrink-0 border-b border-[#8C635B] px-1 text-sm font-medium text-[#7A5148] transition hover:text-[#2D2D2D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
+              重新開始
+            </button>
+          </div>
+        )}
         <div className="grid grid-cols-4 overflow-hidden border border-[#D1D1C7]/60 bg-white/40 shadow-sm">
           {Object.entries(DIMENSION_LABELS).map(([dimension, label]) => (
             <div
