@@ -352,6 +352,21 @@ a:focus-visible {
   color: var(--face-ink);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* MirrorTrade follows the same visual system as FACE rather than the imported demo UI. */
 .mirror-trade-demo {
   font-family: "Noto Sans TC", sans-serif;

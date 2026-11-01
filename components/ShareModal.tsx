@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FaceScores, PersonalityProfile } from '../types';
 
 interface ShareModalProps {
@@ -12,15 +12,45 @@ type CopyState = 'idle' | 'copied';
 export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose }) => {
   const [copyState, setCopyState] = useState<CopyState>('idle');
   const [canUseNativeShare, setCanUseNativeShare] = useState(false);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     setCanUseNativeShare(typeof navigator !== 'undefined' && Boolean(navigator.share));
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
     };
-  }, []);
+  }, [onClose]);
 
   const shareUrl = useMemo(() => {
     const traits = ['A', 'P', 'R', 'I', 'L', 'T', 'C', 'D'] as const;
@@ -98,6 +128,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
       role="presentation"
     >
       <section
+        ref={dialogRef}
         aria-labelledby="share-dialog-title"
         aria-modal="true"
         role="dialog"
@@ -106,6 +137,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ dna, profile, onClose })
       >
         <div className="h-1 w-full bg-[#8C635B]" />
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={onClose}
           aria-label="關閉分享視窗"

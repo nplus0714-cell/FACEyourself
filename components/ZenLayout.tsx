@@ -40,6 +40,10 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const menuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const mobileNavButtonRef = useRef<HTMLButtonElement>(null);
+  const accountMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const previousActiveViewRef = useRef(activeView);
   const t = translations[language];
 
   const openUserMenu = () => {
@@ -71,16 +75,33 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   }, [activeView]);
 
   useEffect(() => {
-    if (!isMobileNavOpen) return;
+    if (!isMobileNavOpen && !isAccountMenuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsMobileNavOpen(false);
+      if (event.key !== 'Escape') return;
+      if (isAccountMenuOpen) {
+        setIsAccountMenuOpen(false);
+        accountMenuButtonRef.current?.focus();
+      } else if (isMobileNavOpen) {
+        setIsMobileNavOpen(false);
+        mobileNavButtonRef.current?.focus();
+      }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [isMobileNavOpen]);
+  }, [isAccountMenuOpen, isMobileNavOpen]);
+
+  useEffect(() => {
+    const previousActiveView = previousActiveViewRef.current;
+    previousActiveViewRef.current = activeView;
+    if (previousActiveView === activeView) return;
+    window.requestAnimationFrame(() => mainRef.current?.focus({ preventScroll: true }));
+  }, [activeView]);
 
   return (
     <div className={`face-site min-h-screen relative flex flex-col items-center transition-colors duration-1000 bg-zen-paper px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-12`}>
+      <a href="#main-content" className="fixed left-4 top-3 z-[200] -translate-y-24 bg-[#2D2D2D] px-5 py-3 text-sm font-bold text-white shadow-xl transition-transform focus:translate-y-0">
+        跳到主要內容
+      </a>
       <div className={`${(wide ? 'max-w-6xl' : 'max-w-4xl') + ' w-full'} transition-all duration-500`}>
         
         {/* Header - 質感深度優化 */}
@@ -99,6 +120,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
             {showAccountActions && <div className="flex shrink-0 items-center gap-1 sm:gap-6">
               {showNav && !isAssessmentView && (
                 <button
+                  ref={mobileNavButtonRef}
                   type="button"
                   onClick={() => setIsMobileNavOpen((open) => !open)}
                   aria-expanded={isMobileNavOpen}
@@ -120,7 +142,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                   onMouseEnter={openUserMenu}
                   onMouseLeave={closeUserMenuLater}
                 >
-                  <button type="button" onClick={() => setIsAccountMenuOpen((open) => !open)} aria-expanded={isAccountMenuOpen} aria-label="開啟會員選單" className="flex items-center gap-3 rounded-full p-1.5 transition-all hover:bg-white/60">
+                  <button ref={accountMenuButtonRef} type="button" onClick={() => setIsAccountMenuOpen((open) => !open)} aria-expanded={isAccountMenuOpen} aria-controls="account-menu" aria-label={isAccountMenuOpen ? '關閉會員選單' : '開啟會員選單'} className="flex items-center gap-3 rounded-full p-1.5 transition-all hover:bg-white/60">
                     <div className="text-right hidden md:block px-1">
                       {/* ✅ 用戶名稱放大 */}
                       <p className={`text-xs font-black uppercase tracking-widest text-[#2D2D2D]`}>{user.name}</p>
@@ -132,7 +154,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                     />
                   </button>
                   
-                  {isAccountMenuOpen && <div className="absolute right-0 top-full z-50 animate-fade-in">
+                  {isAccountMenuOpen && <div id="account-menu" className="absolute right-0 top-full z-50 animate-fade-in">
                     <div className="bg-white border border-[#D1D1C7] shadow-2xl rounded-sm min-w-[180px] overflow-hidden">
                       <button
                         onClick={() => {
@@ -248,7 +270,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
           )}
         </header>
 
-        <main className={`fade-in relative z-10`}>
+        <main id="main-content" ref={mainRef} tabIndex={-1} className="fade-in relative z-10 focus:outline-none">
           {children}
         </main>
         {!isAssessmentView && <SiteFooter />}

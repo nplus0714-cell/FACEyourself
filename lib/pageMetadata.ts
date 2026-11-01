@@ -1,5 +1,6 @@
 import type { ContentItem, } from '../data/contentCatalog';
 import type { PersonalityProfile } from '../types';
+import { FACE_MAP } from '../constants';
 
 const SITE_ORIGIN = 'https://faceyourself.vercel.app';
 const DEFAULT_IMAGE = `${SITE_ORIGIN}/images/face-og-v25.jpg`;
@@ -55,7 +56,7 @@ const upsertPageJsonLd = (graph: unknown[] | null) => {
 };
 
 const buildPageGraph = (input: PageMetadataInput, meta: { title: string; description: string; canonicalUrl: string; imageUrl: string }) => {
-  const { profile, content } = input;
+  const { path, profile, content } = input;
   const breadcrumb = (items: Array<{ name: string; url: string }>) => ({
     '@type': 'BreadcrumbList',
     itemListElement: items.map((item, index) => ({
@@ -103,6 +104,86 @@ const buildPageGraph = (input: PageMetadataInput, meta: { title: string; descrip
         { name: '首頁', url: `${SITE_ORIGIN}/` },
         { name: '生存指南', url: `${SITE_ORIGIN}/watch` },
         { name: content.title, url: meta.canonicalUrl },
+      ]),
+    ];
+  }
+
+  if (path === '/about') {
+    const services = [
+      ['FACE 24 題測驗', `${SITE_ORIGIN}/test`, '透過真實交易情境，看見個人的交易決策模式。'],
+      ['FACE 完整人格分析', `${SITE_ORIGIN}/types`, '理解交易天賦、壓力反應與失控警訊。'],
+      ['交易解憂 Bar', `${SITE_ORIGIN}/watch`, '從追高、套牢、賣飛、停損與焦慮等問題開始閱讀。'],
+      ['FACE 生存指南', `${SITE_ORIGIN}/survival-kit`, '將覺察轉成風險管理、停損與可重複的交易步驟。'],
+      ['RATE 鏡相診股', `${SITE_ORIGIN}/mirror-trade`, '對照 FACE 人格與真實持倉之間的策略落差。'],
+      ['1V1 交易初談', `${SITE_ORIGIN}/coach`, '與教練一起整理當前交易問題的優先順序。'],
+    ];
+    return [
+      {
+        '@type': 'AboutPage',
+        name: meta.title,
+        description: meta.description,
+        url: meta.canonicalUrl,
+        inLanguage: 'zh-TW',
+        isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+        about: { '@id': `${SITE_ORIGIN}/#organization` },
+        mainEntity: {
+          '@type': 'ItemList',
+          name: 'FACE Trader 產品與服務',
+          itemListElement: services.map(([name, url, description], index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            item: { '@type': 'Service', name, url, description, provider: { '@id': `${SITE_ORIGIN}/#organization` } },
+          })),
+        },
+      },
+      breadcrumb([
+        { name: '首頁', url: `${SITE_ORIGIN}/` },
+        { name: '關於 FACE', url: meta.canonicalUrl },
+      ]),
+    ];
+  }
+
+  if (path === '/types') {
+    return [
+      {
+        '@type': 'CollectionPage',
+        name: meta.title,
+        description: meta.description,
+        url: meta.canonicalUrl,
+        inLanguage: 'zh-TW',
+        isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+        mainEntity: {
+          '@type': 'ItemList',
+          name: 'FACE 16 型交易人格',
+          itemListElement: Object.values(FACE_MAP).map((item, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: `${item.name} ${item.code}`,
+            url: `${SITE_ORIGIN}/types/${item.code}`,
+          })),
+        },
+      },
+      breadcrumb([
+        { name: '首頁', url: `${SITE_ORIGIN}/` },
+        { name: '交易人格圖鑑', url: meta.canonicalUrl },
+      ]),
+    ];
+  }
+
+  if (path === '/watch') {
+    return [
+      {
+        '@type': 'CollectionPage',
+        name: meta.title,
+        description: meta.description,
+        url: meta.canonicalUrl,
+        inLanguage: 'zh-TW',
+        isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+        about: ['交易心理', '風險管理', '交易紀律', '停損'],
+      },
+      breadcrumb([
+        { name: '首頁', url: `${SITE_ORIGIN}/` },
+        { name: 'FACE 生存指南', url: meta.canonicalUrl },
       ]),
     ];
   }
