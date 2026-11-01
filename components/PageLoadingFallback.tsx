@@ -4,7 +4,7 @@ const SKELETON_CARDS = [0, 1, 2] as const;
 
 export const PageLoadingFallback: React.FC = () => (
   <section className="relative min-h-[32rem] overflow-hidden border border-[#D9CFC2] bg-[#F7F2EC] px-6 py-16 text-center" role="status" aria-live="polite" aria-busy="true">
-    <img src="/images/homepage-trading-salon-lineart.png" alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.08] mix-blend-multiply" />
+    <img src="/images/homepage-trading-salon-lineart.webp" alt="" aria-hidden="true" width="1440" height="810" decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.08] mix-blend-multiply" />
     <div className="relative mx-auto max-w-2xl">
       <p className="text-[11px] font-bold tracking-[0.24em] text-[#A36F63]">FACE TRADER · 正在整理內容</p>
       <div className="mx-auto mt-8 h-12 w-12 rounded-full border border-[#B9AA9D] p-2">

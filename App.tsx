@@ -60,16 +60,26 @@ const DAILY_RESULT_KEY = 'face-daily-v1-result';
 const DAILY_AWAITING_LOGIN_KEY = 'face-daily-v1-awaiting-login';
 const AUTH_RESTORE_TIMEOUT_MS = 8_000;
 const AUTH_CALLBACK_CLAIM_KEY = 'face-auth-callback-claim-v1';
+const AUTH_RESULT_RETURN_KEY = 'face-auth-result-return-v1';
 
 // Supabase completes an OAuth or magic-link login in one tab, then broadcasts
 // the new session to every open tab. Only the callback tab should copy a guest
 // result into the member account; otherwise each tab can create its own run.
 const authQuery = new URLSearchParams(window.location.search);
 const authHash = new URLSearchParams(window.location.hash.slice(1));
-if (authQuery.has('code') || authQuery.has('token_hash')
-  || authHash.has('access_token') || authHash.has('refresh_token')) {
+const isAuthCallback = authQuery.has('code') || authQuery.has('token_hash')
+  || authHash.has('access_token') || authHash.has('refresh_token');
+if (isAuthCallback) {
   sessionStorage.setItem(AUTH_CALLBACK_CLAIM_KEY, '1');
 }
+
+const shouldReturnToResultAfterAuth = () => {
+  try {
+    return isAuthCallback && localStorage.getItem(AUTH_RESULT_RETURN_KEY) === '/my-result';
+  } catch {
+    return false;
+  }
+};
 
 type AppView = 'landing' | 'dna-test' | 'sequential-test-mockup' | 'daily-test' | 'dashboard' | 'history' | 'report-detail' | 'role-gallery' | 'role-detail' | 'compatibility' | 'shared-dashboard' | 'about-face' | 'coach-profile' | 'content-hub' | 'content-detail' | 'survival-kit' | 'survival-guide' | 'survival-guide-full' | 'personal-trading-manual' | 'mirror-trade' | 'result-preview' | 'reading-prototype' | 'member-home' | 'research-admin' | 'privacy' | 'terms' | 'refund-policy' | 'data-deletion' | 'not-found';
 
@@ -158,7 +168,7 @@ const pathForView = (view: AppView) => ({
 
 const App: React.FC = () => {
   const [state, setState] = useState<UserState>({ user: null, dna: null, history: [], tempDaily: null });
-  const [view, setView] = useState<AppView>(() => viewFromPath(window.location.pathname));
+  const [view, setView] = useState<AppView>(() => shouldReturnToResultAfterAuth() ? 'dashboard' : viewFromPath(window.location.pathname));
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null);
   const [sharedDna, setSharedDna] = useState<FaceScores | null>(null);
   const [language, setLanguage] = useState<Language>('zh');
@@ -400,6 +410,7 @@ const App: React.FC = () => {
     setIsMemberResultLoading(true);
     setMemberResultError(false);
     void (async () => {
+      const returnToResult = shouldReturnToResultAfterAuth();
       try {
         if (sessionStorage.getItem(AUTH_CALLBACK_CLAIM_KEY) === '1') {
           const claimed = await claimPendingGuestAssessment();
@@ -426,11 +437,17 @@ const App: React.FC = () => {
           history,
         } : previous);
         setHydratedMemberId(memberId);
+        if (returnToResult) navigateTo('dashboard');
       } catch (error) {
         console.warn('Unable to restore the latest member assessment', error);
         if (active) setMemberResultError(true);
       } finally {
-        if (active) setIsMemberResultLoading(false);
+        if (active) {
+          setIsMemberResultLoading(false);
+          if (returnToResult) {
+            try { localStorage.removeItem(AUTH_RESULT_RETURN_KEY); } catch { /* Storage can be disabled. */ }
+          }
+        }
       }
     })();
     return () => { active = false; };
@@ -519,7 +536,15 @@ const App: React.FC = () => {
     };
   }, [showDailyResultAfterLogin, pendingDailyAwareness, pendingDailyResult]);
 
-  const handleLogin = () => setIsAuthDialogOpen(true);
+  const handleLogin = () => {
+    try {
+      if (view === 'dashboard' && state.dna) localStorage.setItem(AUTH_RESULT_RETURN_KEY, '/my-result');
+      else localStorage.removeItem(AUTH_RESULT_RETURN_KEY);
+    } catch {
+      // OAuth still works when storage is unavailable; only the return route is lost.
+    }
+    setIsAuthDialogOpen(true);
+  };
 
   const handleLogout = async () => {
     try {
@@ -770,7 +795,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} onOpenCoach={() => navigateTo('coach-profile')} onStartTest={() => navigateTo('dna-test')} onExploreTypes={() => navigateTo('role-gallery')} onOpenContent={() => navigateTo('content-hub')} />}
+      {view === 'about-face' && <AboutFace onGoToMirrorTrade={() => navigateTo('mirror-trade')} onOpenCoach={() => navigateTo('coach-profile')} onStartTest={() => navigateTo('dna-test')} onExploreTypes={() => navigateTo('role-gallery')} onOpenContent={() => navigateTo('content-hub')} onOpenGuide={() => navigateTo('survival-kit')} />}
       {view === 'coach-profile' && <CoachProfile onStartTest={() => navigateTo('dna-test')} onBackToAbout={() => navigateTo('about-face')} />}
       {view === 'mirror-trade' && <MirrorTrade user={state.user} onLogin={handleLogin} />}
       {view === 'member-home' && !FEATURE_FLAGS.dailyAwareness && state.user && <MemberWorkspace userName={state.user.name} hasAssessmentResult={!!state.dna && hydratedMemberId === state.user.id} onViewResult={() => navigateTo('dashboard')} onStartTest={() => navigateTo('dna-test')} onOpenGuide={() => navigateTo('survival-kit')} onOpenContent={() => navigateTo('content-hub')} onOpenGallery={() => navigateTo('role-gallery')} onOpenMirrorTrade={() => navigateTo('mirror-trade')} />}

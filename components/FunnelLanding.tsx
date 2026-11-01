@@ -13,11 +13,18 @@ export const FunnelLanding: React.FC<FunnelLandingProps> = ({ hasResult, isLogge
   <div className="-mx-4 fade-in sm:-mx-6 md:mx-0">
     <section className="relative isolate min-h-[680px] overflow-hidden border-y border-[#CFC6B8] bg-[#F6F1E9] sm:min-h-[760px] lg:min-h-[800px] lg:border">
       <div className="absolute inset-x-0 bottom-0 h-[42%] overflow-hidden sm:h-[50%] lg:h-[58%]" aria-hidden="true">
-        <img
-          src="/images/homepage-trading-salon.png"
-          alt=""
-          className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-[52%_center] opacity-70 mix-blend-multiply saturate-[0.82] contrast-[0.92]"
-        />
+        <picture>
+          <source media="(max-width: 767px)" srcSet="/images/homepage-trading-salon-768.webp" />
+          <img
+            src="/images/homepage-trading-salon-1440.webp"
+            alt=""
+            width="1440"
+            height="810"
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 h-full w-full scale-[1.03] object-cover object-[52%_center] opacity-70 mix-blend-multiply saturate-[0.82] contrast-[0.92]"
+          />
+        </picture>
         <span className="absolute inset-0 bg-[linear-gradient(to_bottom,#F6F1E9_0%,rgba(246,241,233,0.95)_12%,rgba(246,241,233,0.54)_40%,rgba(246,241,233,0.08)_78%)]" />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,rgba(255,253,248,0.94),transparent_46%)]" aria-hidden="true" />

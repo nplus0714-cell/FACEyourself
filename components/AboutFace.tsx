@@ -24,9 +24,10 @@ interface AboutFaceProps {
   onStartTest: () => void;
   onExploreTypes: () => void;
   onOpenContent: () => void;
+  onOpenGuide: () => void;
 }
 
-export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade, onOpenCoach, onStartTest, onExploreTypes, onOpenContent }) => (
+export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade, onOpenCoach, onStartTest, onExploreTypes, onOpenContent, onOpenGuide }) => (
   <div className="mx-auto max-w-6xl space-y-16 pb-28 pt-2 fade-in md:space-y-24 md:pt-8">
     <header className="grid overflow-hidden border border-[#D1D1C7] bg-[#F4F0E9] md:grid-cols-[1.05fr_.95fr]">
       <div className="flex flex-col items-start justify-center p-8 md:p-14 lg:p-16">
@@ -59,45 +60,29 @@ export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade, onOpenC
       ))}
     </section>
 
-    <section className="border-y border-[#D1D1C7] py-12 md:py-20">
-      <div className="max-w-2xl">
-        <p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">YOUR FACE JOURNEY</p>
-        <h2 className="mt-5 serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">測完以後，不是拿到一個標籤就結束。</h2>
+    <section className="border-y border-[#D1D1C7] py-12 md:py-20" aria-labelledby="face-product-map-title">
+      <div className="max-w-3xl">
+        <p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">FACE TRADER PRODUCT MAP</p>
+        <h2 id="face-product-map-title" className="mt-5 serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">你現在卡在哪裡，<br />就從那一站開始。</h2>
+        <p className="mt-6 max-w-2xl text-base leading-8 text-[#70665D]">不需要一次用完所有產品。FACE 負責認識自己，內容與指南協助理解與練習，RATE 與 1V1 幫你把問題帶回真實持倉。</p>
       </div>
-      <div className="mt-10 grid gap-8 md:mt-14 md:grid-cols-3 md:gap-0">
+      <div className="mt-10 grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] sm:grid-cols-2 md:mt-14 lg:grid-cols-3">
         {[
-          ['01', '做測驗', '用約 24 題交易情境，選出更接近你真實反應的一邊。'],
-          ['02', '看結果', '認識你的動物交易人格、四個傾向，還有壓力下容易忽略的地方。'],
-          ['03', '帶回交易', '從交易解憂 Bar、生存指南或 RATE 鏡相診股，找到下一個可做的調整。'],
-        ].map(([number, title, copy], index) => (
-          <article key={number} className={`relative pr-8 md:px-9 ${index < 2 ? 'md:border-r md:border-[#D1D1C7]' : ''}`}>
-            <p className="text-xs font-normal tracking-[0.2em] text-[#8C635B]">{number}</p>
-            <h3 className="mt-6 serif text-3xl text-[#2D2D2D]">{title}</h3>
-            <p className="mt-4 text-sm leading-[1.9] text-[#70665D]">{copy}</p>
-          </article>
+          { number: '01', stage: '認識', title: 'FACE 24 題測驗', copy: '還不確定自己的交易模式，先從真實情境開始。', cta: '開始測驗', onClick: onStartTest },
+          { number: '02', stage: '理解', title: '完整人格分析', copy: '看懂天賦、壓力反應與失控警訊，也可對照 16 型人格。', cta: '認識 16 型', onClick: onExploreTypes },
+          { number: '03', stage: '學習', title: '交易解憂 Bar', copy: '從追高、套牢、賣飛與停損等當下問題開始閱讀。', cta: '找一個問題', onClick: onOpenContent },
+          { number: '04', stage: '落地', title: 'FACE 生存指南', copy: '把覺察轉成交易原則、停損與可重複執行的步驟。', cta: '前往指南', onClick: onOpenGuide },
+          { number: '05', stage: '檢查', title: 'RATE 鏡相診股', copy: '把人格與真實持倉放在一起，找出知道與做到之間的落差。', cta: '檢查持倉', onClick: onGoToMirrorTrade },
+          { number: '06', stage: '陪跑', title: '1V1 交易初談', copy: '當問題纏在一起時，和教練一起重新整理優先順序。', cta: '認識教練', onClick: onOpenCoach },
+        ].map((item) => (
+          <button key={item.number} type="button" onClick={item.onClick} className="group flex min-h-64 flex-col bg-white p-7 text-left transition hover:bg-[#F7F4EF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[#8C635B] md:p-9">
+            <div className="flex items-center justify-between gap-4 text-xs font-bold tracking-[0.16em] text-[#8C635B]"><span>{item.number}</span><span>{item.stage}</span></div>
+            <h3 className="mt-8 serif text-2xl leading-[1.45] text-[#2D2D2D]">{item.title}</h3>
+            <p className="mt-4 text-sm leading-7 text-[#70665D]">{item.copy}</p>
+            <span className="mt-auto pt-7 text-sm font-bold text-[#2D2D2D] group-hover:text-[#8C635B]">{item.cta} →</span>
+          </button>
         ))}
       </div>
-    </section>
-
-    <section className="grid gap-5 md:grid-cols-3">
-      <button type="button" onClick={onStartTest} className="group min-h-64 border border-[#D1D1C7] bg-[#F7F4EF] p-8 text-left transition hover:border-[#8C635B] hover:bg-white md:p-10">
-        <p className="text-xs font-normal tracking-[0.2em] text-[#8C635B]">還沒測驗</p>
-        <h2 className="mt-10 serif text-3xl text-[#2D2D2D]">先認識自己</h2>
-        <p className="mt-5 text-sm leading-[1.9] text-[#70665D]">從交易情境開始，不需要先懂任何人格名詞。</p>
-        <span className="mt-8 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] group-hover:text-[#8C635B]">開始 FACE 測驗 →</span>
-      </button>
-      <button type="button" onClick={onExploreTypes} className="group min-h-64 border border-[#D1D1C7] bg-white p-8 text-left transition hover:border-[#8C635B] hover:bg-[#F7F4EF] md:p-10">
-        <p className="text-xs font-normal tracking-[0.2em] text-[#8C635B]">想先看看</p>
-        <h2 className="mt-10 serif text-3xl text-[#2D2D2D]">認識 16 型人格</h2>
-        <p className="mt-5 text-sm leading-[1.9] text-[#70665D]">每一型都有優勢、壓力反應與適合的提醒。</p>
-        <span className="mt-8 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] group-hover:text-[#8C635B]">前往人格圖鑑 →</span>
-      </button>
-      <button type="button" onClick={onOpenContent} className="group min-h-64 border border-[#D1D1C7] bg-[#F7F4EF] p-8 text-left transition hover:border-[#8C635B] hover:bg-white md:p-10">
-        <p className="text-xs font-normal tracking-[0.2em] text-[#8C635B]">現在正卡住</p>
-        <h2 className="mt-10 serif text-3xl text-[#2D2D2D]">先聊眼前的問題</h2>
-        <p className="mt-5 text-sm leading-[1.9] text-[#70665D]">追高、套牢、賣飛、停損，把心裡的話先說清楚。</p>
-        <span className="mt-8 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-bold text-[#2D2D2D] group-hover:text-[#8C635B]">走進交易解憂 Bar →</span>
-      </button>
     </section>
 
     <section className="grid items-center gap-10 border-y border-[#D1D1C7] py-12 md:grid-cols-[.8fr_1.2fr] md:py-20">

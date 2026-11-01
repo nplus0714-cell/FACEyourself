@@ -38,37 +38,37 @@ const productSlides = [
   {
     title: 'FACE 四項數位內容',
     description: '從閱讀、覺察到計畫與計算，建立一套可以反覆使用的交易整理方式。',
-    src: '/images/survival-kit/face-detail-complete-set.png',
+    src: '/images/survival-kit/face-detail-complete-set.webp',
     alt: 'FACE Survival 電子書與三項交易輔助內容示意',
   },
   {
     title: 'FACE Survival 電子書版',
     description: '從破繭、生存、進攻到歸真，梳理一條更能長期走下去的交易路徑。',
-    src: '/images/survival-kit/face-detail-survival-chapters.png',
+    src: '/images/survival-kit/face-detail-survival-chapters.webp',
     alt: 'FACE Survival 交易生存指南封面與四階段章節內頁示意',
   },
   {
     title: '在不確定中，仍有方向',
     description: '市場讓你感到混亂時，回到原則、風險與下一個可以完成的決定。',
-    src: '/images/survival-kit/face-detail-survival-guide.png',
+    src: '/images/survival-kit/face-detail-survival-guide.webp',
     alt: 'FACE Survival 交易生存指南封面與內容示意',
   },
   {
     title: 'FACE Daily 自我覺察日誌',
     description: '把每天的情緒與行動留下來，看見市場如何影響你的決策節奏。',
-    src: '/images/survival-kit/face-detail-daily-journal.png',
+    src: '/images/survival-kit/face-detail-daily-journal.webp',
     alt: 'FACE Daily 自我覺察日誌內容示意',
   },
   {
     title: 'FACE Plan × FACE Calc',
     description: '把交易理由與風險報酬整理清楚，讓每一次出手都有可以回看的依據。',
-    src: '/images/survival-kit/face-detail-trading-tools.png',
+    src: '/images/survival-kit/face-detail-trading-tools.webp',
     alt: 'FACE 交易計畫、風險報酬與持股診斷工作文件示意',
   },
   {
     title: '讓方法成為日常',
     description: '閱讀建立觀念，記錄與工具承接行動，陪你把交易慢慢整理成自己的方法。',
-    src: '/images/survival-kit/face-physical-design-board.png',
+    src: '/images/survival-kit/face-physical-design-board.webp',
     alt: 'FACE Survival 電子書與交易工作文件整體設計示意',
   },
 ];
@@ -330,7 +330,7 @@ export const SurvivalKitPricing: React.FC<SurvivalKitPricingProps> = ({
               aria-label="免費試讀 FACE Survival 序言"
             >
               <img
-                src="/images/survival-kit/face-detail-survival-chapters.png"
+                src="/images/survival-kit/face-detail-survival-chapters.webp"
                 alt="FACE Survival 電子書封面與章節內容示意"
                 className="absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.025]"
               />

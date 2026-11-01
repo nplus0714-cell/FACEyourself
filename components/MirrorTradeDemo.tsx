@@ -785,7 +785,7 @@ ${getIndicatorAnalysis('產業強弱', totalScores['產業強弱'], portfolioAvg
             </div>
 
             <figure className="mx-auto mt-10 max-w-4xl overflow-hidden border border-[#D1D1C7] bg-white">
-              <img src="/images/rate-diagnosis-preview.png" alt="RATE 鏡相診股示意：五邊形評估、診斷報告與持股配置" className="block h-auto w-full" />
+              <img src="/images/rate-diagnosis-preview.webp" alt="RATE 鏡相診股示意：五邊形評估、診斷報告與持股配置" width="1400" height="788" loading="lazy" decoding="async" className="block h-auto w-full" />
               <figcaption className="border-t border-[#D1D1C7] px-5 py-4 text-left text-sm leading-7 text-[#5F574F]">RATE 會把五個持倉面向整理成一份可閱讀的健檢報告：左側看整體輪廓，右側看重點提醒，下方看持股與配置比例。</figcaption>
             </figure>
 

@@ -45,12 +45,18 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
     <div className="mx-auto max-w-7xl pb-28 fade-in">
       {/* HERO */}
       <header className="relative overflow-hidden border border-[#D1D1C7]">
-        <img
-          src="/images/homepage-trading-salon.png"
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[center_35%] opacity-70"
-        />
+        <picture>
+          <source media="(max-width: 767px)" srcSet="/images/homepage-trading-salon-768.webp" />
+          <img
+            src="/images/homepage-trading-salon-1440.webp"
+            alt=""
+            aria-hidden="true"
+            width="1440"
+            height="810"
+            decoding="async"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[center_35%] opacity-70"
+          />
+        </picture>
         <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#FBFAF7]/70 via-[#FBFAF7]/80 to-[#FBFAF7]" aria-hidden="true" />
         <div className="relative px-6 py-20 text-center md:py-28">
           <p className="text-xs font-bold tracking-[0.32em] text-[#8C635B]">FACE TYPE ATLAS</p>
@@ -128,7 +134,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
           const tone = roleTone(role.code);
           const editorialV2 = PERSONALITY_EDITORIAL_V2[role.code];
           const textImageUrl = editorialV2
-            ? `/images/personalities-v2-text/v2-${String(editorialV2.index).padStart(2, '0')}-${editorialV2.slug}-text.png`
+            ? `/images/personalities-v2-text/v2-${String(editorialV2.index).padStart(2, '0')}-${editorialV2.slug}-text.webp`
             : role.landscapeImageUrl;
           return (
             <a
@@ -138,7 +144,7 @@ export const RoleGallery: React.FC<RoleGalleryProps> = ({ dna, onOpenRole, onSta
               className={`group overflow-hidden border bg-white text-left transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_34px_-20px_rgba(45,45,45,0.35)] focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-2 ${sole ? 'border-[#8C635B] ring-2 ring-[#8C635B]/30' : own ? 'border-[#8C635B]' : 'border-[#D1D1C7] hover:border-[#8C635B]'}`}
             >
               <div className="relative aspect-[16/9] overflow-hidden bg-[#F4F0E9]">
-                <img src={textImageUrl} alt={role.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
+                <img src={textImageUrl} alt={role.name} width="1672" height="941" loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
                 {own && <span className="absolute left-3 top-3 bg-[#8C635B] px-2 py-1 text-[10px] font-bold tracking-[0.1em] text-white">你的類型</span>}
               </div>
               <div className="border-t border-[#D1D1C7] px-5 py-4">

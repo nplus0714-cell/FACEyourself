@@ -55,7 +55,7 @@ const GentleLink: React.FC<{ eyebrow: string; description: string; link: string;
 /** 救贖動物的正方形線稿圖（personalities-v2-square-line）。 */
 const saviorLineArt = (code: string): string => {
   const e = PERSONALITY_EDITORIAL_V2[code];
-  return e ? `/images/personalities-v2-square-line/v2-${String(e.index).padStart(2, '0')}-${e.slug}-square-line.png` : '';
+  return e ? `/images/personalities-v2-square-line/v2-${String(e.index).padStart(2, '0')}-${e.slug}-square-line.webp` : '';
 };
 
 /** 救贖動物的正方形彩色圖（personalities-v2-square-color），滑鼠移入時顯示。 */
@@ -219,7 +219,7 @@ export const RoleDetailV2: React.FC<RoleDetailV2Props> = ({ role, isUserType, on
   const tone = toneFor(role.code);
   const editorial = PERSONALITY_EDITORIAL_V2[role.code]!;
   const nn = String(editorial.index).padStart(2, '0');
-  const textImage = `/images/personalities-v2-text/v2-${nn}-${editorial.slug}-text.png`;
+  const textImage = `/images/personalities-v2-text/v2-${nn}-${editorial.slug}-text.webp`;
   const landscapeImage = `/images/personalities-v2-landscape/v2-${nn}-${editorial.slug}-landscape.png`;
   const masterPortrait = MASTER_PORTRAIT_BY_CODE[role.code];
 

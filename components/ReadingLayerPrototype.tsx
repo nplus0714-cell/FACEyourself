@@ -20,22 +20,22 @@ const PROFILE_CODES = [
 type ProfileCode = (typeof PROFILE_CODES)[number];
 
 const coverByCode: Record<ProfileCode, string> = {
-  ARLC: '/images/personalities-v2-text/v2-01-golden-eagle-commander-text.png',
-  ARLD: '/images/personalities-v2-text/v2-02-polar-bear-strategist-text.png',
-  ARTC: '/images/personalities-v2-text/v2-03-cheetah-sniper-text.png',
-  ARTD: '/images/personalities-v2-text/v2-04-hound-astrologer-text.png',
-  AILC: '/images/personalities-v2-text/v2-05-black-panther-evangelist-text.png',
-  AILD: '/images/personalities-v2-text/v2-06-squirrel-collector-text.png',
-  AITC: '/images/personalities-v2-text/v2-07-sabertooth-gambler-text.png',
-  AITD: '/images/personalities-v2-text/v2-08-macaque-host-text.png',
-  PRLC: '/images/personalities-v2-text/v2-09-white-deer-appraiser-text.png',
-  PRLD: '/images/personalities-v2-text/v2-10-mole-guide-text.png',
-  PRTC: '/images/personalities-v2-text/v2-11-crocodile-actuary-text.png',
-  PRTD: '/images/personalities-v2-text/v2-12-elephant-warden-text.png',
-  PILC: '/images/personalities-v2-text/v2-13-rhinoceros-guard-text.png',
-  PILD: '/images/personalities-v2-text/v2-14-sloth-thinker-text.png',
-  PITC: '/images/personalities-v2-text/v2-15-night-owl-sentinel-text.png',
-  PITD: '/images/personalities-v2-text/v2-16-koala-companion-text.png',
+  ARLC: '/images/personalities-v2-text/v2-01-golden-eagle-commander-text.webp',
+  ARLD: '/images/personalities-v2-text/v2-02-polar-bear-strategist-text.webp',
+  ARTC: '/images/personalities-v2-text/v2-03-cheetah-sniper-text.webp',
+  ARTD: '/images/personalities-v2-text/v2-04-hound-astrologer-text.webp',
+  AILC: '/images/personalities-v2-text/v2-05-black-panther-evangelist-text.webp',
+  AILD: '/images/personalities-v2-text/v2-06-squirrel-collector-text.webp',
+  AITC: '/images/personalities-v2-text/v2-07-sabertooth-gambler-text.webp',
+  AITD: '/images/personalities-v2-text/v2-08-macaque-host-text.webp',
+  PRLC: '/images/personalities-v2-text/v2-09-white-deer-appraiser-text.webp',
+  PRLD: '/images/personalities-v2-text/v2-10-mole-guide-text.webp',
+  PRTC: '/images/personalities-v2-text/v2-11-crocodile-actuary-text.webp',
+  PRTD: '/images/personalities-v2-text/v2-12-elephant-warden-text.webp',
+  PILC: '/images/personalities-v2-text/v2-13-rhinoceros-guard-text.webp',
+  PILD: '/images/personalities-v2-text/v2-14-sloth-thinker-text.webp',
+  PITC: '/images/personalities-v2-text/v2-15-night-owl-sentinel-text.webp',
+  PITD: '/images/personalities-v2-text/v2-16-koala-companion-text.webp',
 };
 
 type EditorialImageSet = {
@@ -262,7 +262,7 @@ const getShadowSituations = (profile: FaceProfilePrototype): ShadowSituation[] =
         code: item.saviorCode,
         name: item.saviorName,
         shift: item.shift,
-        image: `/images/personalities-v2-square-line/v2-${String(neighborEditorial.index).padStart(2, '0')}-${neighborEditorial.slug}-square-line.png`,
+        image: `/images/personalities-v2-square-line/v2-${String(neighborEditorial.index).padStart(2, '0')}-${neighborEditorial.slug}-square-line.webp`,
       },
     }];
   });
@@ -360,10 +360,31 @@ const reflectionPrompts = [
   '如果你已經不缺錢，你還會用現在這種方式交易嗎？',
 ] as const;
 
-const ChapterHeader: React.FC<{ chapter: (typeof chapterMeta)[number] }> = ({ chapter }) => (
+const ChapterHeader: React.FC<{
+  chapter: (typeof chapterMeta)[number];
+  mobileExpanded?: boolean;
+  onToggleMobile?: () => void;
+  controlsId?: string;
+}> = ({ chapter, mobileExpanded, onToggleMobile, controlsId }) => (
   <header className="editorial-chapter-header mb-8 md:mb-11">
-    <p className="editorial-kicker font-mono text-[13px] tracking-[0.14em] text-[#A36F63] md:text-sm">CHAPTER {chapter.number}</p>
-    <h2 className="editorial-chapter-title serif mt-4 text-[2rem] font-normal leading-[1.45] tracking-[0.01em] text-[#2F2925] md:text-[2.4rem]">{chapter.title}</h2>
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <p className="editorial-kicker font-mono text-[13px] tracking-[0.14em] text-[#A36F63] md:text-sm">CHAPTER {chapter.number}</p>
+        <h2 className="editorial-chapter-title serif mt-4 text-[2rem] font-normal leading-[1.45] tracking-[0.01em] text-[#2F2925] md:text-[2.4rem]">{chapter.title}</h2>
+      </div>
+      {onToggleMobile && (
+        <button
+          type="button"
+          onClick={onToggleMobile}
+          aria-expanded={mobileExpanded}
+          aria-controls={controlsId}
+          className="mt-1 inline-flex min-h-11 shrink-0 items-center gap-1 border border-[#CDBCAF] bg-white/70 px-3 text-xs font-bold text-[#79584D] sm:hidden"
+        >
+          {mobileExpanded ? '收起' : '展開'}
+          <ChevronDown size={16} aria-hidden="true" className={`transition-transform ${mobileExpanded ? 'rotate-180' : ''}`} />
+        </button>
+      )}
+    </div>
     <p className="editorial-chapter-deck serif mt-3 text-[1.18rem] font-normal leading-[1.9] text-[#8F5F56] md:text-[1.35rem]">{chapter.description}</p>
   </header>
 );
@@ -372,12 +393,25 @@ const SectionShell: React.FC<{
   chapter: (typeof chapterMeta)[number];
   children: React.ReactNode;
   tinted?: boolean;
-}> = ({ chapter, children, tinted = false }) => (
-  <section id={chapter.id} className={`editorial-section scroll-mt-24 border-x border-b border-[#D9CFC2] px-5 py-12 sm:px-8 md:px-14 md:py-20 ${tinted ? 'bg-[#F7F2EC]' : 'bg-[#FFFEFC]'}`}>
-    <ChapterHeader chapter={chapter} />
-    {children}
-  </section>
-);
+  collapseOnMobile?: boolean;
+}> = ({ chapter, children, tinted = false, collapseOnMobile = false }) => {
+  const [mobileExpanded, setMobileExpanded] = React.useState(!collapseOnMobile);
+  const contentId = `${chapter.id}-content`;
+
+  return (
+    <section id={chapter.id} className={`editorial-section scroll-mt-24 border-x border-b border-[#D9CFC2] px-5 py-12 sm:px-8 md:px-14 md:py-20 ${tinted ? 'bg-[#F7F2EC]' : 'bg-[#FFFEFC]'}`}>
+      <ChapterHeader
+        chapter={chapter}
+        mobileExpanded={mobileExpanded}
+        controlsId={contentId}
+        onToggleMobile={collapseOnMobile ? () => setMobileExpanded((expanded) => !expanded) : undefined}
+      />
+      <div id={contentId} className={`${mobileExpanded ? 'block' : 'hidden'} sm:block`}>
+        {children}
+      </div>
+    </section>
+  );
+};
 
 const GuestUnlockSummary: React.FC<{ onUnlock: () => void; profileCode: ProfileCode }> = ({ onUnlock, profileCode }) => {
   const questions = GUEST_PROFILE_HOOKS[profileCode];
@@ -543,7 +577,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
   const hallProfile = FACE_MAP[selectedCode];
   const editorialProfile = PERSONALITY_EDITORIAL_V2[selectedCode];
   const profileLineArt = editorialProfile
-    ? `/images/personalities-v2-square-line/v2-${String(editorialProfile.index).padStart(2, '0')}-${editorialProfile.slug}-square-line.png`
+    ? `/images/personalities-v2-square-line/v2-${String(editorialProfile.index).padStart(2, '0')}-${editorialProfile.slug}-square-line.webp`
     : coverByCode[selectedCode];
   const masterPortrait = MASTER_PORTRAIT_BY_CODE[selectedCode];
   const editorialImages = editorialImagesByCode[selectedCode];
@@ -616,6 +650,10 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
         <img
           src={coverByCode[selectedCode]}
           alt={`${profile.name} ${profile.code}：${profile.traits.join('、')}。`}
+          width="1672"
+          height="941"
+          fetchPriority="high"
+          decoding="async"
           className="block h-auto w-full"
         />
 
@@ -648,6 +686,21 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
         </div>
       </header>}
 
+      {resultVisualization && !compact && (
+        <section className="border-x border-b border-[#D9CFC2] bg-[#FFFEFC] px-5 py-7 sm:hidden" aria-label="手機版結果摘要">
+          <p className="editorial-kicker text-[12px] tracking-[0.12em] text-[#9A655C]">先看三個重點</p>
+          <ol className="mt-4 space-y-3 text-[15px] leading-7 text-[#514842]">
+            <li><strong className="text-[#2F2925]">優勢：</strong>{profile.talent.headline}</li>
+            <li><strong className="text-[#2F2925]">行動：</strong>{getDecisionAction(profile)}</li>
+            <li><strong className="text-[#2F2925]">留意：</strong>當你開始相信「{profile.selfDeception.quote}」，先回頭確認原本的交易條件。</li>
+          </ol>
+          <div className="mt-5 flex gap-3 overflow-x-auto pb-1 text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <a href={`#${chapterMeta[0].id}`} className="inline-flex min-h-11 shrink-0 items-center border border-[#8C635B] bg-[#8C635B] px-4 font-bold text-white">讀核心解讀</a>
+            <a href={`#${chapterMeta[4].id}`} className="inline-flex min-h-11 shrink-0 items-center border border-[#CDBCAF] bg-white px-4 font-bold text-[#79584D]">看失控警訊</a>
+          </div>
+        </section>
+      )}
+
       <main className={compact ? 'mt-0' : 'mt-4'}>
         <SectionShell chapter={chapterMeta[0]}>
           <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${resultVisualization ? 'md:grid md:grid-cols-[1.08fr_0.92fr]' : faceLayout.grid}`}>
@@ -656,6 +709,8 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
                   <img
                     src={editorialImages.face}
                     alt={`${profile.name}完整彩色交易人格肖像`}
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-contain object-center saturate-[1.12] contrast-[0.98]"
                   />
                   <span className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_44%,rgba(247,242,236,0.28)_100%)]" aria-hidden="true" />
@@ -821,7 +876,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
               </summary>
               <div className="editorial-master-divider grid gap-0 border-t border-[#D8CDBD] sm:grid-cols-[11rem_1fr]">
                 <figure className="overflow-hidden bg-[#F4EEE7]">
-                  <img src={masterPortrait} alt={editorialProfile.master.name} className="block h-auto w-full object-contain object-top" />
+                  <img src={masterPortrait} alt={editorialProfile.master.name} width="1254" height="1254" loading="lazy" decoding="async" className="block h-auto w-full object-contain object-top" />
                 </figure>
                 <div className="editorial-master-divider border-t border-[#D8CDBD] px-5 py-6 sm:border-l sm:border-t-0 md:px-7 md:py-7">
                   <p className="editorial-master-name editorial-subhead serif text-[1.35rem] font-normal leading-[1.6] text-[#3C332E]">{editorialProfile.master.name}</p>
@@ -832,7 +887,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           )}
         </SectionShell>
 
-        {!previewOnly && <SectionShell chapter={chapterMeta[1]} tinted>
+        {!previewOnly && <SectionShell chapter={chapterMeta[1]} tinted collapseOnMobile>
           <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${mirrorLayout.grid}`}>
             <EditorialFigure
               src={editorialImages.mirrors}
@@ -859,7 +914,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           </Takeaway>
         </SectionShell>}
 
-        <SectionShell chapter={chapterMeta[2]}>
+        <SectionShell chapter={chapterMeta[2]} collapseOnMobile>
           <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${talentLayout.grid}`}>
             <EditorialFigure
               src={editorialImages.talent}
@@ -878,7 +933,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           </Takeaway>
         </SectionShell>
 
-        {!previewOnly && <SectionShell chapter={chapterMeta[3]} tinted>
+        {!previewOnly && <SectionShell chapter={chapterMeta[3]} tinted collapseOnMobile>
           <div>
             <h3 className="editorial-subhead serif text-[1.45rem] font-normal leading-[1.7] text-[#3C332E] md:text-[1.65rem]">你是否曾經遇過以下狀況？</h3>
             <p className="editorial-body-s editorial-supporting serif mt-2 text-[1rem] font-normal leading-8 text-[#756A61]">點開最有感的情境，看看哪位鄰居能借你一種不同的思考方式。</p>
@@ -966,7 +1021,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
           </Takeaway>
         </SectionShell>}
 
-        <SectionShell chapter={chapterMeta[4]}>
+        <SectionShell chapter={chapterMeta[4]} collapseOnMobile>
           <div className="space-y-7">
             {(previewOnly ? profile.triggers.slice(0, 1) : profile.triggers).map((trigger, index) => (
               <article key={trigger.title} className="overflow-hidden border border-[#D8CDBD] bg-white">

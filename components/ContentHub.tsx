@@ -62,7 +62,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
 
         <nav className="grid gap-5 md:grid-cols-2" aria-label="文章索引">
           <a href="#survival-guide" className="group relative min-h-[320px] overflow-hidden border border-[#D1D1C7] bg-[#F7F4EF] shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-4 md:min-h-[360px]">
-            <img src="/images/content-hub/survival-guide-cover.png" alt="金雕與北極熊閱讀 FACE 生存指南" className="absolute inset-0 h-full w-full object-cover saturate-125 contrast-105 transition duration-500 group-hover:scale-[1.03]" />
+            <img src="/images/content-hub/survival-guide-cover.webp" alt="金雕與北極熊閱讀 FACE 生存指南" width="1400" height="788" decoding="async" className="absolute inset-0 h-full w-full object-cover saturate-125 contrast-105 transition duration-500 group-hover:scale-[1.03]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/90 via-[#211916]/32 to-[#211916]/5" />
             <div className="relative flex h-full max-w-md flex-col justify-end p-7 text-[#FFF9ED] md:p-10 [text-shadow:0_2px_14px_rgba(28,20,17,0.9)]">
               <p className="text-xs font-normal tracking-[0.22em] text-[#70443C] [text-shadow:none]">FACE Trader · 交易生存指南</p>
@@ -72,7 +72,7 @@ export const ContentHub: React.FC<ContentHubProps> = ({ hasDna, isLoggedIn, hasS
             </div>
           </a>
           <a href="#topic-articles" className="group relative min-h-[320px] overflow-hidden border border-[#2D2D2D] bg-[#2D2D2D] shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#8C635B] focus:ring-offset-4 md:min-h-[360px]">
-            <img src="/images/content-hub/trading-bar-cover.png" alt="夜梟、獵豹與酒保討論交易" className="absolute inset-0 h-full w-full object-cover saturate-125 contrast-105 transition duration-500 group-hover:scale-[1.03]" />
+            <img src="/images/content-hub/trading-bar-cover.webp" alt="夜梟、獵豹與酒保討論交易" width="1400" height="788" decoding="async" className="absolute inset-0 h-full w-full object-cover saturate-125 contrast-105 transition duration-500 group-hover:scale-[1.03]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/90 via-[#211916]/32 to-[#211916]/5" />
             <div className="relative flex h-full max-w-md flex-col justify-end p-7 text-[#FFF9ED] md:p-10 [text-shadow:0_2px_14px_rgba(28,20,17,0.9)]">
               <p className="text-xs font-normal tracking-[0.22em] text-[#E9D39A] [text-shadow:none]">FACE Trader · 交易主題文章</p>
