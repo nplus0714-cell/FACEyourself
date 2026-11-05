@@ -34,7 +34,7 @@ const BlurredPaidPreview = ({ item, onOpenManual }: { item: ContentItem; onOpenM
     <p className="text-xs font-bold text-[#8C635B]">{item.series} · {item.articleNumber}</p>
     <div className="mt-3 flex items-start justify-between gap-4">
       <h3 className="serif text-3xl leading-[1.5] text-[#2D2D2D]">{item.title}</h3>
-      <span className="inline-flex shrink-0 items-center gap-1.5 border border-[#C9B7A7] bg-[#FBF5ED] px-2.5 py-1 text-[11px] tracking-[0.08em] text-[#765247]"><LockKeyhole size={12} aria-hidden="true" />完整版</span>
+      <span className="inline-flex shrink-0 items-center gap-1.5 border border-[#B87972] bg-[#FBF0EE] px-2.5 py-1 text-[11px] tracking-[0.08em] text-[#8A3F38]"><LockKeyhole size={12} aria-hidden="true" />解鎖</span>
     </div>
     <p className="mt-4 text-sm leading-7 text-[#70665D]">{item.summary}</p>
 
@@ -116,7 +116,7 @@ export const SurvivalGuideReader: React.FC<SurvivalGuideReaderProps> = ({ fullFr
               const isSelected = selectedArticle.id === item.id;
               const isPaid = !!item.requiresPurchase;
               return <button key={item.id} type="button" onClick={() => setSelectedArticle(item)} aria-current={isSelected ? 'page' : undefined} className={`w-full border px-4 py-3 text-left text-sm leading-6 transition ${isSelected ? 'border-[#8C635B] bg-[#F3EAE4] text-[#2D2D2D]' : 'border-[#D1D1C7] bg-white text-[#70665D] hover:border-[#B9AA9D] hover:bg-[#FCFBF8]'}`}>
-                <span className="flex items-center justify-between gap-3 text-xs text-[#8C635B]"><span>{item.series} · {item.articleNumber}</span>{isPaid && <span className="inline-flex items-center gap-1 text-[#8C635B]"><LockKeyhole size={11} aria-hidden="true" />完整版</span>}</span>
+                <span className="flex items-center justify-between gap-3 text-xs text-[#8C635B]"><span>{item.series} · {item.articleNumber}</span>{isPaid ? <span className="inline-flex items-center gap-1 text-[#8A3F38]"><LockKeyhole size={11} aria-hidden="true" />解鎖</span> : <span className="text-[#2E6154]">試讀</span>}</span>
                 <span className="mt-1 block">{item.title}</span>
               </button>;
             })}
