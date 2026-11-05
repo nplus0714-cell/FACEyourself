@@ -93,9 +93,9 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
       <section className="mx-auto mt-8 max-w-3xl" aria-labelledby="follow-face-title">
         <h2 id="follow-face-title" className="mb-5 serif text-2xl text-[#2D2D2D]">歡迎追蹤</h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          {PRIMARY_CHANNELS.map((channel) => <a key={channel.label} href={channel.href} target="_blank" rel="noopener noreferrer" aria-label={`${channel.label} ${channel.handle}（另開視窗）`} className="flex min-h-16 items-center gap-4 border border-[#D1D1C7] bg-white px-5 py-4 text-[#2D2D2D] transition hover:border-[#8C635B] hover:bg-[#F7F4EF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
+          {PRIMARY_CHANNELS.map((channel) => <a key={channel.label} href={channel.href} target="_blank" rel="noopener noreferrer" aria-label={`FACE Trader｜知己交易 ${channel.handle}（另開視窗）`} className="flex min-h-20 items-center gap-4 border border-[#D1D1C7] bg-white px-5 py-4 text-[#2D2D2D] transition hover:border-[#8C635B] hover:bg-[#F7F4EF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
             <channel.Icon size={26} strokeWidth={1.7} className={`shrink-0 ${channel.color}`} aria-hidden="true" />
-            <span className="break-all text-sm font-medium">{channel.handle}</span>
+            <span className="min-w-0"><span className="block text-base font-bold">FACE Trader｜知己交易</span><span className="mt-1 block break-all text-xs font-normal text-[#70665D]">{channel.handle}</span></span>
           </a>)}
         </div>
       </section>
