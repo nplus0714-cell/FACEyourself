@@ -17,6 +17,11 @@ interface FunnelResultProps {
 
 const MESSAGE_TOPICS = ['交易疑問', '內容疑問', '網站建議', '其他'] as const;
 
+const PRIMARY_CHANNELS = [
+  { label: 'YouTube', handle: '@FACETrader-k1h', href: 'https://www.youtube.com/@FACETrader-k1h', description: '看交易觀念與 FACE 內容' },
+  { label: 'Instagram', handle: '@face_tradernpc', href: 'https://www.instagram.com/face_tradernpc', description: '追蹤交易日常與最新內容' },
+] as const;
+
 export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onOpenGuide, onLogin, initialEmail = '' }) => {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -60,27 +65,48 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
         resultVisualization={resultVisualization}
       />
 
-      <section className="mx-auto mt-12 max-w-3xl bg-[#2D2D2D] px-7 py-10 text-center text-white sm:px-12 sm:py-14" aria-labelledby="guide-cta-title">
-        <p className="text-xs font-bold tracking-[0.2em] text-[#D9C7A9]">下一步</p>
-        <h2 id="guide-cta-title" className="mt-4 serif text-3xl leading-[1.5] sm:text-4xl">知道自己卡在哪裡之後，<br className="hidden sm:block" />下一步是想辦法走出去。</h2>
-        <p className="mx-auto mt-5 max-w-2xl text-sm leading-8 text-white/72 sm:text-base">了解自己只是開始的第一步。一個交易者會不斷經歷四個階段：破繭（理解交易）、生存（學習停損）、進攻（持續獲利）、歸真（認識自己）。</p>
-        <button type="button" onClick={openGuide} className="mt-8 min-h-14 w-full max-w-sm bg-white px-7 py-4 text-base font-bold tracking-[0.08em] text-[#2D2D2D] transition hover:bg-[#D9C7A9]">
+      <section className="mx-auto mt-12 max-w-3xl border border-[#D1D1C7] bg-[#FCFBF8] p-6 sm:p-9" aria-labelledby="guide-cta-title">
+        <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">下一步</p>
+        <h2 id="guide-cta-title" className="mt-3 serif text-2xl leading-[1.5] text-[#2D2D2D] sm:text-3xl">知道自己卡在哪裡之後，<br className="hidden sm:block" />下一步是想辦法走出去。</h2>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-[#70665D]">了解自己只是開始。一個交易者會不斷經歷四個階段；你不需要一次完成，只要先知道現在該練習什麼。</p>
+        <div className="mt-6 grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] grid-cols-2 sm:grid-cols-4">
+          {[['破繭', '理解交易'], ['生存', '學習停損'], ['進攻', '持續獲利'], ['歸真', '認識自己']].map(([stage, description]) => <div key={stage} className="bg-white px-3 py-4 text-center"><p className="serif text-lg text-[#2D2D2D]">{stage}</p><p className="mt-1 text-xs text-[#70665D]">{description}</p></div>)}
+        </div>
+        <button type="button" onClick={openGuide} className="mt-8 min-h-14 w-full bg-[#2D2D2D] px-6 py-4 text-sm font-bold tracking-[0.06em] text-white transition hover:bg-[#8C635B]">
           看生存篇試讀，領取免費章節 →
         </button>
       </section>
 
-      <div className="mt-8 flex flex-col items-center justify-center gap-4 text-sm sm:flex-row sm:gap-8">
-        <button type="button" onClick={openShare} className="inline-flex min-h-11 items-center border-b border-[#8C7E6D]/50 py-1 font-medium text-[#4A382D] transition hover:border-[#2D2D2D]">
-          覺得有幫助？分享給朋友
+      <section className="mx-auto mt-8 grid max-w-3xl gap-4 sm:grid-cols-2" aria-label="分享結果與提供回饋">
+        <button type="button" onClick={openShare} className="group min-h-44 border border-[#D1D1C7] bg-white p-6 text-left transition hover:border-[#8C635B] hover:bg-[#FCFBF8]">
+          <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">SHARE FACE</p>
+          <h2 className="mt-4 serif text-2xl text-[#2D2D2D]">覺得有幫助？<br />分享給朋友</h2>
+          <span className="mt-5 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-medium text-[#2D2D2D] group-hover:text-[#8C635B]">分享這份結果 →</span>
         </button>
         <button
           type="button"
           onClick={() => { trackFunnelEvent('result_feedback_click'); setIsFeedbackOpen(true); }}
-          className="inline-flex min-h-11 items-center border-b border-[#8C7E6D]/50 py-1 font-medium text-[#4A382D] transition hover:border-[#2D2D2D]"
+          className="group min-h-44 border border-[#D1D1C7] bg-white p-6 text-left transition hover:border-[#8C635B] hover:bg-[#FCFBF8]"
         >
-          想對設計者說的話
+          <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">MESSAGE NPC</p>
+          <h2 className="mt-4 serif text-2xl text-[#2D2D2D]">想對設計者<br />說的話</h2>
+          <span className="mt-5 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-medium text-[#2D2D2D] group-hover:text-[#8C635B]">留下私密留言 →</span>
         </button>
-      </div>
+      </section>
+
+      <section className="mx-auto mt-8 max-w-3xl border border-[#D1D1C7] bg-[#FCFBF8] p-6 sm:p-9" aria-labelledby="follow-face-title">
+        <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FOLLOW FACE</p>
+        <h2 id="follow-face-title" className="mt-3 serif text-2xl text-[#2D2D2D] sm:text-3xl">想繼續練習，從這裡開始。</h2>
+        <p className="mt-3 text-sm leading-7 text-[#70665D]">在 YouTube 與 Instagram，持續聊交易計畫以外、卻總會影響決策的那些事。</p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {PRIMARY_CHANNELS.map((channel) => <a key={channel.label} href={channel.href} target="_blank" rel="noopener noreferrer" className="group border border-[#D1D1C7] bg-white p-5 transition hover:border-[#8C635B] hover:bg-[#F7F4EF]">
+            <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">{channel.label}</p>
+            <p className="mt-3 serif text-xl text-[#2D2D2D]">{channel.handle}</p>
+            <p className="mt-2 text-sm leading-6 text-[#70665D]">{channel.description}</p>
+            <span className="mt-5 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-medium text-[#2D2D2D] group-hover:text-[#8C635B]">前往 {channel.label} →</span>
+          </a>)}
+        </div>
+      </section>
 
       {isFeedbackOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2D2D2D]/60 px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
         <form className="max-h-full w-full max-w-lg overflow-y-auto border border-[#D1D1C7] bg-[#FCFBF8] p-6 shadow-2xl sm:p-9" onSubmit={async (event) => {
