@@ -134,7 +134,10 @@ Deno.serve(async (request) => {
   const url = Deno.env.get('SUPABASE_URL')!;
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const allowedEmails = (Deno.env.get('RESEARCH_ADMIN_EMAILS') || '')
+  // This fallback makes the initial designated owner available after the
+  // function is deployed. More admins can be added with RESEARCH_ADMIN_EMAILS.
+  const configuredAdminEmails = Deno.env.get('RESEARCH_ADMIN_EMAILS') || 'face.trader.npc@gmail.com';
+  const allowedEmails = configuredAdminEmails
     .split(',').map((email) => email.trim().toLowerCase()).filter(Boolean);
   const authorization = request.headers.get('authorization') || '';
   const token = authorization.replace(/^Bearer\s+/i, '');

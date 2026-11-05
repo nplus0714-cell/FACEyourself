@@ -2,7 +2,9 @@ import type { User } from '@supabase/supabase-js';
 import type { AuthUser } from '../types';
 import { getSupabaseClient } from '../lib/supabase';
 
-const redirectTo = () => `${window.location.origin}/`;
+// Return people to the exact page that asked them to sign in. In particular,
+// a research-admin sign-in must not discard `/research-admin` and land on home.
+const redirectTo = () => `${window.location.origin}${window.location.pathname}${window.location.search}`;
 
 export const toAuthUser = (user: User): AuthUser | null => {
   if (user.is_anonymous) return null;

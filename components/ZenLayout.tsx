@@ -14,6 +14,7 @@ interface ZenLayoutProps {
   onLogout?: () => void;
   showNav?: boolean;
   showAccountActions?: boolean;
+  isResearchAdmin?: boolean;
   activeView?: string;
   onViewChange?: (view: any) => void;
   isLanding?: boolean;
@@ -31,6 +32,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   onLogout,
   showNav,
   showAccountActions = true,
+  isResearchAdmin = false,
   activeView,
   onViewChange,
   isLanding,
@@ -165,6 +167,15 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                       >
                         我的 FACE
                       </button>
+                      {isResearchAdmin && <button
+                        onClick={() => {
+                          setIsAccountMenuOpen(false);
+                          onViewChange?.('research-admin');
+                        }}
+                        className="w-full border-t border-[#E3DDD5] px-5 py-4 text-left text-xs font-bold tracking-[0.18em] text-[#6B4E45] transition-colors hover:bg-[#F3F0EB]"
+                      >
+                        研究後台
+                      </button>}
                       <button 
                         onClick={() => {
                           setIsAccountMenuOpen(false);
@@ -219,6 +230,16 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
                 >
                   我的 FACE <span aria-hidden="true">→</span>
                 </button>
+                {isResearchAdmin && <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    onViewChange('research-admin');
+                  }}
+                  className="flex min-h-12 w-full items-center justify-between border-t border-[#D1D1C7]/50 px-2 text-left text-sm font-bold text-[#6B4E45]"
+                >
+                  研究後台 <span aria-hidden="true">→</span>
+                </button>}
               </nav>
 
               <nav aria-label="網站導覽" className={`${isLanding ? 'mb-0' : 'mb-8 md:mb-10'} hidden items-end gap-x-9 border-b border-[#D1D1C7]/60 text-sm font-medium leading-6 tracking-[0.04em] sm:flex sm:justify-center md:gap-x-12 md:text-base`}>

@@ -17,6 +17,7 @@ import { recordMemberActivity } from './services/memberActivity';
 import { getMemberAssessmentHistory } from './services/memberAssessmentHistory';
 import { getBrowserPendingAssessment, getSavedBrowserAssessment, getLatestBrowserAssessment, saveBrowserAssessment, scoresAfterAuthChange, markPendingAssessmentOwner, isFaceScores } from './services/localAssessmentResult';
 import { applyPageMetadata } from './lib/pageMetadata';
+import { isResearchAdminEmail } from './lib/researchAdminAccess';
 import { FEATURE_FLAGS } from './config/featureFlags';
 import { trackFunnelEvent } from './services/funnelAnalytics';
 import { clearLocalAssessmentProgress } from './services/localAssessmentProgress';
@@ -196,6 +197,7 @@ const App: React.FC = () => {
   const [hydratedMemberId, setHydratedMemberId] = useState<string | null>(null);
   const [memberResultError, setMemberResultError] = useState(false);
   const [resultSaveStatus, setResultSaveStatus] = useState<'cloud' | 'browser' | 'memory' | null>(null);
+  const isResearchAdmin = isResearchAdminEmail(state.user?.email);
   const recordedActivityRef = useRef(new Set<string>());
   const resultRevisionRef = useRef(0);
   
@@ -705,6 +707,7 @@ const App: React.FC = () => {
       hasDna={!!state.dna} 
       onLogin={handleLogin} 
       onLogout={() => void handleLogout()}
+      isResearchAdmin={isResearchAdmin}
       showNav={isAuthResolved && !!state.user && view !== 'shared-dashboard'}
       showAccountActions={isAuthResolved && !!state.user && view !== 'shared-dashboard'}
       activeView={view}
@@ -823,7 +826,8 @@ const App: React.FC = () => {
       {view === 'member-home' && FEATURE_FLAGS.dailyAwareness && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">登入後可以保存測驗結果、回看變化，並使用 RATE 鏡相診股。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">登入並保存結果</button></div>}
       {view === 'result-preview' && <ResultPreview selectedCode={previewResultCode} onSelectCode={openResultPreview} onBackToList={backToResultPreviewList} language={language} onOpenDeepDive={() => openDailyAwareness()} onStartAwareness={openDailyAwareness} onRetest={() => navigateTo('dna-test')} />}
       {view === 'reading-prototype' && <ReadingLayerPrototype showPrototypeControls={!!state.user} previewOnly={!state.user} onUnlock={handleLogin} />}
-      {view === 'research-admin' && state.user && <ResearchAdmin />}
+      {view === 'research-admin' && state.user && isResearchAdmin && <ResearchAdmin />}
+      {view === 'research-admin' && state.user && !isResearchAdmin && <section className="mx-auto max-w-xl border border-[#D1D1C7] bg-[#FCFBF8] px-7 py-20 text-center"><p className="text-xs font-medium tracking-[0.22em] text-[#8C635B]">RESEARCH ADMIN</p><h1 className="mt-4 serif text-3xl text-[#2D2D2D]">這個帳號沒有後台權限</h1><p className="mt-4 text-sm leading-7 text-[#70665D]">研究後台僅開放指定管理者帳號。</p></section>}
       {view === 'research-admin' && !state.user && <div className="mx-auto max-w-xl py-24 text-center"><p className="text-sm leading-8 text-[#70665D]">研究後台僅開放管理者帳號。請先登入。</p><button type="button" onClick={handleLogin} className="mt-8 bg-[#2D2D2D] px-8 py-4 text-sm font-bold text-white">管理者登入</button></div>}
       {view === 'content-hub' && (
         <ContentHub
