@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Youtube, Instagram } from 'lucide-react';
+import { Facebook, Instagram, Music2, Youtube } from 'lucide-react';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { trackFunnelEvent } from '../services/funnelAnalytics';
 import type { FaceScores } from '../types';
@@ -21,6 +21,8 @@ const MESSAGE_TOPICS = ['交易疑問', '內容疑問', '網站建議', '其他'
 const PRIMARY_CHANNELS = [
   { label: 'YouTube', handle: '@FACETrader-k1h', href: 'https://www.youtube.com/@FACETrader-k1h', Icon: Youtube, color: 'text-[#C4302B]' },
   { label: 'Instagram', handle: '@face_tradernpc', href: 'https://www.instagram.com/face_tradernpc', Icon: Instagram, color: 'text-[#B44F7B]' },
+  { label: 'Facebook', handle: '@61594374326311', href: 'https://www.facebook.com/61594374326311', Icon: Facebook, color: 'text-[#1877F2]' },
+  { label: 'TikTok', handle: '@face_tradernpc', href: 'https://www.tiktok.com/@face_tradernpc', Icon: Music2, color: 'text-[#2D2D2D]' },
 ] as const;
 
 export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onOpenGuide, onLogin, initialEmail = '' }) => {
