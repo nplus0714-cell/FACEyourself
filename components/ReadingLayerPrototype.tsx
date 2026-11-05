@@ -8,6 +8,7 @@ import { PERSONALITY_EDITORIAL_V2 } from '../data/personalityEditorialV2';
 import { MASTER_PORTRAIT_BY_CODE } from '../data/masterPortraits';
 import { FEATURE_FLAGS } from '../config/featureFlags';
 import { FACE_READING_CHAPTERS } from '../data/faceReadingChapters';
+import { GUEST_PROFILE_HOOKS } from '../data/guestProfileHooks';
 
 const PROFILE_CODES = [
   'ARLC', 'ARLD', 'ARTC', 'ARTD',
@@ -412,16 +413,29 @@ const SectionShell: React.FC<{
   );
 };
 
-const GuestUnlockSummary: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
-  return <section className="relative mx-auto mt-10 min-h-[310px] max-w-3xl overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] text-white" aria-label="登入後接續閱讀這份交易人格結果">
-    <img src="/images/face-og-v25.jpg" alt="FACE 動物交易人格場景" className="absolute inset-0 h-full w-full object-cover object-[42%_center] saturate-110" />
-    <div className="absolute inset-0 bg-gradient-to-r from-[#211916]/95 via-[#211916]/70 to-[#211916]/20" />
-    <div className="relative flex min-h-[310px] max-w-xl flex-col justify-end p-7 sm:p-10">
-      <p className="text-xs font-medium tracking-[0.22em] text-[#E9D39A]">SAVE MY FACE</p>
-      <h2 className="mt-3 serif text-3xl leading-[1.35] sm:text-4xl">登入，接續你的結果。</h2>
-      <p className="mt-4 text-sm leading-7 text-white/85">保存這次測驗，讓後續分析、每日覺察與 RATE 持股檢視都從你的交易傾向開始。</p>
-      <button type="button" onClick={onUnlock} className="mt-7 w-fit border-b border-white/80 pb-1 text-sm font-medium text-white transition hover:border-[#E9D39A] hover:text-[#E9D39A]">登入接續這份結果 →</button>
-      <p className="mt-3 text-xs text-white/65">免費登入，不需要重新測驗。</p>
+const GuestUnlockSummary: React.FC<{ onUnlock: () => void; profileCode: ProfileCode }> = ({ onUnlock, profileCode }) => {
+  const questions = GUEST_PROFILE_HOOKS[profileCode];
+
+  return <section className="mx-auto mt-10 max-w-3xl overflow-hidden border border-[#D1D1C7] bg-white" aria-label="登入後接續閱讀這份交易人格結果">
+    <div className="bg-gradient-to-b from-[#FFFEFC] to-[#F3EEE6] px-6 pb-8 pt-7 sm:px-9 sm:pb-10 sm:pt-9">
+      <p className="serif text-xl leading-9 text-[#2D2D2D] sm:text-2xl">如果你也有以下困擾：</p>
+      <ol className="mt-5 space-y-3">
+        {questions.map((question, index) => <li key={question} className="flex gap-4 border-t border-[#DED7CD] pt-3">
+          <span className="font-mono text-sm text-[#9A6D62]">{String(index + 1).padStart(2, '0')}</span>
+          <p className="serif text-base leading-7 text-[#554C45]">{question}</p>
+        </li>)}
+      </ol>
+    </div>
+    <div className="relative min-h-[285px] border-t border-[#D1D1C7] bg-[#2D2D2D] text-white">
+      <img src="/images/face-og-v25.jpg" alt="FACE 動物交易人格場景" className="absolute inset-0 h-full w-full object-cover object-[42%_center] saturate-110" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#211916]/95 via-[#211916]/68 to-[#211916]/20" />
+      <div className="relative flex min-h-[285px] max-w-xl flex-col justify-end p-7 sm:p-10">
+        <p className="text-xs font-medium tracking-[0.22em] text-[#E9D39A]">SAVE MY FACE</p>
+        <h2 className="mt-3 serif text-3xl leading-[1.35] sm:text-4xl">登入，接續你的結果。</h2>
+        <p className="mt-4 text-sm leading-7 text-white/85">保存這次測驗，讓後續分析、每日覺察與 RATE 持股檢視都從你的交易傾向開始。</p>
+        <button type="button" onClick={onUnlock} className="mt-7 w-fit border-b border-white/80 pb-1 text-sm font-medium text-white transition hover:border-[#E9D39A] hover:text-[#E9D39A]">登入接續這份結果 →</button>
+        <p className="mt-3 text-xs text-white/65">免費登入，不需要重新測驗。</p>
+      </div>
     </div>
   </section>;
 };
@@ -1206,7 +1220,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
         </section>}
       </main>
 
-      {previewOnly && onUnlock && <GuestUnlockSummary onUnlock={onUnlock} />}
+      {previewOnly && onUnlock && <GuestUnlockSummary onUnlock={onUnlock} profileCode={selectedCode} />}
 
       </article>
     </>
