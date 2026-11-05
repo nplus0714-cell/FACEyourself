@@ -10,6 +10,7 @@ import {
   startAssessmentRun,
 } from '../services/assessmentPersistence';
 import { getSupabaseClient } from '../lib/supabase';
+import { saveBrowserAssessment, markPendingAssessmentOwner } from '../services/localAssessmentResult';
 import { trackFunnelEvent } from '../services/funnelAnalytics';
 import {
   clearLocalAssessmentProgress,
@@ -246,9 +247,10 @@ const calculateScores = (answers: Record<string, FaceResponse>): { scores: FaceS
 
 interface FaceAssessmentProps {
   onComplete: (scores: FaceScores, saveStatus: 'cloud' | 'browser' | 'memory') => void;
+  ownerId?: string;
 }
 
-export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) => {
+export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, ownerId }) => {
   const [initialProgress] = useState(getLocalAssessmentProgress);
   const [step, setStep] = useState(initialProgress?.step ?? 0);
   const [answers, setAnswers] = useState<Record<string, FaceResponse>>(initialProgress?.answers ?? {});
@@ -295,6 +297,8 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
     // Keep an anonymous browser copy before attempting the cloud write.
     // App also saves the final result card into its persisted local state.
     const cachedInBrowser = cacheCompletedAssessment(completedAnswers, scores);
+    const snapshotSaved = saveBrowserAssessment(scores, ownerId ?? null);
+    if (ownerId) markPendingAssessmentOwner(ownerId);
     clearLocalAssessmentProgress();
 
     try {
@@ -316,7 +320,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete }) =>
       // cloud write is unavailable. The browser copy remains available until
       // a future signed-in account can merge it.
       trackFunnelEvent('quiz_complete');
-      onComplete(scores, cachedInBrowser ? 'browser' : 'memory');
+      onComplete(scores, cachedInBrowser || snapshotSaved ? 'browser' : 'memory');
       return;
     } finally {
       setIsSaving(false);

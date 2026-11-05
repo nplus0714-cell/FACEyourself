@@ -9,6 +9,7 @@ import {
 import { claimGuestFaceAssessmentRun } from './assessmentPersistence';
 import { getSupabaseClient } from '../lib/supabase';
 import type { AssessmentAnswer, FaceQuestion, FaceScores } from '../types';
+import { saveBrowserAssessment } from './localAssessmentResult';
 
 type PendingAssessment = {
   assessmentVersion: string;
@@ -17,6 +18,7 @@ type PendingAssessment = {
   savedAt: string;
   submissionId?: string;
   claim?: { userId: string; runId: string };
+  ownerId?: string;
 };
 
 const PENDING_ASSESSMENTS: Array<{
@@ -101,6 +103,8 @@ const claimPendingGuestAssessmentUnlocked = async (): Promise<boolean> => {
       const parsed: unknown = JSON.parse(raw);
       if (!isPendingAssessment(parsed, source.version)) continue;
       pending = parsed;
+      const owner = pending.ownerId ?? pending.claim?.userId;
+      if (owner && owner !== memberId) continue;
     } catch {
       continue;
     }
@@ -129,7 +133,10 @@ const claimPendingGuestAssessmentUnlocked = async (): Promise<boolean> => {
       pending.scores,
       scoreValues,
     );
-    localStorage.removeItem(source.storageKey);
+    saveBrowserAssessment(pending.scores, memberId, pending.savedAt);
+    // Another tab may finish a new test while this request is in flight.
+    const current = JSON.parse(localStorage.getItem(source.storageKey) ?? 'null');
+    if (current?.claim?.runId === claimRunId) localStorage.removeItem(source.storageKey);
     claimedAny = true;
   }
 

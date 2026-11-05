@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { getMemberAssessmentHistory, type MemberAssessmentRecord } from '../services/memberAssessmentHistory';
-import { getBrowserPendingAssessment } from '../services/localAssessmentResult';
+import { getLatestBrowserAssessment } from '../services/localAssessmentResult';
 import type { AuthUser, FaceScores } from '../types';
 
 interface LastAssessmentCardProps {
@@ -18,8 +18,8 @@ type DisplayedResult = {
   source: 'member' | 'browser';
 };
 
-const getBrowserPendingResult = (): DisplayedResult | null => {
-  const pending = getBrowserPendingAssessment();
+const getBrowserPendingResult = (ownerId?: string): DisplayedResult | null => {
+  const pending = getLatestBrowserAssessment(ownerId);
   return pending ? {
     code: getFaceCode(pending.scores),
     scores: pending.scores,
@@ -72,7 +72,7 @@ export const LastAssessmentCard: React.FC<LastAssessmentCardProps> = ({ user, lo
         source: 'browser',
       };
     }
-    return getBrowserPendingResult();
+    return getBrowserPendingResult(user?.id);
   }, [localCompletedAt, localScores, memberRecord, user]);
 
   if (!result) return null;

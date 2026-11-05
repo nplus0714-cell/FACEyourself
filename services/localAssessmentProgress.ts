@@ -53,7 +53,7 @@ export const getLocalAssessmentProgress = (): LocalAssessmentProgress | null => 
 
     return { step: parsed.step, answers };
   } catch {
-    localStorage.removeItem(ASSESSMENT_PROGRESS_KEY);
+    try { localStorage.removeItem(ASSESSMENT_PROGRESS_KEY); } catch { /* Storage may be blocked. */ }
     return null;
   }
 };

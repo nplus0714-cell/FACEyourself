@@ -228,7 +228,7 @@ export const claimGuestFaceAssessmentRun = async (
       p_face_code: getFaceCode(scores),
       p_scores: scores as unknown as Json,
       p_answers: serializedAnswers as unknown as Json,
-    });
+    }).abortSignal(AbortSignal.timeout(12_000));
     if (error) throw error;
     if (!data) throw new Error('Guest assessment claim did not return a run id.');
     return data;

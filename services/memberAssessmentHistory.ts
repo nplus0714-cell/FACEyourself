@@ -22,6 +22,7 @@ export const getMemberAssessmentHistory = async (): Promise<MemberAssessmentReco
     .select('id, face_code, scores, completed_at')
     .eq('assessment_type', 'baseline')
     .not('completed_at', 'is', null)
+    .abortSignal(AbortSignal.timeout(12_000))
     .order('completed_at', { ascending: false })
     .limit(20);
 

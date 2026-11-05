@@ -15,7 +15,7 @@ import { generateDailyAwarenessReflection } from './services/geminiService';
 import { hasSurvivalKitEntitlement } from './services/memberEntitlements';
 import { recordMemberActivity } from './services/memberActivity';
 import { getMemberAssessmentHistory } from './services/memberAssessmentHistory';
-import { getBrowserPendingAssessment, isFaceScores } from './services/localAssessmentResult';
+import { getBrowserPendingAssessment, getSavedBrowserAssessment, getLatestBrowserAssessment, saveBrowserAssessment, scoresAfterAuthChange, markPendingAssessmentOwner, isFaceScores } from './services/localAssessmentResult';
 import { applyPageMetadata } from './lib/pageMetadata';
 import { FEATURE_FLAGS } from './config/featureFlags';
 import { trackFunnelEvent } from './services/funnelAnalytics';
@@ -70,7 +70,7 @@ const authHash = new URLSearchParams(window.location.hash.slice(1));
 const isAuthCallback = authQuery.has('code') || authQuery.has('token_hash')
   || authHash.has('access_token') || authHash.has('refresh_token');
 if (isAuthCallback) {
-  sessionStorage.setItem(AUTH_CALLBACK_CLAIM_KEY, '1');
+  try { sessionStorage.setItem(AUTH_CALLBACK_CLAIM_KEY, '1'); } catch { /* Result recovery also works without the callback flag. */ }
 }
 
 const shouldReturnToResultAfterAuth = () => {
@@ -185,7 +185,9 @@ const App: React.FC = () => {
     try { return JSON.parse(sessionStorage.getItem(DAILY_RESULT_KEY) ?? 'null') as DailyAwarenessResult | null; }
     catch { return null; }
   });
-  const [showDailyResultAfterLogin, setShowDailyResultAfterLogin] = useState(() => sessionStorage.getItem(DAILY_AWAITING_LOGIN_KEY) === '1');
+  const [showDailyResultAfterLogin, setShowDailyResultAfterLogin] = useState(() => {
+    try { return sessionStorage.getItem(DAILY_AWAITING_LOGIN_KEY) === '1'; } catch { return false; }
+  });
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isAuthResolved, setIsAuthResolved] = useState(false);
   const [hasSurvivalKitAccess, setHasSurvivalKitAccess] = useState(false);
@@ -195,6 +197,7 @@ const App: React.FC = () => {
   const [memberResultError, setMemberResultError] = useState(false);
   const [resultSaveStatus, setResultSaveStatus] = useState<'cloud' | 'browser' | 'memory' | null>(null);
   const recordedActivityRef = useRef(new Set<string>());
+  const resultRevisionRef = useRef(0);
   
   const navigateTo = (nextView: AppView) => {
     const path = pathForView(nextView);
@@ -205,7 +208,7 @@ const App: React.FC = () => {
   const restoreBaselineScores = useCallback(async (): Promise<FaceScores | null> => {
     if (state.dna) return state.dna;
 
-    const browserResult = getBrowserPendingAssessment();
+    const browserResult = getLatestBrowserAssessment(state.user?.id);
     if (browserResult) {
       setState((previous) => ({ ...previous, dna: browserResult.scores }));
       return browserResult.scores;
@@ -234,7 +237,7 @@ const App: React.FC = () => {
       console.warn('Unable to restore the baseline assessment for FACE Daily', error);
       return null;
     }
-  }, [state.dna]);
+  }, [state.dna, state.user?.id]);
 
   const clearPendingDailyAwareness = () => {
     setPendingDailyAwareness(null);
@@ -382,16 +385,17 @@ const App: React.FC = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       const parsed = saved ? JSON.parse(saved) as Partial<UserState> : null;
-      const pending = getBrowserPendingAssessment();
+      const restored = getLatestBrowserAssessment() ?? (isFaceScores(parsed?.dna) ? { scores: parsed.dna, ownerId: parsed?.user?.id ?? null } : null);
+      if (restored) saveBrowserAssessment(restored.scores, restored.ownerId ?? null, restored.completedAt);
       setState((previous) => ({
         ...previous,
-        dna: !parsed?.user && isFaceScores(parsed?.dna) ? parsed.dna : pending?.scores ?? previous.dna,
+        dna: restored?.scores ?? previous.dna,
         history: !parsed?.user && Array.isArray(parsed?.history) ? parsed.history : previous.history,
         tempDaily: isFaceScores(parsed?.tempDaily) ? parsed.tempDaily : null,
       }));
     } catch (error) {
       console.warn('Unable to restore the local FACE result', error);
-      const pending = getBrowserPendingAssessment();
+      const pending = getBrowserPendingAssessment() ?? getSavedBrowserAssessment();
       if (pending) setState((previous) => ({ ...previous, dna: pending.scores }));
     } finally {
       setIsLocalStateHydrated(true);
@@ -400,30 +404,41 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (!isLocalStateHydrated) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch { /* Independent result storage remains available when this larger state cannot be saved. */ }
   }, [isLocalStateHydrated, state]);
 
   useEffect(() => {
     if (!isLocalStateHydrated || !isAuthResolved || !state.user) return;
     let active = true;
     const memberId = state.user.id;
+    const resultRevision = resultRevisionRef.current;
     setIsMemberResultLoading(true);
     setMemberResultError(false);
     void (async () => {
       const returnToResult = shouldReturnToResultAfterAuth();
       try {
-        if (sessionStorage.getItem(AUTH_CALLBACK_CLAIM_KEY) === '1') {
+        if (getBrowserPendingAssessment()) {
           const claimed = await claimPendingGuestAssessment();
           sessionStorage.removeItem(AUTH_CALLBACK_CLAIM_KEY);
           if (active && claimed) setResultSaveStatus('cloud');
         }
       } catch (error) {
         console.warn('Unable to claim the guest result yet', error);
+        if (active) setResultSaveStatus(getLatestBrowserAssessment(memberId) ? 'browser' : 'memory');
       }
       try {
         const records = await getMemberAssessmentHistory();
         if (!active) return;
+        if (resultRevision !== resultRevisionRef.current) {
+          setHydratedMemberId(memberId);
+          return;
+        }
         const latest = records[0];
+        const local = getLatestBrowserAssessment(memberId);
+        const useLocal = local && (!latest || (local.completedAt ?? '') > latest.completedAt);
+        const restoredScores = useLocal ? local.scores : latest?.scores;
+        if (restoredScores) saveBrowserAssessment(restoredScores, memberId, useLocal ? local.completedAt : latest?.completedAt);
         const history: DiaryEntry[] = records.map((record) => ({
           id: record.id,
           date: record.completedAt,
@@ -433,14 +448,21 @@ const App: React.FC = () => {
         }));
         setState((previous) => previous.user?.id === memberId ? {
           ...previous,
-          dna: latest?.scores ?? previous.dna,
+          dna: restoredScores ?? previous.dna,
           history,
         } : previous);
         setHydratedMemberId(memberId);
         if (returnToResult) navigateTo('dashboard');
       } catch (error) {
         console.warn('Unable to restore the latest member assessment', error);
-        if (active) setMemberResultError(true);
+        if (active) {
+          const cached = getLatestBrowserAssessment(memberId);
+          if (cached) {
+            setState(previous => previous.user?.id === memberId ? { ...previous, dna: cached.scores } : previous);
+            setHydratedMemberId(memberId);
+          }
+          setMemberResultError(true);
+        }
       } finally {
         if (active) {
           setIsMemberResultLoading(false);
@@ -466,8 +488,7 @@ const App: React.FC = () => {
         const authUser = data.session ? toAuthUser(data.session.user) : null;
         setState((previous) => {
           if (previous.user?.id === authUser?.id) return previous;
-          const comingFromGuest = !previous.user && !!authUser;
-          return { ...previous, user: authUser, dna: comingFromGuest ? previous.dna : null, history: comingFromGuest ? previous.history : [], tempDaily: null };
+          return { ...previous, user: authUser, dna: scoresAfterAuthChange(previous.dna, previous.user?.id ?? null, authUser?.id ?? null), history: [], tempDaily: null };
         });
         if (authUser) {
           const activityKey = `session_restored:${authUser.id}`;
@@ -493,8 +514,7 @@ const App: React.FC = () => {
         const authUser = session ? toAuthUser(session.user) : null;
         setState((previous) => {
           if (previous.user?.id === authUser?.id) return previous;
-          const comingFromGuest = !previous.user && !!authUser;
-          return { ...previous, user: authUser, dna: comingFromGuest ? previous.dna : null, history: comingFromGuest ? previous.history : [], tempDaily: null };
+          return { ...previous, user: authUser, dna: scoresAfterAuthChange(previous.dna, previous.user?.id ?? null, authUser?.id ?? null), history: [], tempDaily: null };
         });
         setIsAuthResolved(true);
         if (authUser) {
@@ -537,6 +557,7 @@ const App: React.FC = () => {
   }, [showDailyResultAfterLogin, pendingDailyAwareness, pendingDailyResult]);
 
   const handleLogin = () => {
+    if (state.dna) saveBrowserAssessment(state.dna, state.user?.id ?? getSavedBrowserAssessment()?.ownerId ?? null, getLatestBrowserAssessment(state.user?.id)?.completedAt);
     try {
       if (view === 'dashboard' && state.dna) localStorage.setItem(AUTH_RESULT_RETURN_KEY, '/my-result');
       else localStorage.removeItem(AUTH_RESULT_RETURN_KEY);
@@ -548,6 +569,7 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
+      if (state.dna) saveBrowserAssessment(state.dna, state.user?.id ?? null, getLatestBrowserAssessment(state.user?.id)?.completedAt);
       if (state.user) {
         await recordMemberActivity('signed_out', state.user.id).catch((error) => console.warn('Unable to record sign out', error));
         recordedActivityRef.current.delete(`signed_in:${state.user.id}`);
@@ -556,16 +578,18 @@ const App: React.FC = () => {
       await signOut();
     } catch (error) {
       console.error('Unable to sign out', error);
-    } finally {
-      setState((previous) => ({ ...previous, user: null, dna: null, history: [], tempDaily: null }));
-      setIsMemberResultLoading(false);
-      setHydratedMemberId(null);
-      localStorage.removeItem(STORAGE_KEY);
+      return;
     }
+    setState((previous) => ({ ...previous, user: null, dna: previous.dna ?? getSavedBrowserAssessment()?.scores ?? null, history: [], tempDaily: null }));
+    setIsMemberResultLoading(false);
+    setHydratedMemberId(null);
   };
 
   const handleDnaComplete = (scores: FaceScores, saveStatus: 'cloud' | 'browser' | 'memory') => {
-    setResultSaveStatus(saveStatus);
+    resultRevisionRef.current += 1;
+    const cached = saveBrowserAssessment(scores, state.user?.id ?? null);
+    if (state.user) markPendingAssessmentOwner(state.user.id);
+    setResultSaveStatus(saveStatus === 'memory' && cached ? 'browser' : saveStatus);
     const baseline: DiaryEntry = { 
       id: 'dna-' + Date.now(), 
       date: new Date().toLocaleDateString('zh-TW'), 
@@ -654,20 +678,14 @@ const App: React.FC = () => {
 
   const handleRetestDna = () => {
     const confirmMsg = language === 'zh' 
-      ? '這會清除你的測驗結果與歷史紀錄，並重新開始。確定嗎？'
-      : 'This will clear your test result and history so you can start again. Continue?';
+      ? '重新開始測驗？上一份結果會保留，完成新測驗後才會更新。'
+      : 'Start a new test? Your last result stays available until you finish the new test.';
       
     if (window.confirm(confirmMsg)) {
-      // 徹底清除狀態，達到「讓網頁忘記儲存紀錄」的效果
-      setState(prev => ({ 
-        ...prev, 
-        dna: null, 
-        history: [], 
-        tempDaily: null 
-      }));
+      setState(prev => ({ ...prev, tempDaily: null }));
       clearLocalAssessmentProgress();
       // 回到首頁重新開始
-      setView('landing');
+      navigateTo('dna-test');
       
       // 確保 URL 乾淨（如果是從分享連結進來的）
       if (window.location.search.includes('dna_share')) {
@@ -714,7 +732,7 @@ const App: React.FC = () => {
         />
       )}
 
-      {view === 'dna-test' && <FaceAssessment onComplete={handleDnaComplete} />}
+      {view === 'dna-test' && <FaceAssessment ownerId={state.user?.id} onComplete={handleDnaComplete} />}
       {view === 'sequential-test-mockup' && <FaceSequentialMockup onExit={() => navigateTo('landing')} />}
       
       {FEATURE_FLAGS.dailyAwareness && view === 'daily-test' && (
@@ -727,6 +745,7 @@ const App: React.FC = () => {
       {view === 'dashboard' && state.dna && isAuthResolved && !isMemberResultLoading && (!state.user || hydratedMemberId === state.user.id) && (
         state.user ? (
           <div className="space-y-8">
+            {memberResultError && <p role="status" className="border border-[#D1D1C7] bg-[#FCFBF8] px-5 py-4 text-sm leading-7 text-[#70665D]">目前顯示這個瀏覽器保存的測驗結果。雲端暫時無法連線，稍後重新整理即可再次同步。</p>}
             {resultSaveStatus === 'browser' && <p role="alert" className="border border-[#B98A83] bg-[#F8EFED] px-5 py-4 text-sm leading-7 text-[#744A44]">雲端暫時無法保存這次測驗。結果已暫存在這個瀏覽器；請勿清除瀏覽資料。服務恢復後，重新整理頁面即可再嘗試存入帳號。</p>}
             {resultSaveStatus === 'memory' && <p role="alert" className="border border-[#B98A83] bg-[#F8EFED] px-5 py-4 text-sm leading-7 text-[#744A44]">這次結果目前無法保存到帳號或此瀏覽器。離開或重新整理後可能需要重新測驗。</p>}
             <div className="border border-[#D1D1C7] bg-[#FCFBF8] px-6 py-6 sm:px-9">
@@ -827,7 +846,7 @@ const App: React.FC = () => {
         </section>
       )}
 
-      {view === 'dashboard' && state.user && memberResultError && !isMemberResultLoading && <section className="mx-auto max-w-2xl border border-[#B98A83] bg-[#F8EFED] px-7 py-14 text-center"><h1 className="serif text-3xl text-[#2D2D2D]">暫時無法讀取會員結果</h1><p className="mt-4 text-sm leading-7 text-[#70665D]">你的資料沒有被清除。請稍後重新整理，或確認網路連線。</p></section>}
+      {view === 'dashboard' && state.user && !state.dna && memberResultError && !isMemberResultLoading && <section className="mx-auto max-w-2xl border border-[#B98A83] bg-[#F8EFED] px-7 py-14 text-center"><h1 className="serif text-3xl text-[#2D2D2D]">暫時無法讀取會員結果</h1><p className="mt-4 text-sm leading-7 text-[#70665D]">你的資料沒有被清除。請稍後重新整理，或確認網路連線。</p></section>}
       {view === 'dashboard' && isLocalStateHydrated && isAuthResolved && !isMemberResultLoading && !memberResultError && (!state.user || hydratedMemberId === state.user.id) && !state.dna && (
         <section className="mx-auto max-w-2xl border border-[#D1D1C7] bg-[#FCFBF8] px-7 py-20 text-center sm:px-12">
           <p className="text-xs font-medium tracking-[0.24em] text-[#8C635B]">MY FACE</p>
