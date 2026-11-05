@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Youtube, Instagram } from 'lucide-react';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { trackFunnelEvent } from '../services/funnelAnalytics';
 import type { FaceScores } from '../types';
@@ -18,8 +19,8 @@ interface FunnelResultProps {
 const MESSAGE_TOPICS = ['交易疑問', '內容疑問', '網站建議', '其他'] as const;
 
 const PRIMARY_CHANNELS = [
-  { label: 'YouTube', handle: '@FACETrader-k1h', href: 'https://www.youtube.com/@FACETrader-k1h', description: '看交易觀念與 FACE 內容', image: '/images/homepage-trading-salon.png' },
-  { label: 'Instagram', handle: '@face_tradernpc', href: 'https://www.instagram.com/face_tradernpc', description: '追蹤交易日常與最新內容', image: '/images/NPC Bartender.jpg' },
+  { label: 'YouTube', handle: '@FACETrader-k1h', href: 'https://www.youtube.com/@FACETrader-k1h', Icon: Youtube, color: 'text-[#C4302B]' },
+  { label: 'Instagram', handle: '@face_tradernpc', href: 'https://www.instagram.com/face_tradernpc', Icon: Instagram, color: 'text-[#B44F7B]' },
 ] as const;
 
 export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onOpenGuide, onLogin, initialEmail = '' }) => {
@@ -90,12 +91,11 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
       </section>
 
       <section className="mx-auto mt-8 max-w-3xl" aria-labelledby="follow-face-title">
-        <div className="mb-5"><p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FOLLOW FACE</p><h2 id="follow-face-title" className="mt-2 serif text-2xl text-[#2D2D2D] sm:text-3xl">在你常用的平台，繼續聊交易。</h2></div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {PRIMARY_CHANNELS.map((channel) => <a key={channel.label} href={channel.href} target="_blank" rel="noopener noreferrer" className="group relative min-h-56 overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] p-6 text-white sm:p-7">
-            <img src={channel.image} alt={`FACE ${channel.label} 頻道`} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/95 via-[#211916]/45 to-[#211916]/10" />
-            <div className="relative flex min-h-44 flex-col justify-end"><p className="text-xs font-medium tracking-[0.2em] text-[#E9D39A]">{channel.label}</p><h3 className="mt-3 serif text-2xl">{channel.handle}</h3><p className="mt-2 text-sm text-white/80">{channel.description}</p><span className="mt-5 w-fit border-b border-white/80 pb-1 text-sm font-medium">前往 {channel.label} →</span></div>
+        <h2 id="follow-face-title" className="mb-5 serif text-2xl text-[#2D2D2D]">歡迎追蹤</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {PRIMARY_CHANNELS.map((channel) => <a key={channel.label} href={channel.href} target="_blank" rel="noopener noreferrer" aria-label={`${channel.label} ${channel.handle}（另開視窗）`} className="flex min-h-16 items-center gap-4 border border-[#D1D1C7] bg-white px-5 py-4 text-[#2D2D2D] transition hover:border-[#8C635B] hover:bg-[#F7F4EF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8C635B]">
+            <channel.Icon size={26} strokeWidth={1.7} className={`shrink-0 ${channel.color}`} aria-hidden="true" />
+            <span className="break-all text-sm font-medium">{channel.handle}</span>
           </a>)}
         </div>
       </section>
