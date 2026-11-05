@@ -18,8 +18,8 @@ interface FunnelResultProps {
 const MESSAGE_TOPICS = ['交易疑問', '內容疑問', '網站建議', '其他'] as const;
 
 const PRIMARY_CHANNELS = [
-  { label: 'YouTube', handle: '@FACETrader-k1h', href: 'https://www.youtube.com/@FACETrader-k1h', description: '看交易觀念與 FACE 內容' },
-  { label: 'Instagram', handle: '@face_tradernpc', href: 'https://www.instagram.com/face_tradernpc', description: '追蹤交易日常與最新內容' },
+  { label: 'YouTube', handle: '@FACETrader-k1h', href: 'https://www.youtube.com/@FACETrader-k1h', description: '看交易觀念與 FACE 內容', image: '/images/homepage-trading-salon.png' },
+  { label: 'Instagram', handle: '@face_tradernpc', href: 'https://www.instagram.com/face_tradernpc', description: '追蹤交易日常與最新內容', image: '/images/NPC Bartender.jpg' },
 ] as const;
 
 export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onOpenGuide, onLogin, initialEmail = '' }) => {
@@ -65,45 +65,37 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
         resultVisualization={resultVisualization}
       />
 
-      <section className="mx-auto mt-12 max-w-3xl border border-[#D1D1C7] bg-[#FCFBF8] p-6 sm:p-9" aria-labelledby="guide-cta-title">
-        <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">下一步</p>
-        <h2 id="guide-cta-title" className="mt-3 serif text-2xl leading-[1.5] text-[#2D2D2D] sm:text-3xl">知道自己卡在哪裡之後，<br className="hidden sm:block" />下一步是想辦法走出去。</h2>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-[#70665D]">了解自己只是開始。一個交易者會不斷經歷四個階段；你不需要一次完成，只要先知道現在該練習什麼。</p>
-        <div className="mt-6 grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] grid-cols-2 sm:grid-cols-4">
-          {[['破繭', '理解交易'], ['生存', '學習停損'], ['進攻', '持續獲利'], ['歸真', '認識自己']].map(([stage, description]) => <div key={stage} className="bg-white px-3 py-4 text-center"><p className="serif text-lg text-[#2D2D2D]">{stage}</p><p className="mt-1 text-xs text-[#70665D]">{description}</p></div>)}
+      <section className="relative mx-auto mt-12 min-h-[310px] max-w-3xl overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] text-white" aria-labelledby="guide-cta-title">
+        <img src="/images/content-hub/survival-guide-cover.png" alt="金雕與北極熊閱讀 FACE 交易生存指南" className="absolute inset-0 h-full w-full object-cover saturate-110" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#211916]/95 via-[#211916]/68 to-[#211916]/20" />
+        <div className="relative flex min-h-[310px] max-w-xl flex-col justify-end p-7 sm:p-10">
+          <p className="text-xs font-medium tracking-[0.22em] text-[#E9D39A]">FACE 交易生存指南</p>
+          <h2 id="guide-cta-title" className="mt-3 serif text-3xl leading-[1.35] sm:text-4xl">下一步，學著走出去。</h2>
+          <p className="mt-4 text-sm leading-7 text-white/85">從破繭、生存、進攻到歸真，慢慢整理出一套你做得出來的交易過程。</p>
+          <button type="button" onClick={openGuide} className="mt-7 w-fit border-b border-white/80 pb-1 text-sm font-medium text-white transition hover:border-[#E9D39A] hover:text-[#E9D39A]">看生存篇試讀，領取免費章節 →</button>
         </div>
-        <button type="button" onClick={openGuide} className="mt-8 min-h-14 w-full bg-[#2D2D2D] px-6 py-4 text-sm font-bold tracking-[0.06em] text-white transition hover:bg-[#8C635B]">
-          看生存篇試讀，領取免費章節 →
-        </button>
       </section>
 
       <section className="mx-auto mt-8 grid max-w-3xl gap-4 sm:grid-cols-2" aria-label="分享結果與提供回饋">
-        <button type="button" onClick={openShare} className="group min-h-44 border border-[#D1D1C7] bg-white p-6 text-left transition hover:border-[#8C635B] hover:bg-[#FCFBF8]">
-          <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">SHARE FACE</p>
-          <h2 className="mt-4 serif text-2xl text-[#2D2D2D]">覺得有幫助？<br />分享給朋友</h2>
-          <span className="mt-5 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-medium text-[#2D2D2D] group-hover:text-[#8C635B]">分享這份結果 →</span>
+        <button type="button" onClick={openShare} className="group relative min-h-64 overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] p-6 text-left text-white sm:p-8">
+          <img src="/images/homepage-trading-salon.png" alt="FACE 動物交易沙龍" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/95 via-[#211916]/50 to-[#211916]/10" />
+          <div className="relative flex min-h-48 flex-col justify-end"><p className="text-xs font-medium tracking-[0.2em] text-[#E9D39A]">SHARE FACE</p><h2 className="mt-3 serif text-3xl leading-[1.3]">分享這份結果</h2><p className="mt-3 text-sm leading-6 text-white/80">把你的交易傾向，傳給也在交易路上的朋友。</p><span className="mt-5 w-fit border-b border-white/80 pb-1 text-sm font-medium">分享給朋友 →</span></div>
         </button>
-        <button
-          type="button"
-          onClick={() => { trackFunnelEvent('result_feedback_click'); setIsFeedbackOpen(true); }}
-          className="group min-h-44 border border-[#D1D1C7] bg-white p-6 text-left transition hover:border-[#8C635B] hover:bg-[#FCFBF8]"
-        >
-          <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">MESSAGE NPC</p>
-          <h2 className="mt-4 serif text-2xl text-[#2D2D2D]">想對設計者<br />說的話</h2>
-          <span className="mt-5 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-medium text-[#2D2D2D] group-hover:text-[#8C635B]">留下私密留言 →</span>
+        <button type="button" onClick={() => { trackFunnelEvent('result_feedback_click'); setIsFeedbackOpen(true); }} className="group relative min-h-64 overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] p-6 text-left text-white sm:p-8">
+          <img src="/images/npc/ask-npc-bar-background.jpg" alt="交易解憂 Bar 的 NPC" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/95 via-[#211916]/50 to-[#211916]/10" />
+          <div className="relative flex min-h-48 flex-col justify-end"><p className="text-xs font-medium tracking-[0.2em] text-[#E9D39A]">MESSAGE NPC</p><h2 className="mt-3 serif text-3xl leading-[1.3]">想對 NPC 說的話</h2><p className="mt-3 text-sm leading-6 text-white/80">留下你的交易困惑，或告訴我網站可以更好的地方。</p><span className="mt-5 w-fit border-b border-white/80 pb-1 text-sm font-medium">留下私密留言 →</span></div>
         </button>
       </section>
 
-      <section className="mx-auto mt-8 max-w-3xl border border-[#D1D1C7] bg-[#FCFBF8] p-6 sm:p-9" aria-labelledby="follow-face-title">
-        <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FOLLOW FACE</p>
-        <h2 id="follow-face-title" className="mt-3 serif text-2xl text-[#2D2D2D] sm:text-3xl">想繼續練習，從這裡開始。</h2>
-        <p className="mt-3 text-sm leading-7 text-[#70665D]">在 YouTube 與 Instagram，持續聊交易計畫以外、卻總會影響決策的那些事。</p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {PRIMARY_CHANNELS.map((channel) => <a key={channel.label} href={channel.href} target="_blank" rel="noopener noreferrer" className="group border border-[#D1D1C7] bg-white p-5 transition hover:border-[#8C635B] hover:bg-[#F7F4EF]">
-            <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">{channel.label}</p>
-            <p className="mt-3 serif text-xl text-[#2D2D2D]">{channel.handle}</p>
-            <p className="mt-2 text-sm leading-6 text-[#70665D]">{channel.description}</p>
-            <span className="mt-5 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-medium text-[#2D2D2D] group-hover:text-[#8C635B]">前往 {channel.label} →</span>
+      <section className="mx-auto mt-8 max-w-3xl" aria-labelledby="follow-face-title">
+        <div className="mb-5"><p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FOLLOW FACE</p><h2 id="follow-face-title" className="mt-2 serif text-2xl text-[#2D2D2D] sm:text-3xl">在你常用的平台，繼續聊交易。</h2></div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {PRIMARY_CHANNELS.map((channel) => <a key={channel.label} href={channel.href} target="_blank" rel="noopener noreferrer" className="group relative min-h-56 overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] p-6 text-white sm:p-7">
+            <img src={channel.image} alt={`FACE ${channel.label} 頻道`} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/95 via-[#211916]/45 to-[#211916]/10" />
+            <div className="relative flex min-h-44 flex-col justify-end"><p className="text-xs font-medium tracking-[0.2em] text-[#E9D39A]">{channel.label}</p><h3 className="mt-3 serif text-2xl">{channel.handle}</h3><p className="mt-2 text-sm text-white/80">{channel.description}</p><span className="mt-5 w-fit border-b border-white/80 pb-1 text-sm font-medium">前往 {channel.label} →</span></div>
           </a>)}
         </div>
       </section>
