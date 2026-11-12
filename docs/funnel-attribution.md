@@ -12,7 +12,7 @@ GA4 資源使用 `FaceYourself` 的正式網頁串流。訪客允許 Google Anal
 | `quiz_complete` | 回答全部 24 題並算出結果，在 GA4 標記為重要事件 |
 
 - 在 GA4 的「流量開發」用「工作階段來源／媒介」及「工作階段廣告活動」查看社群、搜尋、轉介及直接流量，並選擇 `quiz_complete` 觀察各來源的完成情況。
-- 在「探索」用封閉式漏斗 `quiz_landing_view` → `quiz_start` → `quiz_complete`，依來源或裝置拆分。完成率用同一漏斗中的完成使用者數除以開始使用者數。總事件次數會包含同一訪客的重測，適合看測驗次數。
+- [FACE Trader｜交易人格測驗漏斗](https://analytics.google.com/analytics/web/#/analysis/a387083724p527782660/edit/AASbA_JZRo-zO5BfPVf9qQ) 依工作階段來源細分 `quiz_landing_view` → `quiz_start` → `quiz_complete`，排除驗收來源 `face_qa`。完成率用同一漏斗中的完成使用者數除以開始使用者數。總事件次數會包含同一訪客的重測，適合看測驗次數。若使用標準流量報表，請排除 `face_qa` 以免把驗收當成訪客。
 - 在「探索」篩選 `quiz_question_progress`，使用「測驗題號」維度及使用者數看哪幾題掉得最多。以啟用日後的資料為準，等累積樣本再判讀。
 
 ## 追蹤範圍與隱私

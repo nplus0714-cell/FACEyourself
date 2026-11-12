@@ -3,7 +3,6 @@ import { FACE_MAP } from '../constants';
 import { readCampaignAttribution } from '../lib/campaignAttribution';
 
 type Consent = 'granted' | 'denied';
-type Ga4Event = 'quiz_landing_view' | 'quiz_start' | 'quiz_question_progress' | 'quiz_complete';
 type PageParameters = { page_location: string; page_referrer: string; page_title: string };
 type GoogleTagWindow = Window & {
   dataLayer?: unknown[];
@@ -19,6 +18,7 @@ const publicPaths = new Set([
   '/', '/test', '/my-result', '/types', '/types/compatibility', '/watch', '/survival-kit',
   '/guide', '/guide/line', '/manual', '/about', '/coach', '/privacy',
 ]);
+const quizEvents = new Set(['quiz_start', 'quiz_question_progress', 'quiz_complete']);
 
 export function isMeasuredPath(path: string): boolean {
   return publicPaths.has(path)
@@ -101,7 +101,9 @@ export function trackGa4Page(path: string): void {
 
   if (!tagInitialized) initializeTag(page);
   gaWindow.gtag?.('set', page);
-  gaWindow.gtag?.('event', 'page_view', { ...page, send_to: measurementId });
+  const parameters = { ...page, send_to: measurementId };
+  gaWindow.gtag?.('event', 'page_view', parameters);
+  if (path === '/test') gaWindow.gtag?.('event', 'quiz_landing_view', parameters);
   currentPage = page;
   lastPath = path;
   previousPage = `${location.origin}${path}`;
@@ -109,8 +111,7 @@ export function trackGa4Page(path: string): void {
 }
 
 export function trackGa4QuizEvent(event: string, step?: number): void {
-  const quizEvents: readonly Ga4Event[] = ['quiz_landing_view', 'quiz_start', 'quiz_question_progress', 'quiz_complete'];
-  if (!ga4Configured || consent !== 'granted' || !quizEvents.includes(event as Ga4Event)) return;
+  if (!ga4Configured || consent !== 'granted' || !quizEvents.has(event)) return;
   if (location.pathname !== '/test') return;
   trackGa4Page('/test');
   const parameters: Record<string, string | number> = { ...currentPage, send_to: measurementId };
