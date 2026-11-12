@@ -19,7 +19,7 @@ export const toAuthUser = (user: User): AuthUser | null => {
     ? metadata.avatar_url
     : typeof metadata.picture === 'string'
       ? metadata.picture
-      : `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=F4F0E9&color=2D2D2D`;
+      : '/images/brand/member-avatar.svg';
 
   return { id: user.id, name: displayName, email: user.email ?? '', avatar };
 };

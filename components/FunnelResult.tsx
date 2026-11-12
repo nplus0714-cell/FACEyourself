@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Facebook, Instagram, Music2, Youtube } from 'lucide-react';
 import { FACE_MAP, getFaceCode } from '../constants';
 import { trackFunnelEvent } from '../services/funnelAnalytics';
@@ -34,6 +34,8 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
   const [feedbackConsent, setFeedbackConsent] = useState(false);
   const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [feedbackError, setFeedbackError] = useState('');
+  const feedbackDialogRef = useRef<HTMLFormElement>(null);
+  const feedbackCloseRef = useRef<HTMLButtonElement>(null);
   const code = useMemo(() => getFaceCode(dna), [dna]);
   const profile = FACE_MAP[code] ?? FACE_MAP.ARTC;
   const resultVisualization = useMemo(() => ({
@@ -44,6 +46,42 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
   useEffect(() => {
     trackFunnelEvent('result_view');
   }, []);
+
+  useEffect(() => {
+    if (!isFeedbackOpen) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    feedbackCloseRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsFeedbackOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(feedbackDialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? []).filter((element) => element.getClientRects().length > 0);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      const outsideDialog = !feedbackDialogRef.current?.contains(document.activeElement);
+      if (event.shiftKey && (document.activeElement === first || outsideDialog)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || outsideDialog)) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
+    };
+  }, [isFeedbackOpen]);
 
   const openGuide = () => {
     trackFunnelEvent('survival_guide_click');
@@ -69,7 +107,7 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
       />
 
       <section className="relative mx-auto mt-12 min-h-[310px] max-w-3xl overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] text-white" aria-labelledby="guide-cta-title">
-        <img src="/images/content-hub/survival-guide-cover.png" alt="金雕與北極熊閱讀 FACE 交易生存指南" className="absolute inset-0 h-full w-full object-cover saturate-110" />
+        <img src="/images/content-hub/survival-guide-cover.webp" alt="金雕與北極熊閱讀 FACE 交易生存指南" width="1400" height="788" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover saturate-110" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#211916]/95 via-[#211916]/68 to-[#211916]/20" />
         <div className="relative flex min-h-[310px] max-w-xl flex-col justify-end p-7 sm:p-10">
           <p className="text-xs font-medium tracking-[0.22em] text-[#E9D39A]">FACE 交易生存指南</p>
@@ -81,12 +119,12 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
 
       <section className="mx-auto mt-8 grid max-w-3xl gap-4 sm:grid-cols-2" aria-label="分享結果與提供回饋">
         <button type="button" onClick={openShare} className="group relative min-h-64 overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] p-6 text-left text-white sm:p-8">
-          <img src="/images/homepage-trading-salon.png" alt="FACE 動物交易沙龍" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+          <img src="/images/homepage-trading-salon-768.webp" alt="FACE 動物交易沙龍" width="768" height="432" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/95 via-[#211916]/50 to-[#211916]/10" />
           <div className="relative flex min-h-48 flex-col justify-end"><p className="text-xs font-medium tracking-[0.2em] text-[#E9D39A]">SHARE FACE</p><h2 className="mt-3 serif text-3xl leading-[1.3]">分享這份結果</h2><p className="mt-3 text-sm leading-6 text-white/80">把你的交易傾向，傳給也在交易路上的朋友。</p><span className="mt-5 w-fit border-b border-white/80 pb-1 text-sm font-medium">分享給朋友 →</span></div>
         </button>
         <button type="button" onClick={() => { trackFunnelEvent('result_feedback_click'); setIsFeedbackOpen(true); }} className="group relative min-h-64 overflow-hidden border border-[#D1D1C7] bg-[#2D2D2D] p-6 text-left text-white sm:p-8">
-          <img src="/images/npc/ask-npc-bar-background.jpg" alt="交易解憂 Bar 的 NPC" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+          <img src="/images/npc/ask-npc-bar-background.jpg" alt="交易解憂 Bar 的 NPC" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#211916]/95 via-[#211916]/50 to-[#211916]/10" />
           <div className="relative flex min-h-48 flex-col justify-end"><p className="text-xs font-medium tracking-[0.2em] text-[#E9D39A]">MESSAGE NPC</p><h2 className="mt-3 serif text-3xl leading-[1.3]">想對 NPC 說的話</h2><p className="mt-3 text-sm leading-6 text-white/80">留下你的交易困惑，或告訴我網站可以更好的地方。</p><span className="mt-5 w-fit border-b border-white/80 pb-1 text-sm font-medium">留下私密留言 →</span></div>
         </button>
@@ -103,7 +141,7 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
       </section>
 
       {isFeedbackOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2D2D2D]/60 px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
-        <form className="max-h-full w-full max-w-lg overflow-y-auto border border-[#D1D1C7] bg-[#FCFBF8] p-6 shadow-2xl sm:p-9" onSubmit={async (event) => {
+        <form ref={feedbackDialogRef} className="max-h-full w-full max-w-lg overflow-y-auto border border-[#D1D1C7] bg-[#FCFBF8] p-6 shadow-2xl sm:p-9" onSubmit={async (event) => {
           event.preventDefault();
           if (!feedback.trim() || !feedbackEmail.trim() || !feedbackConsent) return;
           setFeedbackStatus('sending');
@@ -116,7 +154,7 @@ export const FunnelResult: React.FC<FunnelResultProps> = ({ dna, saveStatus, onO
             setFeedbackStatus('error');
           }
         }}>
-          <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">給 FACE 設計者</p><h2 id="feedback-title" className="mt-3 serif text-3xl text-[#2D2D2D]">想對設計者說的話</h2></div><button type="button" onClick={() => setIsFeedbackOpen(false)} className="text-2xl text-[#70665D]" aria-label="關閉">×</button></div>
+          <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">給 FACE 設計者</p><h2 id="feedback-title" className="mt-3 serif text-3xl text-[#2D2D2D]">想對設計者說的話</h2></div><button ref={feedbackCloseRef} type="button" onClick={() => setIsFeedbackOpen(false)} className="grid h-11 w-11 shrink-0 place-items-center text-2xl text-[#70665D]" aria-label="關閉留言視窗">×</button></div>
           <p className="mt-4 text-sm leading-7 text-[#70665D]">對交易有疑問、對內容有疑問，或想給網站建議，都可以留在這裡。留言不會公開；請留下 Email，方便我回覆你。</p>
           <fieldset className="mt-6"><legend className="text-sm font-bold text-[#4A382D]">你想聊什麼？</legend><div className="mt-3 grid grid-cols-2 gap-2">{MESSAGE_TOPICS.map((topic) => <label key={topic} className={`cursor-pointer border px-3 py-2.5 text-center text-sm ${feedbackTopic === topic ? 'border-[#8C635B] bg-[#F3EAE4] text-[#4A382D]' : 'border-[#D1D1C7] bg-white text-[#70665D]'}`}><input className="sr-only" type="radio" name="feedback-topic" value={topic} checked={feedbackTopic === topic} onChange={() => setFeedbackTopic(topic)} />{topic}</label>)}</div></fieldset>
           <label htmlFor="feedback-message" className="mt-5 block text-sm font-bold text-[#4A382D]">你想說的話</label>

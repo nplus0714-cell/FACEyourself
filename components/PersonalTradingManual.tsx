@@ -1,5 +1,6 @@
 import React from 'react';
 import { EarlyAccessWaitlistForm } from './EarlyAccessWaitlistForm';
+import { ProductAvailability } from './ProductAvailability';
 
 interface PersonalTradingManualProps {
   isLoggedIn: boolean;
@@ -12,10 +13,13 @@ export const PersonalTradingManual: React.FC<PersonalTradingManualProps> = ({ is
     <header className="border border-[#D1D1C7] bg-[#FCFBF8] px-7 py-12 text-center sm:px-12 sm:py-16">
       <p className="text-xs font-bold tracking-[0.2em] text-[#8C635B]">FACE TRADER · 知己交易</p>
       <h1 className="mt-5 serif text-4xl leading-[1.45] text-[#2D2D2D] sm:text-5xl">個人交易使用說明書</h1>
+      <p className="mx-auto mt-5 w-fit border border-[#CDB9A4] bg-[#F4EBDF] px-4 py-1.5 text-sm font-medium text-[#72523C]">規劃中・尚未開賣</p>
       <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-[#625A53]">完整人格分析登入即可免費看；這份規劃中的付費說明書，會把後面的進攻、歸真篇章與交易工具接起來。售價與開放時間尚未確定。</p>
     </header>
 
-    <section className="mt-10 grid gap-px border border-[#D1D1C7] bg-[#D1D1C7] sm:grid-cols-2" aria-label="方案規劃內容">
+    <ProductAvailability />
+
+    <section id="manual-plan" className="mt-10 grid scroll-mt-6 gap-px border border-[#D1D1C7] bg-[#D1D1C7] sm:grid-cols-2" aria-label="方案規劃內容">
       {[
         ['01', '進攻篇完整版', '持續獲利：從勝率、賠率、部位與持有節奏，建立能重複執行的方法。'],
         ['02', '歸真篇完整版', '認識自己：把市場條件與你的性格、承受力、生活節奏重新放在一起。'],

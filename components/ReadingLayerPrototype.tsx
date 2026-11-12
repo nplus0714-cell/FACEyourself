@@ -657,6 +657,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
       )}
 
       <article className={`reading-editorial reading-editorial--pilot reading-editorial--approved-body mx-auto max-w-4xl fade-in ${compact ? 'pb-12' : 'pb-28'}`} key={selectedCode}>
+      <h1 className="sr-only">{profile.name} {profile.code}｜FACE 交易人格分析</h1>
       {!compact && <header className="relative overflow-hidden border border-[#CFC6B8] bg-[#F4EEE7]">
         <img
           src={coverByCode[selectedCode]}
@@ -712,7 +713,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
         </section>
       )}
 
-      <main className={compact ? 'mt-0' : 'mt-4'}>
+      <div className={compact ? 'mt-0' : 'mt-4'}>
         <SectionShell chapter={chapterMeta[0]}>
           <div className={`overflow-hidden border border-[#D8CDBD] bg-white ${resultVisualization ? 'md:grid md:grid-cols-[1.08fr_0.92fr]' : faceLayout.grid}`}>
             {resultVisualization ? (
@@ -1218,7 +1219,7 @@ export const ReadingLayerPrototype: React.FC<ReadingLayerPrototypeProps> = ({
             )}
           </div>
         </section>}
-      </main>
+      </div>
 
       {previewOnly && onUnlock && <GuestUnlockSummary onUnlock={onUnlock} profileCode={selectedCode} />}
 

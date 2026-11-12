@@ -65,6 +65,7 @@ export const AboutFace: React.FC<AboutFaceProps> = ({ onGoToMirrorTrade, onOpenC
         <p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">FACE TRADER PRODUCT MAP</p>
         <h2 id="face-product-map-title" className="mt-5 serif text-3xl leading-[1.55] text-[#2D2D2D] md:text-5xl">你現在卡在哪裡，<br />就從那一站開始。</h2>
         <p className="mt-6 max-w-2xl text-base leading-8 text-[#70665D]">不需要一次用完所有產品。FACE 負責認識自己，內容與指南協助理解與練習，RATE 與 1V1 幫你把問題帶回真實持倉。</p>
+        <a href="/manual#available-now" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-[#4A382D] underline underline-offset-4">先看免費內容、示範與開發狀態 →</a>
       </div>
       <div className="mt-10 grid gap-px overflow-hidden border border-[#D1D1C7] bg-[#D1D1C7] sm:grid-cols-2 md:mt-14 lg:grid-cols-3">
         {[

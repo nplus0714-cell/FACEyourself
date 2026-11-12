@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { LockKeyhole } from 'lucide-react';
 import { CONTENT_CATALOG, type ContentItem } from '../data/contentCatalog';
@@ -38,8 +38,8 @@ const BlurredPaidPreview = ({ item, onOpenManual }: { item: ContentItem; onOpenM
     </div>
     <p className="mt-4 text-sm leading-7 text-[#70665D]">{item.summary}</p>
 
-    <section className="relative mt-8 min-h-[35rem] overflow-hidden border-y border-[#E4DDD4] py-8" aria-label="付費篇章預覽">
-      <div className="pointer-events-none select-none space-y-5 px-1 text-[15px] leading-8 text-[#655C55] blur-[5px] opacity-55" aria-hidden="true">
+    <section className="relative mt-8 overflow-hidden border-y border-[#E4DDD4] py-6 sm:py-8" aria-label="付費篇章預覽">
+      <div className="pointer-events-none absolute inset-0 select-none space-y-5 px-1 py-8 text-[15px] leading-8 text-[#655C55] blur-[5px] opacity-55" aria-hidden="true">
         <p>走到這一步，交易不再只是看對或看錯。你會開始面對：什麼時候該放大，什麼時候又該先退一步。</p>
         <p>每一次選擇都需要理由，也需要一個自己做得到的節奏。方向、部位與時間，必須一起被看見。</p>
         <p>市場不會替任何人保留機會。真正要練習的，是在機會出現時，仍能用自己承受得住的方式前進。</p>
@@ -48,7 +48,7 @@ const BlurredPaidPreview = ({ item, onOpenManual }: { item: ContentItem; onOpenM
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-white/15 via-white/35 to-white/95" aria-hidden="true" />
 
-      <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 bg-[#2D2D2D] p-6 text-white shadow-2xl sm:inset-x-7 sm:p-8">
+      <div className="relative mx-2 bg-[#2D2D2D] p-5 text-white shadow-2xl sm:mx-7 sm:p-8">
         <div className="grid gap-7 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8">
           <div className="flex flex-col justify-center">
             <p className="text-xs tracking-[0.18em] text-[#D9C7A9]">完整版閱讀權限</p>
@@ -70,8 +70,26 @@ const BlurredPaidPreview = ({ item, onOpenManual }: { item: ContentItem; onOpenM
 
 export const SurvivalGuideReader: React.FC<SurvivalGuideReaderProps> = ({ fullFree = false, onOpenManual }) => {
   const [selectedArticle, setSelectedArticle] = useState<ContentItem>(freeArticles[0]);
+  const [isContentsOpen, setIsContentsOpen] = useState(false);
+  const readingPanelRef = useRef<HTMLDivElement>(null);
+  const contentsButtonRef = useRef<HTMLButtonElement>(null);
   const selectedIsPaid = !!selectedArticle.requiresPurchase;
   const selectedIndex = useMemo(() => guideArticles.findIndex((item) => item.id === selectedArticle.id), [selectedArticle.id]);
+
+  const selectArticle = (item: ContentItem) => {
+    setSelectedArticle(item);
+    setIsContentsOpen(false);
+    window.requestAnimationFrame(() => {
+      readingPanelRef.current?.focus({ preventScroll: true });
+      readingPanelRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' });
+    });
+  };
+
+  const returnToContents = () => {
+    setIsContentsOpen(true);
+    contentsButtonRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' });
+    contentsButtonRef.current?.focus({ preventScroll: true });
+  };
 
   useEffect(() => {
     trackFunnelEvent('guide_access');
@@ -108,22 +126,28 @@ export const SurvivalGuideReader: React.FC<SurvivalGuideReaderProps> = ({ fullFr
         <div className="border-b border-[#D1D1C7] pb-6">
           <p className="text-xs font-bold tracking-[0.18em] text-[#8C635B]">TABLE OF CONTENTS</p>
           <h2 id="chapters-title" className="mt-3 serif text-3xl text-[#2D2D2D]">交易生存指南目錄</h2>
-          <p className="mt-3 text-sm leading-7 text-[#70665D]">左側可直接選擇章節。進攻與歸真可先看內容方向，完整版開放時會通知你。</p>
+          <p className="mt-3 text-sm leading-7 text-[#70665D]">選擇章節即可接續閱讀。破繭與生存提供免費全文；進攻與歸真先看內容方向，完整版尚未開放。</p>
         </div>
         <div className="mt-7 grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)]">
-          <nav className="space-y-2" aria-label="交易生存指南章節目錄">
+          <div>
+          <button ref={contentsButtonRef} type="button" aria-expanded={isContentsOpen} aria-controls="guide-chapter-list" onClick={() => setIsContentsOpen((open) => !open)} className="flex min-h-14 w-full items-center justify-between gap-4 border border-[#B9AA9D] bg-[#F7F1EC] px-4 py-3 text-left text-sm font-medium text-[#4A382D] lg:hidden">
+            <span>{isContentsOpen ? '收起章節目錄' : '選擇章節'}<span className="mt-1 block text-xs font-normal text-[#70665D]">目前：{selectedArticle.articleNumber} · {selectedArticle.title}</span></span><span aria-hidden="true">{isContentsOpen ? '−' : '＋'}</span>
+          </button>
+          <nav id="guide-chapter-list" className={`${isContentsOpen ? 'block' : 'hidden'} mt-3 space-y-2 lg:mt-0 lg:block`} aria-label="交易生存指南章節目錄">
             {guideArticles.map((item) => {
               const isSelected = selectedArticle.id === item.id;
               const isPaid = !!item.requiresPurchase;
-              return <button key={item.id} type="button" onClick={() => setSelectedArticle(item)} aria-current={isSelected ? 'page' : undefined} className={`w-full border px-4 py-3 text-left text-sm leading-6 transition ${isSelected ? 'border-[#8C635B] bg-[#F3EAE4] text-[#2D2D2D]' : 'border-[#D1D1C7] bg-white text-[#70665D] hover:border-[#B9AA9D] hover:bg-[#FCFBF8]'}`}>
-                <span className="flex items-center justify-between gap-3 text-xs text-[#8C635B]"><span>{item.series} · {item.articleNumber}</span>{isPaid ? <span className="inline-flex items-center gap-1 text-[#8A3F38]"><LockKeyhole size={11} aria-hidden="true" />解鎖</span> : <span className="text-[#2E6154]">試讀</span>}</span>
+              return <button key={item.id} type="button" onClick={() => selectArticle(item)} aria-current={isSelected ? 'page' : undefined} className={`w-full border px-4 py-3 text-left text-sm leading-6 transition ${isSelected ? 'border-[#8C635B] bg-[#F3EAE4] text-[#2D2D2D]' : 'border-[#D1D1C7] bg-white text-[#70665D] hover:border-[#B9AA9D] hover:bg-[#FCFBF8]'}`}>
+                <span className="flex items-center justify-between gap-3 text-xs text-[#8C635B]"><span>{item.series} · {item.articleNumber}</span>{isPaid ? <span className="inline-flex items-center gap-1 text-[#8A3F38]"><LockKeyhole size={11} aria-hidden="true" />付費規劃</span> : <span className="text-[#2E6154]">免費全文</span>}</span>
                 <span className="mt-1 block">{item.title}</span>
               </button>;
             })}
           </nav>
-          <div className="min-w-0">
+          </div>
+          <div ref={readingPanelRef} tabIndex={-1} role="region" aria-label={`目前章節：${selectedArticle.articleNumber} ${selectedArticle.title}`} className="min-w-0 scroll-mt-6 focus:outline-none">
             {selectedIsPaid ? <BlurredPaidPreview item={selectedArticle} onOpenManual={onOpenManual} /> : <div className="border border-[#D1D1C7] bg-white p-6 sm:p-9"><p className="text-xs font-bold text-[#8C635B]">{selectedArticle.series} · {selectedArticle.articleNumber}</p><h3 className="mt-3 serif text-3xl leading-[1.5] text-[#2D2D2D]">{selectedArticle.title}</h3><ArticleBody item={selectedArticle} /></div>}
             <p className="mt-5 text-right text-xs text-[#978A7E]">章節 {String(selectedIndex + 1).padStart(2, '0')} / {String(guideArticles.length).padStart(2, '0')}</p>
+            <button type="button" onClick={returnToContents} className="mt-4 inline-flex min-h-11 items-center text-sm font-medium text-[#4A382D] underline underline-offset-4 lg:hidden">返回章節目錄 ↑</button>
           </div>
         </div>
       </section>}

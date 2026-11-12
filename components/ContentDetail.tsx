@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { CONTENT_CATALOG, ContentItem } from '../data/contentCatalog';
 import { createReadingSessionId, recordContentReading } from '../services/contentReading';
 import { getPaidArticleMarkdown } from '../services/paidContent';
+import { isPlainNavigationClick } from '../lib/navigation';
 
 interface ContentDetailProps {
   item: ContentItem;
@@ -101,7 +102,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
 
   return (
     <article ref={articleRef} className="mx-auto max-w-4xl pb-28 pt-4 md:pt-10 fade-in">
-      <a href="/watch" onClick={(event) => { event.preventDefault(); onBack(); }} className="text-sm font-bold text-[#70665D] transition hover:text-[#2D2D2D]">← 回到內容中心</a>
+      <a href="/watch" onClick={(event) => { if (!isPlainNavigationClick(event)) return; event.preventDefault(); onBack(); }} className="text-sm font-bold text-[#70665D] transition hover:text-[#2D2D2D]">← 回到內容中心</a>
       <header className="mt-10 border-b border-[#D1D1C7] pb-9 text-center md:mt-14 md:pb-12">
         <p className="text-xs font-bold tracking-[0.28em] text-[#8C635B]">
           FACE {item.kind === 'video' ? 'VIDEO' : item.channel === 'topic-articles' ? 'TOPIC · 交易解憂 Bar' : 'COLUMN'} {item.series ? `· ${item.articleNumber} · ${item.series}` : item.isDemo ? '· DEMO' : ''}
@@ -129,7 +130,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             {isLoginLocked && <button type="button" onClick={onLoginRequest} className="bg-[#2D2D2D] px-7 py-4 text-sm font-medium text-white transition hover:bg-[#3A302B]">登入並繼續 →</button>}
-            {(item.requiresPurchase || !isLoginLocked) && <a href="/manual" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">查看完整版開放規劃</a>}
+            {(item.requiresPurchase || !isLoginLocked) && <a href="/manual" onClick={(event) => { if (!isPlainNavigationClick(event)) return; event.preventDefault(); onOpenPricing(); }} className="border border-[#9A6D62] bg-white px-7 py-4 text-sm font-medium text-[#5F443D] transition hover:bg-[#F2E8E2]">查看完整版開放規劃</a>}
           </div>
         </section>
       ) : item.requiresPurchase && paidArticleStatus === 'loading' ? (
@@ -171,20 +172,20 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
         <div className="p-7 md:p-9">
           <p className="text-xs font-medium tracking-[0.2em] text-[#8C635B]">FACE 交易生存指南 · 完整方案</p>
           <h2 className="mt-3 serif text-2xl leading-[1.55] text-[#2D2D2D] md:text-3xl">把閱讀變成適合你這一型的交易使用說明書</h2>
-          <p className="mt-3 text-[15px] leading-[1.9] text-[#70665D]">查看七個關鍵問題、完整內容與早鳥方案。</p>
+          <p className="mt-3 text-[15px] leading-[1.9] text-[#70665D]">查看規劃內容與開放通知。目前尚未開放購買，價格與交付形式仍待確定。</p>
         </div>
-        <a href="/survival-kit" onClick={(event) => { event.preventDefault(); onOpenPricing(); }} className="flex min-h-24 items-center justify-between gap-8 bg-[#2D2D2D] px-7 py-5 text-left text-white transition hover:bg-[#3A302B] md:min-w-64 md:px-9">
-          <span><span className="block text-xs tracking-[0.16em] text-white/55">PLAN PREVIEW</span><span className="mt-2 block serif text-2xl">查看方案</span></span>
+        <a href="/manual" onClick={(event) => { if (!isPlainNavigationClick(event)) return; event.preventDefault(); onOpenPricing(); }} className="flex min-h-24 items-center justify-between gap-8 bg-[#2D2D2D] px-7 py-5 text-left text-white transition hover:bg-[#3A302B] md:min-w-64 md:px-9">
+          <span><span className="block text-xs tracking-[0.16em] text-white/55">PLAN PREVIEW</span><span className="mt-2 block serif text-2xl">了解說明書規劃</span></span>
           <span className="text-xl" aria-hidden="true">→</span>
         </a>
       </section>}
 
       {item.kind === 'article' && <nav className="mt-12 grid gap-3 border-t border-[#D1D1C7] pt-8 sm:grid-cols-2" aria-label="上一篇與下一篇文章">
-        {previousArticle ? <a href={`/watch/${previousArticle.slug}`} onClick={(event) => { event.preventDefault(); onOpenContent(previousArticle); }} className="border border-[#D1D1C7] bg-white px-5 py-5 transition hover:border-[#8C635B]">
+        {previousArticle ? <a href={`/watch/${previousArticle.slug}`} onClick={(event) => { if (!isPlainNavigationClick(event)) return; event.preventDefault(); onOpenContent(previousArticle); }} className="border border-[#D1D1C7] bg-white px-5 py-5 transition hover:border-[#8C635B]">
           <span className="text-xs tracking-[0.14em] text-[#8C7E6D]">← 上一篇</span>
           <span className="mt-2 block serif text-xl leading-[1.55] text-[#2D2D2D]">{previousArticle.title}</span>
         </a> : <span />}
-        {nextArticle && <a href={`/watch/${nextArticle.slug}`} onClick={(event) => { event.preventDefault(); onOpenContent(nextArticle); }} className="border border-[#D1D1C7] bg-white px-5 py-5 text-right transition hover:border-[#8C635B]">
+        {nextArticle && <a href={`/watch/${nextArticle.slug}`} onClick={(event) => { if (!isPlainNavigationClick(event)) return; event.preventDefault(); onOpenContent(nextArticle); }} className="border border-[#D1D1C7] bg-white px-5 py-5 text-right transition hover:border-[#8C635B]">
           <span className="text-xs tracking-[0.14em] text-[#8C7E6D]">下一篇 →</span>
           <span className="mt-2 block serif text-xl leading-[1.55] text-[#2D2D2D]">{nextArticle.title}</span>
         </a>}
@@ -192,7 +193,7 @@ export const ContentDetail: React.FC<ContentDetailProps> = ({ item, isLoggedIn, 
 
       {item.kind === 'article' && <aside className="mt-8 border-y border-[#D1D1C7] py-8 text-center">
         <p className="serif text-2xl leading-[1.6] text-[#2D2D2D]">文章談的是市場，也可能正在說你的決策習慣</p>
-        <a href="/test" onClick={(event) => { event.preventDefault(); onStartTest(); }} className="mt-5 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-medium text-[#2D2D2D]">用 24 題找到我的 FACE →</a>
+        <a href="/test" onClick={(event) => { if (!isPlainNavigationClick(event)) return; event.preventDefault(); onStartTest(); }} className="mt-5 inline-block border-b border-[#2D2D2D] pb-1 text-sm font-medium text-[#2D2D2D]">用 24 題找到我的 FACE →</a>
       </aside>}
 
       {item.kind === 'video' && <section className="mt-14 border border-[#D1D1C7] bg-[#F7F4EF] p-7 text-center md:p-10">

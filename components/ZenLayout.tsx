@@ -3,6 +3,7 @@ import { AuthUser, Language } from '../types';
 import { translations } from '../i18n';
 import { FaceWordmark } from './FaceWordmark';
 import { SiteFooter } from './SiteFooter';
+import { isPlainNavigationClick } from '../lib/navigation';
 
 interface ZenLayoutProps {
   children: React.ReactNode;
@@ -65,6 +66,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
   };
 
   const handleInternalLink = (event: React.MouseEvent<HTMLAnchorElement>, view: string) => {
+    if (!isPlainNavigationClick(event)) return;
     event.preventDefault();
     setIsMobileNavOpen(false);
     onViewChange?.(view);
@@ -112,7 +114,7 @@ export const ZenLayout: React.FC<ZenLayoutProps> = ({
             <a
               href="/"
               className="group flex items-center gap-3"
-              onClick={(event) => { event.preventDefault(); handleLogoClick(); }}
+              onClick={(event) => { if (!isPlainNavigationClick(event)) return; event.preventDefault(); handleLogoClick(); }}
               title="返回首頁"
               aria-label="FACE 首頁"
             >

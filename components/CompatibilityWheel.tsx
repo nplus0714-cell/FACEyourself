@@ -72,7 +72,7 @@ export const CompatibilityWheel: React.FC<CompatibilityWheelProps> = ({ dna, ini
     setActiveCode(flipAt(code, 0));
   };
 
-  return <main className="mx-auto w-full max-w-6xl px-5 py-10 md:px-10 md:py-16">
+  return <section className="mx-auto w-full max-w-6xl px-5 py-10 md:px-10 md:py-16">
     <header className="max-w-3xl">
       <p className="text-xs font-bold tracking-[0.24em] text-[#8C635B]">FACE COMPATIBILITY WHEEL</p>
       <h1 className="mt-4 serif text-4xl leading-[1.35] text-[#2D2D2D] md:text-6xl">交易互補輪盤</h1>
@@ -168,5 +168,5 @@ export const CompatibilityWheel: React.FC<CompatibilityWheelProps> = ({ dna, ini
         <button type="button" onClick={onStartTest} className="shrink-0 bg-[#2D2D2D] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-black">開始測驗 →</button>
       </div>
     </section>}
-  </main>;
+  </section>;
 };

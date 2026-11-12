@@ -261,11 +261,23 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
   const clientRunIdRef = useRef<string | null>(null);
   const runIdRef = useRef<string | null>(null);
   const runPromiseRef = useRef<Promise<string> | null>(null);
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null);
+  const previousStepRef = useRef(step);
   const question = FACE_BASELINE_V2_QUESTIONS[step];
 
   useEffect(() => {
     trackFunnelEvent('quiz_start');
   }, []);
+
+  useEffect(() => {
+    if (previousStepRef.current === step) return;
+    previousStepRef.current = step;
+    const frame = window.requestAnimationFrame(() => {
+      questionHeadingRef.current?.focus({ preventScroll: true });
+      questionHeadingRef.current?.scrollIntoView({ block: 'center', behavior: 'auto' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [step]);
 
   const getOrStartRun = (): Promise<string> => {
     if (runIdRef.current) return Promise.resolve(runIdRef.current);
@@ -412,7 +424,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
         </div>
         <div className="space-y-2">
           <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[#8C635B]">{TYPE_LABELS[question.type]}</p>
-          <h2 className="serif text-xl tracking-wide text-[#2D2D2D]">FACE 交易人格測驗</h2>
+          <h1 className="serif text-xl tracking-wide text-[#2D2D2D]">FACE 交易人格測驗</h1>
           <div className="mx-auto max-w-lg pt-2" aria-label={`測驗進度：第 ${step + 1} 題，共 ${FACE_BASELINE_V2_QUESTION_COUNT} 題`}>
             <div className="relative h-5">
               <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-[#D1D1C7]"></div>
@@ -421,7 +433,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
             </div>
             <div className="flex justify-between font-mono text-[11px] tracking-[0.06em] text-[#8C7E6D]">
               <span>START</span>
-              <span>第 {step + 1} 題 / {FACE_BASELINE_V2_QUESTION_COUNT}</span>
+              <span id="assessment-question-position">第 {step + 1} 題 / {FACE_BASELINE_V2_QUESTION_COUNT}</span>
               <span>FINISH</span>
             </div>
           </div>
@@ -439,7 +451,7 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
               <div className="mt-2 grid grid-cols-2 gap-2">{[1, 2].map((stage) => <span key={stage} className={`h-1 ${stage <= (question.scenarioStage ?? 0) ? 'bg-[#8C635B]' : 'bg-[#DED7CE]'}`} />)}</div>
             </div>
           )}
-          <p className="serif px-2 text-xl leading-[1.7] text-[#2D2D2D] md:text-2xl">{question.prompt}</p>
+          <h2 ref={questionHeadingRef} tabIndex={-1} aria-describedby="assessment-question-position" className="serif px-2 text-xl leading-[1.7] text-[#2D2D2D] focus:outline-none md:text-2xl">{question.prompt}</h2>
         </div>
 
         {question.type === 'image' && question.compositeImage && question.options && (

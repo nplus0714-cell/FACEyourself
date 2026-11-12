@@ -205,8 +205,8 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
     description: content.summary,
   };
   if (path === '/') return {
-    title: 'FACE Trader 知己交易｜交易人格測驗',
-    description: 'FACE 交易心理測驗（交易人格測驗）：用 24 題看懂你的交易心態、決策邏輯與資金管理偏好，找到屬於你的 16 型交易人格。',
+    title: 'FACE Trader 知己交易｜交易人格測驗與免費指南',
+    description: 'FACE Trader 提供交易教育與自我覺察工具：用 24 題交易人格測驗了解決策偏好，從免費生存指南整理交易理由、風險與停損。',
   };
   if (path === '/types') return {
     title: 'FACE 16 型交易人格圖鑑｜交易人格測驗的 16 種結果',
@@ -238,7 +238,7 @@ const getPageCopy = ({ path, profile, content, isNotFound }: PageMetadataInput) 
   };
   if (path === '/manual') return {
     title: '個人交易使用說明書｜FACE Trader 知己交易',
-    description: '了解規劃中的進攻、歸真完整版、人格分析與交易輔助道具。',
+    description: '查看已開放的免費內容、會員示範工具與個人交易使用說明書規劃。價格及開放時間未定。',
   };
   if (path === '/privacy') return {
     title: '隱私權政策｜FACE Trader 知己交易',
