@@ -1,5 +1,6 @@
 import React from 'react';
 import { SITE_IDENTITY } from '../data/siteIdentity';
+import { ga4Configured } from '../services/ga4Analytics';
 
 export type LegalPageKind = 'privacy' | 'terms' | 'refund' | 'data-deletion';
 
@@ -50,6 +51,7 @@ const PrivacyPolicy = () => (
     <Section title="使用的第三方服務">
       <p>為提供網站功能，我們可能使用：Supabase（資料庫、登入與檔案服務）、Google Forms／Google Sheets（前期研究問卷與資料整理）、Google／Gmail 或其他 Email 服務（通知與客服）、綠界科技 ECPay（付款處理）、Vercel（網站託管與基礎技術紀錄）。</p>
       <p>付款資料由付款服務商依其規範處理；本站不保存完整信用卡卡號。第三方服務可能依其隱私政策在境外處理資料。</p>
+      {ga4Configured && <p>經你選擇允許後，Google Analytics 會使用 Cookie 等技術衡量瀏覽來源、頁面與測驗進度。本站送出的分析事件不含姓名、Email、測驗答案或分數。你可以在本頁下方的「網站分析偏好」變更選擇。</p>}
     </Section>
     <Section title="保存、安全與您的權利">
       <p>我們只在提供服務、處理交易、遵守法令或處理爭議所需期間保存資料，並採取合理的存取控制與安全措施。您可來信要求查詢、更正、停止利用或刪除個人資料；依法必須保留的交易、會計或爭議紀錄不在此限。</p>

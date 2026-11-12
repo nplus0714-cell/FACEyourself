@@ -20,6 +20,8 @@ import { applyPageMetadata } from './lib/pageMetadata';
 import { isResearchAdminEmail } from './lib/researchAdminAccess';
 import { FEATURE_FLAGS } from './config/featureFlags';
 import { trackFunnelEvent } from './services/funnelAnalytics';
+import { trackGa4Page } from './services/ga4Analytics';
+import { AnalyticsConsent } from './components/AnalyticsConsent';
 import { clearLocalAssessmentProgress } from './services/localAssessmentProgress';
 import { FunnelLanding } from './components/FunnelLanding';
 import { PageLoadingFallback } from './components/PageLoadingFallback';
@@ -351,6 +353,10 @@ const App: React.FC = () => {
   useEffect(() => {
     if (view === 'dna-test') trackFunnelEvent('quiz_landing_view');
   }, [view]);
+
+  useEffect(() => {
+    trackGa4Page(window.location.pathname);
+  }, [selectedContent, selectedRoleCode, view]);
 
   useEffect(() => {
     applyPageMetadata({
@@ -723,6 +729,7 @@ const App: React.FC = () => {
       language={language}
       onToggleLanguage={toggleLanguage}
     >
+      {view !== 'privacy' && <AnalyticsConsent />}
       <React.Suspense fallback={<PageLoadingFallback />}>
       {view === 'landing' && (
         <FunnelLanding
@@ -909,7 +916,7 @@ const App: React.FC = () => {
         />
       )}
       {view === 'compatibility' && <CompatibilityWheel dna={state.dna} initialCode={new URLSearchParams(window.location.search).get('type')} onOpenRole={openRole} onStartTest={() => navigateTo('dna-test')} />}
-      {view === 'privacy' && <LegalPage kind="privacy" />}
+      {view === 'privacy' && <><LegalPage kind="privacy" /><AnalyticsConsent settings /></>}
       {view === 'terms' && <LegalPage kind="terms" />}
       {view === 'refund-policy' && <LegalPage kind="refund" />}
       {view === 'data-deletion' && <LegalPage kind="data-deletion" />}

@@ -3,6 +3,9 @@ import './styles/globals.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { captureFunnelAttribution } from './services/funnelAnalytics';
+
+captureFunnelAttribution();
 
 const CHUNK_RELOAD_KEY = 'face_chunk_reload_at';
 window.addEventListener('vite:preloadError', (event) => {

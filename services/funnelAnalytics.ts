@@ -1,4 +1,6 @@
 import { getAnonymousVisitorId } from './assessmentPersistence';
+import { readCampaignAttribution, type CampaignAttribution } from '../lib/campaignAttribution';
+import { trackGa4QuizEvent } from './ga4Analytics';
 
 export type FunnelEventType =
   | 'quiz_landing_view'
@@ -21,6 +23,7 @@ interface FunnelEventOptions {
 const SESSION_ID_KEY = 'face_funnel_session_id_v1';
 const ATTRIBUTION_KEY = 'face_funnel_attribution_v1';
 const trackedEvents = new Set<string>();
+let entryAttribution: CampaignAttribution = {};
 
 const getFunnelSessionId = (): string => {
   const existing = sessionStorage.getItem(SESSION_ID_KEY);
@@ -30,25 +33,24 @@ const getFunnelSessionId = (): string => {
   return sessionId;
 };
 
-const readAttribution = (): Record<string, string | undefined> => {
-  const params = new URLSearchParams(window.location.search);
-  const current = {
-    source: params.get('utm_source') ?? undefined,
-    medium: params.get('utm_medium') ?? undefined,
-    campaign: params.get('utm_campaign') ?? undefined,
-    content: params.get('utm_content') ?? undefined,
-  };
-
-  if (Object.values(current).some(Boolean)) {
-    try { sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(current)); } catch { /* best effort */ }
-    return current;
+export const captureFunnelAttribution = (): void => {
+  const current = readCampaignAttribution(new URLSearchParams(window.location.search));
+  if (Object.keys(current).length > 0) {
+    entryAttribution = current;
+    try { sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(current)); } catch { /* Best effort. */ }
   }
+};
 
+const readAttribution = () => {
+  if (Object.keys(entryAttribution).length > 0) return entryAttribution;
   try {
-    return JSON.parse(sessionStorage.getItem(ATTRIBUTION_KEY) ?? '{}') as Record<string, string | undefined>;
-  } catch {
-    return current;
-  }
+    const saved = JSON.parse(sessionStorage.getItem(ATTRIBUTION_KEY) ?? '{}');
+    const params = new URLSearchParams();
+    for (const key of ['source', 'medium', 'campaign', 'content']) {
+      if (typeof saved?.[key] === 'string') params.set(`utm_${key}`, saved[key]);
+    }
+    return readCampaignAttribution(params);
+  } catch { return {}; }
 };
 
 /**
@@ -61,6 +63,13 @@ export const trackFunnelEvent = (eventType: FunnelEventType, options: FunnelEven
   trackedEvents.add(eventKey);
 
   try {
+    trackGa4QuizEvent(eventType, options.step);
+  } catch (error) {
+    console.warn('Unable to record GA4 quiz event', error);
+  }
+
+  try {
+    captureFunnelAttribution();
     void fetch('/api/analytics/funnel', {
       method: 'POST',
       keepalive: true,

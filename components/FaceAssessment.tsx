@@ -263,11 +263,9 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
   const runPromiseRef = useRef<Promise<string> | null>(null);
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const previousStepRef = useRef(step);
+  const trackedAnswers = useRef(new Set(Object.keys(initialProgress?.answers ?? {})));
+  const finishingRef = useRef(false);
   const question = FACE_BASELINE_V2_QUESTIONS[step];
-
-  useEffect(() => {
-    trackFunnelEvent('quiz_start');
-  }, []);
 
   useEffect(() => {
     if (previousStepRef.current === step) return;
@@ -312,13 +310,13 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
     const snapshotSaved = saveBrowserAssessment(scores, ownerId ?? null);
     if (ownerId) markPendingAssessmentOwner(ownerId);
     clearLocalAssessmentProgress();
+    trackFunnelEvent('quiz_complete', { once: false });
 
     try {
       await waitForCloudSave((async () => {
         const runId = await getOrStartRun();
         await completeFaceAssessmentRun(runId, FACE_BASELINE_V2_QUESTIONS, completedAnswers, scores, scoreValues);
       })());
-      trackFunnelEvent('quiz_complete');
       void getSupabaseClient().auth.getSession()
         .then(({ data: { session } }) => {
           if (session?.user && !session.user.is_anonymous) localStorage.removeItem(LOCAL_PENDING_ASSESSMENT_KEY);
@@ -331,7 +329,6 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
       // Do not make an anonymous visitor lose a completed result because a
       // cloud write is unavailable. The browser copy remains available until
       // a future signed-in account can merge it.
-      trackFunnelEvent('quiz_complete');
       onComplete(scores, cachedInBrowser || snapshotSaved ? 'browser' : 'memory');
       return;
     } finally {
@@ -340,15 +337,20 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
   };
 
   const choose = (response: FaceResponse) => {
-    if (isSaving) return;
+    if (isSaving || finishingRef.current) return;
 
     setShowResumeNotice(false);
     const updated = { ...answers, [question.id]: response };
     setAnswers(updated);
-    trackFunnelEvent('quiz_question_progress', { step: step + 1 });
+    if (!trackedAnswers.current.has(question.id)) {
+      if (trackedAnswers.current.size === 0) trackFunnelEvent('quiz_start', { once: false });
+      trackedAnswers.current.add(question.id);
+      trackFunnelEvent('quiz_question_progress', { step: step + 1, once: false });
+    }
     if (!runIdRef.current && !runPromiseRef.current) void getOrStartRun().catch(() => undefined);
 
     if (step === FACE_BASELINE_V2_QUESTIONS.length - 1) {
+      finishingRef.current = true;
       void finish(updated);
       return;
     }
@@ -370,6 +372,8 @@ export const FaceAssessment: React.FC<FaceAssessmentProps> = ({ onComplete, owne
     setAnswers({});
     setStep(0);
     setShowResumeNotice(false);
+    trackedAnswers.current.clear();
+    finishingRef.current = false;
     clientRunIdRef.current = null;
     runIdRef.current = null;
     runPromiseRef.current = null;
